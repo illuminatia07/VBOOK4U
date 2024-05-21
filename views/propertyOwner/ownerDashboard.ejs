@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vbook4U | Owner Dashboard</title>
+    <link rel="stylesheet" href="/css/ownerDashboard.css" />
+    <script src="/scripts/addPropertyValidation.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="footer-links">
+        <button class="owner-info-button"><%= owner.fullname %></button>
+        <a href="#" class="vbook4u-link">Vbook4U.com</a>
+        <form action="/owner/logout" method="GET" class="logout-form">
+          <button type="submit" class="logout-button">Logout</button>
+        </form>
+      </div>
+    </header>
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <a href="#" id="profileLink">PROFILE</a>
+        <a href="#" id="dashboardLink">DASHBOARD</a>
+        <a href="#" id="bookingsLink">BOOKINGS</a>
+        <a href="#" id="addPropertyLink" class="toggle-add-property"
+          >ADD PROPERTIES</a
+        >
+        <a href="#" id="deleteLink">OPERATIONS</a>
+        <a href="#" id="couponsLink">COUPONS</a>
+        <a href="#" id="editLink" class="toggle-edit">EDIT</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Profile Section -->
+        <div id="profileSection" style="display: none">
+          <h2>Your Profile</h2>
+          <p>Name: <%= owner.fullname %></p>
+          <p>Phone No: <%= owner.phoneNumber %></p>
+          <p>Email: <%= owner.email %></p>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none">
+          <!-- Content for Dashboard -->
+          <h2>Dashboard</h2>
+          <div>
+            <h3>Statistics</h3>
+            <ul>
+              <li>
+                Total Properties:
+                <span id="totalProperties"><%= totalProperties %></span>
+              </li>
+              <li>Total Bookings: <span id="totalBookings">0</span></li>
+              <!-- Add more statistics as needed -->
+            </ul>
+          </div>
+          <div>
+            <h3>Recent Bookings</h3>
+            <ul id="recentBookingsList">
+              <!-- Recent bookings will be populated dynamically -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="bookingsSection" style="display: none">
+          <!-- Content for Bookings -->
+        </div>
+
+        <!-- Add Property Section -->
+        <div id="addPropertySection" style="display: none">
+          <h2>Add Property</h2>
+          <form
+            action="/owner/dashboard/addProperty"
+            method="POST"
+            id="add-property-form"
+          >
+            <div class="form-group">
+              <label for="propertyName">Property Name:</label>
+              <input type="text" id="propertyName" name="propertyName" />
+              <span id="propertyNameError" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="categoryName">Category Name:</label>
+              <select id="categoryName" name="categoryName">
+                <option value="">Select Category</option>
+                <% categories.forEach(function(category) { %>
+                <option value="<%= category.name %>">
+                  <%= category.name %>
+                </option>
+                <% }); %>
+              </select>
+              <span id="categoryNameError" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description:</label>
+              <textarea id="description" name="description" rows="4"></textarea>
+              <span id="descriptionError" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+              <label>Room Facilities:</label><br />
+              <div class="facility-items">
+                <div class="facility-row">
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="seatingArea"
+                      name="roomFacilities"
+                      value="Seating Area"
+                    />
+                    <label for="seatingArea">Seating Area</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="smokingRoom"
+                      name="roomFacilities"
+                      value="Smoking Room"
+                    />
+                    <label for="smokingRoom">Smoking Room</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="kingSizedBed"
+                      name="roomFacilities"
+                      value="King Sized Bed"
+                    />
+                    <label for="kingSizedBed">King Sized Bed</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="miniFridge"
+                      name="roomFacilities"
+                      value="Mini Fridge"
+                    />
+                    <label for="miniFridge">Mini Fridge</label>
+                  </div>
+                </div>
+                <div class="facility-row">
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="queenSizedBed"
+                      name="roomFacilities"
+                      value="Queen Sized Bed"
+                    />
+                    <label for="queenSizedBed">Queen Sized Bed</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="twinSingleBed"
+                      name="roomFacilities"
+                      value="Twin Single Bed"
+                    />
+                    <label for="twinSingleBed">Twin Single Bed</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="swimmingPool"
+                      name="roomFacilities"
+                      value="Swimming Pool"
+                    />
+                    <label for="swimmingPool">Swimming Pool</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="ac"
+                      name="roomFacilities"
+                      value="Air Conditioned Room"
+                    />
+                    <label for="ac">Air Conditioned Room</label>
+                  </div>
+                </div>
+                <div class="facility-row">
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="kitchen"
+                      name="roomFacilities"
+                      value="Kitchen"
+                    />
+                    <label for="kitchen">Kitchen</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="coffeeTeaMaker"
+                      name="roomFacilities"
+                      value="Coffee/Tea Maker"
+                    />
+                    <label for="coffeeTeaMaker">Coffee/Tea Maker</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="gameConsole"
+                      name="roomFacilities"
+                      value="Game Console"
+                    />
+                    <label for="gameConsole">Game Console</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="roofTopPool"
+                      name="roomFacilities"
+                      value="Roof-Top Pool"
+                    />
+                    <label for="roofTopPool">Roof-Top Pool</label>
+                  </div>
+                </div>
+                <div class="facility-row">
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="mountainView"
+                      name="roomFacilities"
+                      value="Mountain View"
+                    />
+                    <label for="mountainView">Mountain View</label>
+                  </div>
+                  <div class="facility-item">
+                    <input
+                      type="checkbox"
+                      id="seaView"
+                      name="roomFacilities"
+                      value="Sea View"
+                    />
+                    <label for="seaView">Sea View</label>
+                  </div>
+                  <!-- Add more facilities here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="address">Address:</label>
+              <input type="text" id="address" name="address" />
+              <span id="addressError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="price">Price:</label>
+              <input type="number" id="price" name="price" required />
+              <span id="priceError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="images">Upload Images:</label>
+              <input
+                type="file"
+                id="images"
+                name="images"
+                accept="image/*"
+                multiple
+                onchange="previewImages(event)"
+              />
+              <span id="imagesError" class="error-message"></span>
+            </div>
+            <div id="image-preview" class="image-preview"></div>
+            <span id="file-count" class="file-count">No file selected</span>
+
+            <button type="submit">Add Property</button>
+          </form>
+        </div>
+
+        <!-- Delete Section -->
+        <div id="deleteSection" style="display: none">
+          <div id="properties">
+            <!-- Loop through properties -->
+            <% properties.forEach(property => { %>
+            <div class="property">
+              <h3>Property Name: <%= property.propertyName %></h3>
+              <p>Description: <%= property.description %></p>
+              <p>Price: <%= property.price %></p>
+              <p>Room Facilities: <%= property.roomFacilities.join(', ') %></p>
+              <p>
+                Availability: <%= property.availability ? 'true' : 'false' %>
+              </p>
+              <!-- Buttons to list/unlist -->
+              <form
+                action="/owner/dashboard/updateAvailability/<%= property._id %>"
+                method="POST"
+              >
+                <input
+                  type="hidden"
+                  name="isListButton"
+                  value="<%= !property.availability %>"
+                />
+                <% if (property.availability) { %>
+                <button
+                  class="unlist-btn"
+                  type="submit"
+                  data-property-id="<%= property._id %>"
+                >
+                  Unlist
+                </button>
+                <% } else { %>
+                <button
+                  class="list-btn"
+                  type="submit"
+                  data-property-id="<%= property._id %>"
+                >
+                  List
+                </button>
+                <% } %>
+              </form>
+              <!-- Button to delete property -->
+              <form
+                action="/owner/dashboard/deleteProperty/<%= property._id %>"
+                method="POST"
+              >
+                <button
+                  class="delete-btn"
+                  type="submit"
+                  data-property-id="<%= property._id %>"
+                  style="padding: 10px 10px; gap: 5px"
+                  <!--
+                  Adjust
+                  padding
+                  values
+                  as
+                  needed
+                  --
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+        <!-- Edit Property Section -->
+        <div id="editPropertySection" style="display: none">
+          <form
+            action="/owner/dashboard/editProperty"
+            method="POST"
+            id="edit-property-form"
+            enctype="multipart/form-data"
+          >
+            <!-- Property details fields -->
+            <div class="form-group">
+              <div id="editPropertyDropdownSection">
+                <label for="editPropertyDropdown">Select Property to Edit:</label>
+                <select id="editPropertyDropdown" name="editPropertyDropdown">
+                  <% properties.forEach(property => { %>
+                    <option value="<%= property._id %>"><%= property.propertyName %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <label for="editPropertyName">Property Name:</label>
+              <input type="text" id="editPropertyName" name="propertyName" />
+              <span id="editPropertyNameError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="editCategoryName">Category:</label>
+              <select id="editCategoryName" name="categoryName">
+                <% categories.forEach(category => { %>
+                <option value="<%= category.name %>">
+                  <%= category.name %>
+                </option>
+                <% }); %>
+              </select>
+              <span id="editCategoryNameError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="editDescription">Description:</label>
+              <textarea id="editDescription" name="description"></textarea>
+              <span id="editDescriptionError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="editAddress">Address:</label>
+              <input type="text" id="editAddress" name="address" />
+              <span id="editAddressError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="editRoomFacilities">Room Facilities:</label><br />
+              <input
+                type="checkbox"
+                id="seatingArea"
+                name="roomFacilities"
+                value="Seating Area"
+              />
+              <label for="seatingArea">Seating Area</label><br />
+              <input
+                type="checkbox"
+                id="smokingRoom"
+                name="roomFacilities"
+                value="Smoking Room"
+              />
+              <label for="smokingRoom">Smoking Room</label><br />
+              <input
+                type="checkbox"
+                id="kingSizedBed"
+                name="roomFacilities"
+                value="King Sized Bed"
+              />
+              <label for="kingSizedBed">King Sized Bed</label><br />
+              <input
+                type="checkbox"
+                id="queenSizedBed"
+                name="roomFacilities"
+                value="Queen Sized Bed"
+              />
+              <label for="queenSizedBed">Queen Sized Bed</label><br />
+              <input
+                type="checkbox"
+                id="twinSingleBed"
+                name="roomFacilities"
+                value="Twin Single Bed"
+              />
+              <label for="twinSingleBed">Twin Single Bed</label><br />
+              <input
+                type="checkbox"
+                id="swimmingPool"
+                name="roomFacilities"
+                value="Swimming Pool"
+              />
+              <label for="swimmingPool">Swimming Pool</label><br />
+              <input
+                type="checkbox"
+                id="seaView"
+                name="roomFacilities"
+                value="Sea View"
+              />
+              <label for="seaView">Sea View</label><br />
+              <input type="checkbox" id="ac" name="roomFacilities" value="AC" />
+              <label for="ac">AC</label><br />
+              <input
+                type="checkbox"
+                id="kitchen"
+                name="roomFacilities"
+                value="Kitchen"
+              />
+              <label for="kitchen">Kitchen</label><br />
+              <input
+                type="checkbox"
+                id="coffeeTeaMaker"
+                name="roomFacilities"
+                value="Coffee/Tea Maker"
+              />
+              <label for="coffeeTeaMaker">Coffee/Tea Maker</label><br />
+              <input
+                type="checkbox"
+                id="roofTopPool"
+                name="roomFacilities"
+                value="Roof-Top pool"
+              />
+              <label for="roofTopPool">Roof-Top pool</label><br />
+              <input
+                type="checkbox"
+                id="gameConsole"
+                name="roomFacilities"
+                value="Game Console"
+              />
+              <label for="gameConsole">Game Console</label><br />
+              <input
+                type="checkbox"
+                id="mountainView"
+                name="roomFacilities"
+                value="Mountain View"
+              />
+              <label for="mountainView">Mountain View</label><br />
+            </div>
+            <div class="form-group">
+              <label for="editPrice">Price:</label>
+              <input type="number" id="editPrice" name="price" />
+              <span id="editPriceError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="editImages">Upload Images:</label>
+              <input
+                type="file"
+                id="editImages"
+                name="images"
+                accept="image/*"
+                multiple
+              />
+              <span id="editImagesError" class="error-message"></span>
+            </div>
+            <!-- Add more fields for edit property section as needed -->
+            <button type="submit">Save Changes</button>
+          </form>
+        </div>
+
+        <!-- Display flash messages -->
+
+        <!-- Coupons Section -->
+        <div id="couponsSection" style="display: none">
+          <!-- Content for Coupons -->
+        </div>
+
+        <!-- Error/Success Messages Section -->
+        <% if (messages.error) { %>
+        <div class="error-message"><%= messages.error %></div>
+        <% } %> <% if (messages.success) { %>
+        <div class="success-message"><%= messages.success %></div>
+        <% } %> <% if (messages.success) { %>
+        <div class="success-message"><%= messages.success %></div>
+        <% } %> <% if (messages.error) { %>
+        <div class="error-message"><%= messages.error %></div>
+        <% } %>
+      </div>
+    </div>
+
+    <script src="/scripts/ownerDashboard.js"></script>
+  </body>
+</html>

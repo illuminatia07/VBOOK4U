@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vbook4U | Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/adminDashboard.css" />
+  </head>
+  <body>
+    <header>
+      <div class="footer-links">
+        <button class="admin-info-button"><%= admin.fullname %></button>
+        <a href="#" class="vbook4u-link">Vbook4U.com</a>
+        <form action="/admin/logout" method="POST" class="logout-form">
+          <button type="submit" class="logout-button">Logout</button>
+        </form>
+      </div>
+    </header>
+    <div class="container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <a href="#" id="profileLink">PROFILE</a>
+        <a href="#" id="dashboardLink">DASHBOARD</a>
+        <a href="#" id="ownersLink">OWNERS</a>
+        <a href="#" id="usersLink">USERS</a>
+        <a href="#" id="categoriesLink">CATEGORIES</a>
+        <a href="#" id="salesReportLink">SALES REPORT</a>
+        <a href="#" id="bookingsLink">BOOKINGS</a>
+        <a href="#" id="deletionLink">DELETION</a>
+        <a href="#" id="requestLink">REQUESTS</a>
+        <!-- Added REQUESTS link -->
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Profile Section -->
+        <% if (admin) { %>
+        <div id="profileSection">
+          <h2>Profile</h2>
+          <!-- Display admin profile details here -->
+          <p>Name: <%= admin.name %></p>
+          <p>Email: <%= admin.email %></p>
+          <p>Phone No: <%= admin.phoneNumber %></p>
+        </div>
+        <% } %>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none">
+          <!-- Content for Dashboard -->
+        </div>
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            displaySection("dashboardSection");
+          });
+          function displaySection(sectionId) {
+            // Hide all sections
+            var sections = document.querySelectorAll(".main-content > div");
+            sections.forEach(function (section) {
+              section.style.display = "none";
+            });
+
+            // Show the selected section
+            var selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+              selectedSection.style.display = "block";
+            } else {
+              // Hide all sections if no section ID is provided
+              sections.forEach(function (section) {
+                section.style.display = "none";
+              });
+            }
+          }
+        </script>
+
+        <!-- Owners Section -->
+        <div id="ownersSection" style="display: none">
+          <h2>Owners</h2>
+          <% if (owners.length > 0) { %>
+          <!-- Display list of owners -->
+          <ul id="ownersList">
+            <% owners.forEach(function(owner) { %>
+            <li>
+              <p>Name: <%= owner.fullname %></p>
+              <p>Email: <%= owner.email %></p>
+              <p>Phone No: <%= owner.phoneNumber %></p>
+              <!-- Add more owner details as needed -->
+              <% if (owner.isBlocked) { %>
+              <!-- If owner is blocked, show Unblock button -->
+              <form
+                method="POST"
+                action="/admin/owners/<%= owner._id %>/unblock"
+                style="display: inline"
+              >
+                <button type="submit">Unblock</button>
+              </form>
+              <% } else { %>
+              <!-- If owner is not blocked, show Block button -->
+              <form
+                method="POST"
+                action="/admin/owners/<%= owner._id %>/block"
+                style="display: inline"
+              >
+                <button type="submit">Block</button>
+              </form>
+              <% } %>
+            </li>
+            <% }); %>
+          </ul>
+          <% } else { %>
+          <p>No owners found.</p>
+          <% } %>
+        </div>
+
+        <!-- Users Section -->
+        <div id="usersSection">
+          <h2>Users</h2>
+          <% if (users.length > 0) { %>
+          <!-- Display list of users -->
+          <ul id="usersList">
+            <% users.forEach(function(user) { %>
+            <li>
+              <p>Name: <%= user.fullname %></p>
+              <p>Email: <%= user.email %></p>
+              <p>Phone No: <%= user.phoneNumber %></p>
+              <!-- Add more user details as needed -->
+              <% if (user.isBlocked) { %>
+              <form
+                method="POST"
+                action="/admin/users/<%= user._id %>/unblock"
+                style="display: inline"
+              >
+                <button type="submit">Unblock</button>
+              </form>
+              <% } else { %>
+              <form
+                method="POST"
+                action="/admin/users/<%= user._id %>/block"
+                style="display: inline"
+              >
+                <button type="submit">Block</button>
+              </form>
+              <% } %>
+            </li>
+            <% }); %>
+          </ul>
+          <% } else { %>
+          <p>No users found.</p>
+          <% } %>
+        </div>
+
+        <!-- Categories Section -->
+        <div id="categoriesSection" style="display: none; padding: 10px 20px">
+          <h2>Categories</h2>
+          <% if (categories.length > 0) { %>
+          <!-- Display existing categories here -->
+          <ul class="pt-10" id="categoriesList">
+            <% categories.forEach(function(category) { %>
+            <li>
+              <%= category.name %><br />
+              <form
+                method="POST"
+                action="/admin/categories/<%= category._id %>/delete"
+                style="display: inline"
+              >
+                <button class="btn-del" type="submit">Delete</button>
+              </form>
+              <br />
+            </li>
+            <% }); %>
+          </ul>
+          <% } else { %>
+          <p>No categories found.</p>
+          <% } %>
+
+          <!-- Add Category Form -->
+          <h3>Add New Category</h3>
+          <form id="addCategoryForm" method="POST" action="/admin/categories">
+            <label for="categoryName">Name:</label>
+            <input
+              type="text"
+              id="categoryName"
+              name="name"
+              required
+              pattern="[A-Za-z0-9./#]+"
+              title="Only letters, numbers, ., /, and # allowed"
+            />
+            <label for="categoryDescription">Description:</label>
+            <textarea
+              id="categoryDescription"
+              name="description"
+              required
+            ></textarea>
+            <button type="submit">Add Category</button>
+          </form>
+
+          <!-- Error/Success Messages for Add Category -->
+          <% if (addCategoryError) { %>
+          <div class="error-message"><%= addCategoryError %></div>
+          <% } %> <% if (addCategorySuccess) { %>
+          <div class="success-message"><%= addCategorySuccess %></div>
+          <% } %>
+
+          <!-- Success Message for Category Deletion -->
+          <% if (categoryDeletedSuccess) { %>
+          <div class="success-message"><%= categoryDeletedSuccess %></div>
+          <% } %>
+        </div>
+
+        <!-- Requests Section -->
+        <div id="requestsSection">
+          <h2>Property Requests</h2>
+          <% if (requests.length > 0) { %>
+          <!-- Display property requests here -->
+          <ul id="requestList">
+            <% requests.forEach(function(request) { %>
+            <li>
+              <h3><%= request.propertyName %></h3>
+              <p>Category: <%= request.categoryName %></p>
+              <p>Description: <%= request.description %></p>
+              <p>Address: <%= request.address %></p>
+              <p>Price: <%= request.price %></p>
+              <!-- Add more property details as needed -->
+              <form
+                method="POST"
+                action="/admin/requests/<%= request._id %>/approve"
+              >
+                <button type="submit">Approve</button>
+              </form>
+              <form
+                method="POST"
+                action="/admin/requests/<%= request._id %>/reject"
+              >
+                <button type="submit">Reject</button>
+              </form>
+            </li>
+            <% }); %>
+          </ul>
+          <% } else { %>
+          <p>No property requests found.</p>
+          <% } %>
+        </div>
+
+        <!-- Sales Report Section -->
+        <div id="salesReportSection" style="display: none">
+          <!-- Content for Sales Report -->
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="bookingsSection" style="display: none">
+          <!-- Content for Bookings -->
+        </div>
+
+        <div id="deletionSection" style="display: none">
+          <h2>Deletion</h2>
+          <!-- Display properties to delete -->
+          <% if (properties.length > 0) { %>
+          <ul>
+            <% properties.forEach(function(properties) { %>
+            <li>
+              <p>
+                <%= properties.owner.fullname %> - <%= properties.propertyName
+                %>
+              </p>
+              <!-- Add delete button with corresponding action -->
+              <form
+                method="POST"
+                action="/admin/properties/<%= properties._id %>/delete"
+              >
+                <button class="btn-del" type="submit">Delete</button>
+              </form>
+            </li>
+            <% }); %>
+          </ul>
+          <% } else { %>
+          <p>No properties to delete.</p>
+          <% } %>
+        </div>
+
+        <!-- Error/Success Messages Section -->
+        <% if (messages.error) { %>
+        <div class="error-message"><%= messages.error %></div>
+        <% } %> <% if (messages.success) { %>
+        <div class="success-message"><%= messages.success %></div>
+        <% } %>
+      </div>
+    </div>
+
+    <script>
+      //script for add category
+      document.addEventListener("DOMContentLoaded", function () {
+        const addCategoryForm = document.getElementById("addCategoryForm");
+        const categoryNameInput = document.getElementById("categoryName");
+        const categoryDescriptionInput = document.getElementById(
+          "categoryDescription"
+        );
+        const addCategoryButton = document.getElementById("addCategoryButton");
+
+        addCategoryForm.addEventListener("submit", function (event) {
+          if (!categoryNameInput.value || !categoryDescriptionInput.value) {
+            event.preventDefault(); // Prevent form submission
+            alert("Please provide both name and description");
+          }
+        });
+
+        categoryNameInput.addEventListener("input", toggleAddCategoryButton);
+        categoryDescriptionInput.addEventListener(
+          "input",
+          toggleAddCategoryButton
+        );
+
+        function toggleAddCategoryButton() {
+          if (categoryNameInput.value && categoryDescriptionInput.value) {
+            addCategoryButton.disabled = false;
+          } else {
+            addCategoryButton.disabled = true;
+          }
+        }
+      });
+    </script>
+
+    <!-- JavaScript to Show/Hide Sections based on Clicked Links -->
+    <script>
+      document
+        .getElementById("profileLink")
+        .addEventListener("click", function () {
+          displaySection("profileSection");
+        });
+
+      document
+        .getElementById("dashboardLink")
+        .addEventListener("click", function () {
+          displaySection("dashboardSection");
+        });
+
+      document
+        .getElementById("ownersLink")
+        .addEventListener("click", function () {
+          displaySection("ownersSection");
+        });
+
+      document
+        .getElementById("usersLink")
+        .addEventListener("click", function () {
+          displaySection("usersSection");
+        });
+
+      document
+        .getElementById("categoriesLink")
+        .addEventListener("click", function () {
+          displaySection("categoriesSection");
+        });
+
+      document
+        .getElementById("salesReportLink")
+        .addEventListener("click", function () {
+          displaySection("salesReportSection");
+        });
+
+      document
+        .getElementById("bookingsLink")
+        .addEventListener("click", function () {
+          displaySection("bookingsSection");
+        });
+
+      document
+        .getElementById("deletionLink")
+        .addEventListener("click", function () {
+          displaySection("deletionSection");
+        });
+
+      document
+        .getElementById("requestLink")
+        .addEventListener("click", function () {
+          displaySection("requestsSection");
+        });
+
+      function displaySection(sectionId) {
+        // Hide all sections
+        var sections = document.querySelectorAll(".main-content > div");
+        sections.forEach(function (section) {
+          section.style.display = "none";
+        });
+
+        // Show the selected section
+        var selectedSection = document.getElementById(sectionId);
+        if (selectedSection) {
+          selectedSection.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>

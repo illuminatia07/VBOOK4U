@@ -1,0 +1,227 @@
+/* ownerDashboard.css */
+
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f2f2f2;
+}
+
+.container {
+  display: flex;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.sidebar {
+  width: 200px;
+  height: 500px;
+  background-color: #ff006f;
+  color: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px;
+  transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+  background-color: #fd7eb3;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  color: #ff006f;
+}
+
+.main-content h2 {
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.main-content p {
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.owner-info-button {
+  background-color: #ff0055;
+  color: white;
+  padding: 8px 47px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.owner-info-button:hover {
+  background-color: #d4004f;
+}
+
+.vbook4u-link {
+  background-color: rgb(255, 0, 128);
+  padding: 10px 20px;
+  border-top-left-radius: 10px;
+  border-radius: 10px;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.vbook4u-link:hover {
+  background-color: #ff80bf;
+}
+
+.logout-form {
+  display: flex;
+  align-items: center;
+  margin-right: -10px;
+}
+
+.logout-button {
+  background-color: #ff0055;
+  color: white;
+  padding: 8px 30px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #d4004f;
+}
+/* AddProperty Form Styling */
+.add-property-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select,
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-group select {
+  appearance: none;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group label,
+.form-group input[type="checkbox"] {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+button[type="submit"] {
+  background-color: #ff006f;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+  background-color: #fd7eb3;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+
+.facility-items {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.facility-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.facility-item {
+  flex: 1 0 25%;
+  margin-right: 20px;
+}
+
+.facility-item:last-child {
+  margin-right: 0;
+}
+.error-message {
+  color: red;
+}
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.image-preview img {
+  max-width: 100px;
+  max-height: 100px;
+  margin: 5px;
+}
+.delete-btn{
+    background-color: #ff006f;
+    color: #fff;
+    border: none;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.image-preview button {
+  margin: 5px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}

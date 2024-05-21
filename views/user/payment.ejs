@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment</title>
+  <link rel="stylesheet" href="/css/payment.css" />
+</head>
+<body>
+  <header>
+    <div class="vbook-box">
+      <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+    </div>
+    <div class="search">
+      <% if (userSession) { %>
+      <button class="logout-btn" onclick="window.location.href='/logout'">
+        Logout
+      </button>
+      <% } else { %>
+      <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+      <% } %>
+    </div>
+  </header>
+
+  <main>
+    <form id="paymentForm" action="/payment" method="POST">
+      <h1>Payment</h1>
+      <h2>Property: <%= propertyName %></h2>
+
+      <div class="form-group">
+        <label for="checkInDate">Check-in Date:</label>
+        <input
+          type="date"
+          id="checkInDate"
+          name="checkInDate"
+          value="<%= checkInDate %>"
+          min="<%= getCurrentDate() %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="checkOutDate">Check-out Date:</label>
+        <input
+          type="date"
+          id="checkOutDate"
+          name="checkOutDate"
+          value="<%= checkOutDate %>"
+          required
+          min="<%= checkInDate %>" <!-- Set min attribute to check-in date -->
+        
+      </div>
+
+      <div class="form-group">
+        <label for="totalPrice">Total Price:</label>
+        <input
+          type="text"
+          id="totalPrice"
+          name="totalPrice"
+          value="<%= totalPrice %>"
+          readonly
+        />
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            id="ageConfirmation"
+            name="ageConfirmation"
+            required
+          />
+          I confirm that I am above 18 years of age.
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required pattern="[a-zA-Z\s]+" />
+        <small class="error-message">Please enter a valid name (letters and spaces only).</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+        <small class="error-message">Please enter a valid email address.</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" />
+        <small class="error-message">Please enter a valid 10-digit phone number.</small>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            id="idProofConfirmation"
+            name="idProofConfirmation"
+            required
+          />
+          I confirm that I will provide a valid ID proof during check-in.
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="paymentMethod">Payment Method:</label>
+        <div class="payment-options">
+          <label>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="online"
+              required
+            />
+            Online Payment
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="payAtProperty"
+              required
+            />
+            Pay at Property
+          </label>
+        </div>
+      </div>
+
+      <button type="submit">Book Now</button>
+    </form>
+  </main>
+
+  <footer>
+    <!-- Include your footer content here -->
+  </footer>
+
+  <script>
+    // JavaScript code to calculate the total price based on the check-in and check-out dates
+    const checkInDate = document.getElementById("checkInDate");
+    const checkOutDate = document.getElementById("checkOutDate");
+    const totalPrice = document.getElementById("totalPrice");
+    checkInDate.addEventListener("change", calculateTotalPrice);
+    checkOutDate.addEventListener("change", calculateTotalPrice);
+
+    function calculateTotalPrice() {
+      const checkIn = new Date(checkInDate.value);
+      const checkOut = new Date(checkOutDate.value);
+      const timeDiff = checkOut.getTime() - checkIn.getTime();
+      const numNights = timeDiff / (1000 * 60 * 60 * 24);
+
+      if (!isNaN(numNights) && numNights >= 0) {
+        const propertyPrice = "<%= propertyPrice %>";
+        const totalCost = numNights * propertyPrice;
+        totalPrice.value = totalCost.toFixed(2);
+      } else {
+        totalPrice.value = "0.00";
+      }
+    }
+
+    // Initial calculation in case dates are already populated
+    calculateTotalPrice();
+
+    // Function to get current date in YYYY-MM-DD format
+    function getCurrentDate() {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
+      const yyyy = today.getFullYear();
+      return yyyy + "-" + mm + "-" + dd;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+/* Global Styles */
+html,
+body {
+  height: 100%;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  padding-bottom: 100px; /* Height of the footer */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.error-message {
+  display: none; /* Hide error message by default */
+  color: red;
+}
+
+input:invalid + .error-message {
+  display: block; /* Show error message when input is invalid */
+}
+
+/* Header Styles */
+header {
+  background-color: #ffffff;
+  padding: 15px 20px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vbook-box {
+  margin-left: 20px;
+}
+
+.search {
+  margin-right: 20px;
+}
+
+.logout-btn {
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px 17px;
+}
+
+.logout-btn:hover {
+  background-color: #ff0051;
+}
+
+/* Main Content Styles */
+main {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="date"],
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="checkbox"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #bfbfbf;
+  width: 100%;
+}
+
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.payment-options {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+/* Button Styles */
+button[type="submit"] {
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+  background-color: #ff0051;
+}
+
+/* Footer Styles */
+footer {
+  background-color: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Additional Styles */
+.top-text,
+.middle-text,
+.bottom-text {
+  text-align: center;
+}
+
+.button {
+  background-color: #4d4d4d41;
+  border: 1px #ff003c;
+  width: 80%;
+  height: 120px;
+  justify-content: center;
+  margin-left: 27px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+.buy-now {
+  margin-left: 101px;
+  border-color: #fff;
+  color: #ff006a;
+  background-color: #ffff;
+  margin-top: 10px;
+}
+
+.buy-now:hover {
+  border-width: 3px;
+}
+.vbook-box {
+  margin-left: 20px;
+}
+
+.vbook-btn {
+  background-color: #ff006a;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.search {
+  margin-right: 20px;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+form {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

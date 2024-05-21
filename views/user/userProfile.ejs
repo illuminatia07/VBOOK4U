@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/css/userProfile.css">
+    <script>
+        // Client-side validation
+        function validateForm() {
+            const fullname = document.getElementById('fullname').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const retypePassword = document.getElementById('retypePassword').value;
+
+            let errorMessages = [];
+
+            if (!fullname) {
+                errorMessages.push('Full name is required.');
+            }
+
+            if (!/^[\d]{10}$/.test(phoneNumber)) {
+                errorMessages.push('Phone number must be 10 digits.');
+            }
+
+            if (!age || isNaN(age) || age <= 0) {
+                errorMessages.push('Please enter a valid age.');
+            }
+
+            if (!gender) {
+                errorMessages.push('Please select a gender.');
+            }
+
+            if (currentPassword.length === 0) {
+                errorMessages.push('Current password is required.');
+            } else {
+                // Check if the current password matches the user's password in the database
+                // Replace the following code with your server-side logic to check the password
+                const userPassword = "<%= user.password %>"; // Replace with the user's password from the database
+                if (!bcrypt.compareSync(currentPassword, userPassword)) {
+                    errorMessages.push('Incorrect current password.');
+                }
+            }
+
+            if (newPassword.length > 0 || retypePassword.length > 0) {
+                if (newPassword !== retypePassword) {
+                    errorMessages.push('New password and retype password do not match.');
+                } else {
+                    // Hash the new password using bcrypt
+                    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+                    // Store the hashed password in your database
+                    // Replace the following code with your server-side logic to update the password
+                    console.log('New hashed password:', hashedPassword);
+                }
+            }
+
+            const errorDiv = document.getElementById('errorMessages');
+            errorDiv.innerHTML = '';
+
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(message => {
+                    const p = document.createElement('p');
+                    p.className = 'flash-message error';
+                    p.textContent = message;
+                    errorDiv.appendChild(p);
+                });
+                return false; // Prevent form submission
+            }
+
+            return true; // Allow form submission
+        }
+    </script>
+</head>
+<header>
+    <div class="vbook-box">
+        <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+    </div>
+    <div class="search">
+        <% if (userSession) { %>
+                <button class="logout-btn" onclick="window.location.href='/logout'"> Logout </button>
+            </a>
+        <% } else { %>
+            <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+        <% } %>
+    </div>
+</header>
+<body>
+    <div class="container">
+        <h2 class="subtitle">User Details</h2>
+
+        <div id="errorMessages" class="flash-messages">
+            <% if (errorMessage && errorMessage.length > 0) { %>
+                <% errorMessage.forEach(function(message) { %>
+                    <p class="flash-message error  "><%= message %></p>
+                <% }); %>
+            <% } %>
+            <% if (successMessage && successMessage.length > 0) { %>
+                <% successMessage.forEach(function(message) { %>
+                    <p class="flash-message success"><%= message %></p>
+                <% }); %>
+            <% } %>
+        </div>
+
+        <form action="/profile" method="post" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="fullname">Full Name:</label> <br>
+                <input class="field-up" type="text" id="fullname" name="fullname" value="<%= user.fullname %>">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label> <br>
+                <input class="field-up" type="email" id="email" name="email" value="<%= user.email %>">
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label> <br>
+                <input class="field-up" type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phoneNumber %>">
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label> <br>
+                <input class="field-up" type="number" id="age" name="age" value="<%= user.age %>">
+            </div>
+            <div class="form-group ">
+                <label for="gender">Gender:</label> <br>
+                <select class="field-up" id="gender" name="gender">
+                    <option value="">Select Gender</option>
+                    <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                    <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                    <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                </select>
+            </div> 
+            <div class="form-group">
+                <label for="newPassword">New Password:</label> <br>
+                <input class="field-up" type="password" id="newPassword" name="newPassword">
+            </div>
+            <div class="form-group">
+                <label for="retypePassword">Retype Password:</label> <br>
+                <input class="field-up" type="password" id="retypePassword" name="retypePassword">
+            </div>
+            <div class="form-group">
+                <label for="currentPassword">Current Password:</label> <br>
+                <input class="field-up" type="password" id="currentPassword" name="currentPassword">
+            </div>
+            <div class="form-group"><br>
+                <button class="submit-btn" type="submit">Update Profile</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

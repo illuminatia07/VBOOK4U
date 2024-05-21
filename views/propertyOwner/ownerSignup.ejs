@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Owner Signup</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <!-- Custom CSS -->
+    <style>
+      /* Custom styles */
+      body {
+        background-image: url("/img/assets/backgroundLogin.jpg");
+        background-size: cover; /* Cover the entire container with the background image */
+        background-position: center; /* Center the background image */
+      }
+      .container {
+        width: 100%; /* Set width to 100% */
+        height: 100vh; /* Use 100% of the viewport height */
+      }
+      .error {
+        color: red;
+      }
+      .card {
+        background-color: #ffffff00; /* Dark card background color */
+        color: #ff0055; /* Light text color */
+        border: #ffffff00;
+      }
+      .btn {
+        background-color: #ff0055;
+        color: white;
+        border: #ab043b;
+        padding-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h1 class="card-title text-center mb-4">Signup</h1>
+              <% if (errorMessage) { %>
+              <div class="text-danger" role="alert"><%= errorMessage %></div>
+              <% } %> <% if (successMessage) { %>
+              <div class="text-success" role="alert"><%= successMessage %></div>
+              <% } %>
+              <form
+                id="signupForm"
+                action="/owner/signup"
+                method="POST"
+                onsubmit="return validateForm()"
+              >
+                <div class="mb-3">
+                  <label for="fullname" class="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="fullname"
+                    name="fullname"
+                    placeholder="Enter your fullname"
+                    required
+                  />
+                  <span id="fullnameError" class="text-danger error"></span>
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email address</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                  <span id="emailError" class="text-danger error"></span>
+                </div>
+                <div class="mb-3">
+                  <label for="phoneNumber" class="form-label"
+                    >Phone Number</label
+                  >
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                  <span id="phoneNumberError" class="text-danger error"></span>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <span id="passwordError" class="text-danger error"></span>
+                </div>
+                <div class="mb-3">
+                  <label for="repassword" class="form-label"
+                    >Confirm Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="repassword"
+                    name="repassword"
+                    placeholder="Re-enter your password"
+                    required
+                  />
+                  <span id="repasswordError" class="text-danger error"></span>
+                </div>
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary">Signup</button>
+                </div>
+                <br />
+                <div class="text-center">
+                  <a href="/owner/login" class="btn btn-primary">Login</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add blur event listeners for input fields
+        document
+          .getElementById("fullname")
+          .addEventListener("blur", function () {
+            validateInput(
+              "fullname",
+              /^(?! )[a-zA-Z'\s_-]{3,16}$/,
+              "Invalid Name"
+            );
+          });
+
+        document
+          .getElementById("password")
+          .addEventListener("blur", function () {
+            validateInput(
+              "password",
+              /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+              "Password must contain at least 8 characters with at least one uppercase letter, one lowercase letter, one digit, and one special character."
+            );
+          });
+
+        document.getElementById("email").addEventListener("blur", function () {
+          validateInput(
+            "email",
+            /^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/,
+            "Invalid email"
+          );
+        });
+
+        document
+          .getElementById("phoneNumber")
+          .addEventListener("blur", function () {
+            validateInput("phoneNumber", /^\d{10}$/, "Invalid phone number");
+          });
+
+        document
+          .getElementById("repassword")
+          .addEventListener("blur", function () {
+            validateRePassword();
+          });
+      });
+
+      function validateInput(inputId, regexPattern, errorMessage) {
+        const input = document.getElementById(inputId);
+        const value = input.value.trim();
+        const errorElement = document.getElementById(inputId + "Error");
+
+        if (!regexPattern.test(value)) {
+          errorElement.textContent = errorMessage;
+          return false;
+        } else {
+          errorElement.textContent = "";
+          return true;
+        }
+      }
+
+      function validateForm() {
+        const usernameRegex = /^(?! )[a-zA-Z'\s_-]{3,16}$/;
+        const passwordRegex =
+          /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-z]+\.[a-z]{2,}$/;
+        const phoneRegex = /^\d{10}$/;
+
+        const isUsernameValid = validateInput(
+          "fullname",
+          usernameRegex,
+          "Invalid Name"
+        );
+        const isPasswordValid = validateInput(
+          "password",
+          passwordRegex,
+          "Password must contain at least 8 characters with at least one uppercase letter, one lowercase letter, one digit, and one special character."
+        );
+        const isEmailValid = validateInput(
+          "email",
+          emailRegex,
+          "Invalid email"
+        );
+
+        const isPhoneNumberValid = validateInput(
+          "phoneNumber",
+          phoneRegex,
+          "Invalid phone number"
+        );
+        const isRpasswordValid = validateRePassword();
+
+        return (
+          isUsernameValid &&
+          isPasswordValid &&
+          isEmailValid &&
+          isPhoneNumberValid &&
+          isRpasswordValid
+        );
+      }
+
+      function validateRePassword() {
+        const password = document.getElementById("password").value.trim();
+        const repassword = document.getElementById("repassword").value.trim();
+        const errorElement = document.getElementById("repasswordError");
+
+        if (password !== repassword) {
+          errorElement.textContent =
+            "Passwords do not match. Please try again.";
+          return false;
+        } else {
+          errorElement.textContent = "";
+          return true;
+        }
+      }
+    </script>
+  </body>
+</html>

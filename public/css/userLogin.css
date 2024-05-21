@@ -1,0 +1,66 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-image: url("/img/assets/header.jpg");
+}
+
+.container {
+  max-width: 50%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.login-section {
+  margin-top: 50px;
+  background-color: rgba(244, 244, 244, 0.8); /* Adjusted background color with transparency */
+  padding: 40px; /* Increased padding for better spacing */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Added box shadow for depth */
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 10px; /* Adjusted margin for better alignment */
+  font-weight: 500; /* Added font weight for better readability */
+}
+
+.input-group input[type="email"],
+.input-group input[type="password"] {
+  width: 100%; /* Adjusted input width for responsiveness */
+  padding: 15px; /* Increased padding for better input size */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none; /* Added to remove default input outline */
+}
+
+.create-new-btn,
+.sign-in-btn {
+  padding: 15px 30px; /* Increased padding for better button size */
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  background-color: #e82574; /* Changed button color to match the theme */
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s; /* Added smooth transition effect */
+}
+
+.create-new-btn:hover,
+.sign-in-btn:hover {
+  background-color: #bc1c5c; /* Darker shade on hover for visual feedback */
+}
+
+.forgot-password-link {
+  text-decoration: none;
+  color: #e82574; /* Adjusted link color to match the theme */
+  font-weight: 500; /* Added font weight for better readability */
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
