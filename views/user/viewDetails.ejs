@@ -42,20 +42,29 @@
         <span class="price">₹<span id="total-price"><%= totalPrice.toFixed(2) %></span></span>
       </p>
       
-      <form action="/payment" method="GET">
-        <button type="submit" class="continue-to-book">Continue to Book</button>
-      </form>
+     <form action="/payment" method="GET">
+  <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
+  <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
+  <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
+  <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
+  <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
+  <button type="submit" class="continue-to-book">Continue to Book</button>
+</form>
     </div>
     <div class="property-details">
       <div class="selected-dates">
         <h3>Selected Dates</h3>
         <p>
-          Check-in:
-          <input type="text" id="check-in" class="datepicker" value="<%= checkIn.toISOString().split('T')[0] %>" readonly />
-        </p>
+         <div class="check">
+         Check-in:
+          <span id="check-in-display"><%= checkIn.toISOString().split('T')[0] %></span>
+        </div>
+       </p>
         <p>
+          <div class="check"> 
           Check-out:
-          <input type="text" id="check-out" class="datepicker" value="<%= checkOut.toISOString().split('T')[0] %>" readonly />
+          <span id="check-out-display"><%= checkOut.toISOString().split('T')[0] %></span>
+          </div>
         </p>
       </div>
       <div class="hotel-policies">
@@ -93,6 +102,11 @@
         <p><%= property.address %></p>
       </div>
       <form action="/payment" method="GET">
+        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>">
+        <input type="hidden" name="propertyPrice" value="<%= property.price %>">
+        <input type="hidden" name="checkInDate" id="check-in-hidden-2">
+        <input type="hidden" name="checkOutDate" id="check-out-hidden-2">
+        <input type="hidden" name="totalPrice" id="total-price-hidden-2">
         <button type="submit" class="continue-to-book">Continue to Book</button>
       </form>
     </div>

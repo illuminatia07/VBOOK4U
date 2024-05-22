@@ -7,26 +7,43 @@ const bookingSchema = new mongoose.Schema({
         required: true
     },
     checkIn: {
-        type: Date,
+        type: String,
         required: true
     },
     checkOut: {
-        type: Date,
+        type: String,
         required: true
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'UserAdmin', // Reference to the UserAdmin model
         required: true
     },
     price: {
-        type: Number,
+        type: String,
         required: true
     },
     bookingStatus: {
         type: String,
         enum: ['Pending', 'Confirmed', 'Cancelled'],
-        default: 'Pending'
+        default: 'Confirmed'
+    },
+    payMethod: {
+        type: String,
+        enum: ['online', 'PayAtProperty'],
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    phoneNumber: {
+        type: String,
+        required: true
     }
 });
 

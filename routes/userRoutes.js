@@ -22,14 +22,14 @@ router.get("/logout", userController.renderLogout);
 router.get("/search", userController.searchProperty);
 router.get("/applyFilters", userController.applyFilters);
 router.get('/home', userController.renderUserHome);
-router.get("/propertyDetails", userController.renderPropertyDetails);
+
 
 // Protected routes (middleware applied)
 router.use(userMiddleware.ensureAuthenticated, userMiddleware.checkUserBlockedStatus);
 
 router.get('/payment', userMiddleware.ensureAuthenticated, userController.displayPaymentPage);
-router.post('/payment', userMiddleware.ensureAuthenticated, userController.handlePayment);
 router.get("/profile", userMiddleware.ensureAuthenticated, userController.renderAndUpdateProfile);
+router.get("/propertyDetails",userMiddleware.ensureAuthenticated, userController.renderPropertyDetails);
 router.post("/profile", userMiddleware.ensureAuthenticated, userController.updateProfile);
 router.post("/bookProperty", userMiddleware.ensureAuthenticated, userController.bookProperty);
 

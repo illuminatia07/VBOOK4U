@@ -7,6 +7,7 @@ require("dotenv").config();
 const { body, validationResult } = require("express-validator");
 const twilio = require("twilio");
 const Property = require("../models/property");
+const decodeParam = (param) => decodeURIComponent(param || "");
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN,
@@ -244,14 +245,14 @@ const userController = {
     console.log("CheckOut:", req.session.checkOut);
 
     res.render("user/userHome", {
-        errorMessage: req.flash("error"),
-        successMessage: req.flash("success"),
-        userSession: req.session.user,
-        getCurrentDate: getCurrentDate,
-        checkIn: req.session.checkIn, // Pass the checkIn variable to the view
-        checkOut: req.session.checkOut, // Pass the checkOut variable to the view
+      errorMessage: req.flash("error"),
+      successMessage: req.flash("success"),
+      userSession: req.session.user,
+      getCurrentDate: getCurrentDate,
+      checkIn: req.session.checkIn, // Pass the checkIn variable to the view
+      checkOut: req.session.checkOut, // Pass the checkOut variable to the view
     });
-},
+  },
 
   loginPost: async (req, res, next) => {
     try {
@@ -328,97 +329,97 @@ const userController = {
 
   searchProperty: async (req, res, next) => {
     try {
-        const {
-            search,
-            category,
-            roomFacilities,
-            priceRange,
-            guest,
-            page = 1,
-        } = req.query;
-        const { checkIn, checkOut } = req.query;
+      const {
+        search,
+        category,
+        roomFacilities,
+        priceRange,
+        guest,
+        page = 1,
+      } = req.query;
+      const { checkIn, checkOut } = req.query;
 
-        // Store check-in and check-out dates in session
-        req.session.checkIn = checkIn;
-        req.session.checkOut = checkOut;
+      // Store check-in and check-out dates in session
+      req.session.checkIn = checkIn;
+      req.session.checkOut = checkOut;
 
-        const propertiesPerPage = 5;
+      const propertiesPerPage = 5;
 
-        // Construct the initial search query
-        const searchQuery = {};
+      // Construct the initial search query
+      const searchQuery = {};
 
-        // If search term is provided, search by property name or address
-        if (search) {
-            searchQuery.$or = [
-                { propertyName: { $regex: new RegExp(search, "i") } },
-                { address: { $regex: new RegExp(search, "i") } },
-            ];
-        }
+      // If search term is provided, search by property name or address
+      if (search) {
+        searchQuery.$or = [
+          { propertyName: { $regex: new RegExp(search, "i") } },
+          { address: { $regex: new RegExp(search, "i") } },
+        ];
+      }
 
-        // If category is provided, filter by category
-        if (category) {
-            searchQuery.categoryName = category;
-        }
+      // If category is provided, filter by category
+      if (category) {
+        searchQuery.categoryName = category;
+      }
 
-        // If roomFacilities is provided, filter by roomFacilities
-        if (roomFacilities) {
-            // Convert roomFacilities to an array if it's a single value
-            const selectedRoomFacilities = Array.isArray(roomFacilities)
-                ? roomFacilities
-                : [roomFacilities];
-            // Add a condition to check if any of the selected room facilities are in the property's roomFacilities array
-            searchQuery.roomFacilities = { $in: selectedRoomFacilities };
-        }
+      // If roomFacilities is provided, filter by roomFacilities
+      if (roomFacilities) {
+        // Convert roomFacilities to an array if it's a single value
+        const selectedRoomFacilities = Array.isArray(roomFacilities)
+          ? roomFacilities
+          : [roomFacilities];
+        // Add a condition to check if any of the selected room facilities are in the property's roomFacilities array
+        searchQuery.roomFacilities = { $in: selectedRoomFacilities };
+      }
 
-        // If priceRange is provided, filter by priceRange
-        if (priceRange) {
-            const [minPrice, maxPrice] = priceRange.split("-");
-            searchQuery.price = {
-                $gte: parseInt(minPrice),
-                $lte: parseInt(maxPrice),
-            };
-        }
+      // If priceRange is provided, filter by priceRange
+      if (priceRange) {
+        const [minPrice, maxPrice] = priceRange.split("-");
+        searchQuery.price = {
+          $gte: parseInt(minPrice),
+          $lte: parseInt(maxPrice),
+        };
+      }
 
-        // Fetch properties based on the search query
-        const properties = await Property.find(searchQuery)
-            .skip((page - 1) * propertiesPerPage)
-            .limit(propertiesPerPage);
+      // Fetch properties based on the search query
+      const properties = await Property.find(searchQuery)
+        .skip((page - 1) * propertiesPerPage)
+        .limit(propertiesPerPage);
 
-        // Fetch categories from the database
-        const categories = await Category.find(); // Assuming this fetches all categories
+      // Fetch categories from the database
+      const categories = await Category.find(); // Assuming this fetches all categories
 
-        // Calculate total number of properties
-        const totalCount = await Property.countDocuments(searchQuery);
-        // Calculate total number of pages
-        const totalPages = Math.ceil(totalCount / propertiesPerPage);
+      // Calculate total number of properties
+      const totalCount = await Property.countDocuments(searchQuery);
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / propertiesPerPage);
 
-        // Get today's date
-        const today = new Date().toISOString().split("T")[0];
-        console.log("CheckIn:", checkIn);
-        console.log("CheckOut:", checkOut);
-        console.log("Value:", checkOut - checkIn);
+      // Get today's date
+      const today = new Date().toISOString().split("T")[0];
+      console.log("CheckIn:", checkIn);
+      console.log("CheckOut:", checkOut);
+      console.log("Value:", checkOut - checkIn);
 
-        // Render the search results
-        res.render("user/userSearch", {
-            search: search || "", // Ensure that search is properly passed with a default value
-            category,
-            roomFacilities,
-            priceRange,
-            checkIn,
-            checkOut,
-            guest,
-            properties,
-            categories,
-            currentPage: page,
-            userSession: req.session.user,
-            propertyCount: properties.length,
-            totalPages: totalPages,
-            today, // Pass today's date to the template
-        });
+      // Render the search results
+      res.render("user/userSearch", {
+        search: search || "", // Ensure that search is properly passed with a default value
+        category,
+        roomFacilities,
+        priceRange,
+        checkIn,
+        checkOut,
+        guest,
+        properties,
+        categories,
+        currentPage: page,
+        userSession: req.session.user,
+        propertyCount: properties.length,
+        totalPages: totalPages,
+        today, // Pass today's date to the template
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
-},
+  },
 
   // Function to apply filters
   applyFilters: async (req, res, next) => {
@@ -510,166 +511,115 @@ const userController = {
 
   renderPropertyDetails: async (req, res, next) => {
     try {
-        const {userSession, search, guest, propertyName, checkIn, checkOut } = req.query;
+      const { userSession, search, guest, propertyName, checkIn, checkOut } =
+        req.query;
 
-        // Parse check-in and check-out dates
-        const parsedCheckIn = checkIn ? new Date(checkIn) : null;
-        const parsedCheckOut = checkOut ? new Date(checkOut) : null;
+      // Parse check-in and check-out dates
+      const parsedCheckIn = checkIn ? new Date(checkIn) : null;
+      const parsedCheckOut = checkOut ? new Date(checkOut) : null;
 
-        console.log("parsedCheckIn:", parsedCheckIn);
-        console.log("parsedCheckOut:", parsedCheckOut);
+      console.log("parsedCheckIn:", parsedCheckIn);
+      console.log("parsedCheckOut:", parsedCheckOut);
 
-        // Check if both check-in and check-out dates are valid
-        if (!parsedCheckIn || !parsedCheckOut || parsedCheckIn >= parsedCheckOut) {
-            throw new Error("Invalid check-in or check-out date.");
-        }
+    
+      
 
-        // Decode and trim property name
-        const decodedPropertyName = decodeURIComponent(propertyName).trim();
-
-        // Log the decoded property name
-        console.log("Decoded Property Name:", decodedPropertyName);
-
-        // Query the database for the property details
-        const property = await Property.findOne({ propertyName: decodedPropertyName }).lean();
-        if (!property) {
-            console.log("Property not found in the database for name:", decodedPropertyName);
-            return res.status(404).send("Property not found");
-        }
-
-        // Calculate the availability and pricing based on the dates and guest count
-        // This is a simplified example, assuming the Property model has pricing details
-        const numberOfNights = Math.ceil((parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24));
-        const totalPrice = property.price * numberOfNights;
-        console.log("NoNight :",numberOfNights);
-        console.log("PriceOfPro :",property.price);
-        console.log("TotalPrice : ",totalPrice)
-        // Render the property details page
-        res.render("user/viewDetails", {
-            property,
-            checkIn: parsedCheckIn,
-            checkOut: parsedCheckOut,
-            guest,
-            userSession,
-            search,
-            totalPrice,
-            numberOfNights,
-        });
-    } catch (error) {
-        next(error);
-    }
-},
-
-  handlePayment: async (req, res, next) => {
-    try {
-      const {
-        propertyName,
-        userSession,
-        checkIn,
-        checkOut,
-        price,
-        paymentMethod,
-      } = req.body;
-      const userId = req.session.user._id;
-
-      console.log("Received checkIn:", checkIn);
-      console.log("Received checkOut:", checkOut);
-
-      // Validate and parse checkIn and checkOut dates
-      const parsedCheckIn = new Date(checkIn);
-      const parsedCheckOut = new Date(checkOut);
-
-      // Check if parsed dates are valid
-      if (isNaN(parsedCheckIn.getTime()) || isNaN(parsedCheckOut.getTime())) {
-        throw new Error("Invalid date format for checkIn or checkOut");
+      // Check if both check-in and check-out dates are valid
+      if (
+        !parsedCheckIn ||
+        !parsedCheckOut ||
+        parsedCheckIn >= parsedCheckOut
+      ) {
+        throw new Error("Invalid check-in or check-out date.");
       }
 
-      // Check if required fields are provided
-      if (!propertyName || !price) {
-        throw new Error("propertyName and price are required");
+      // Decode and trim property name
+      const decodedPropertyName = decodeURIComponent(propertyName).trim();
+
+      // Log the decoded property name
+      console.log("Decoded Property Name:", decodedPropertyName);
+
+      // Query the database for the property details
+      const property = await Property.findOne({
+        propertyName: decodedPropertyName,
+      }).lean();
+
+
+      req.session.propbook={
+        property,
+        checkIn:parsedCheckIn,
+       checkOut:parsedCheckOut,
+      };
+      console.log("req.session.propbook:",req.session.propbook);
+      if (!property) {
+        console.log(
+          "Property not found in the database for name:",
+          decodedPropertyName
+        );
+        return res.status(404).send("Property not found");
       }
 
-      // Create a new booking
-      const newBooking = new Booking({
-        propertyName,
+      // Calculate the availability and pricing based on the dates and guest count
+      // This is a simplified example, assuming the Property model has pricing details
+      const numberOfNights = Math.ceil(
+        (parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24)
+      );
+      const totalPrice = property.price * numberOfNights;
+      console.log("NoNight :", numberOfNights);
+      console.log("PriceOfPro :", property.price);
+      console.log("TotalPrice : ", totalPrice);
+      // Render the property details page
+      res.render("user/viewDetails", {
+        property,
         checkIn: parsedCheckIn,
         checkOut: parsedCheckOut,
-        user: userId,
+        guest,
         userSession,
-        price,
+        search,
+        totalPrice,
+        numberOfNights,
       });
-
-      await newBooking.save();
-
-      // Check if payment method is "payAtProperty"
-      if (paymentMethod === "payAtProperty") {
-        req.flash(
-          "success",
-          "Booking successful! Payment will be made at the property."
-        );
-      } else {
-        // You can integrate payment gateway logic here
-        req.flash("success", "Booking and payment successful!");
-      }
-
-      res.redirect("/home");
     } catch (error) {
-      console.error("Error processing payment:", error);
-      req.flash(
-        "error",
-        error.message || "Failed to process payment. Please try again."
-      );
-      res.redirect("/viewDetails");
+      next(error);
     }
   },
 
   bookProperty: async (req, res, next) => {
     try {
-      const { propertyName, checkIn, checkOut } = req.body;
+      // Extracting data from the request body
+      const {
+        propertyId,
+        checkInDate,
+        checkOutDate,
+        totalPrice,
+        name,
+        email,
+        phoneNumber,
+        paymentMethod
+      } = req.body;
 
-      // Check if check-in and check-out dates are valid and not in the past
-      const today = new Date();
-      const selectedCheckIn = new Date(checkIn);
-      const selectedCheckOut = new Date(checkOut);
+      // Create a new booking document
+      const newBooking = new Booking({
+        property: req.session.propbook.property._id, // Using propertyId from the request body
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        user: req.session.user, // Assuming you have user session available
+        price: totalPrice,
+        name: name,
+        email: email,
+        phoneNumber: phoneNumber,
+        bookingStatus: "Pending", // Default status is set to 'Pending'
+        payMethod: paymentMethod, // Using payment method from the request body
+      });
 
-      if (selectedCheckIn < today || selectedCheckOut < today) {
-        throw new Error("Check-in and check-out dates cannot be in the past.");
-      }
+      // Save the booking document to the database
+      await newBooking.save();
 
-      if (selectedCheckIn >= selectedCheckOut) {
-        throw new Error("Check-out date must be after the check-in date.");
-      }
-
-      // Calculate the price based on the selected property's price and the duration of stay
-      const property = await Property.findOne({ propertyName });
-      if (!property) {
-        throw new Error("Property not found.");
-      }
-
-      const price = calculatePrice(
-        property.price,
-        selectedCheckIn,
-        selectedCheckOut
-      );
-
-      // Store booking details in session
-      req.session.bookingDetails = {
-        propertyName,
-        checkIn: selectedCheckIn,
-        checkOut: selectedCheckOut,
-        price,
-      };
-
-      // Redirect to the payment page
-      res.redirect("/payment");
+      // Redirect or send response as needed
+      res.redirect('/profile')
     } catch (error) {
-      // Handle error
       console.error("Error booking property:", error);
-      req.flash(
-        "error",
-        error.message || "Failed to book property. Please try again."
-      );
-      res.redirect("/home"); // Redirect to home or wherever appropriate
+      res.status(500).send("Error booking property.");
     }
   },
 
@@ -688,31 +638,34 @@ const userController = {
         return yyyy + "-" + mm + "-" + dd;
       };
 
-      // Retrieve query parameters from the request
       const {
         propertyName,
-        userSession,
         propertyPrice,
+        propertyId,
         checkInDate,
         checkOutDate,
         totalPrice,
       } = req.query;
 
-      // Render the payment page with the retrieved data
+
+
       res.render("user/payment", {
-        propertyName,
-        checkInDate,
-        checkOutDate,
-        userSession,
-        propertyPrice,
-        totalPrice,
-        currentDate: getCurrentDate(), // Pass the current date value
+        propertyName: decodeParam(propertyName),
+        propertyPrice: decodeParam(propertyPrice),
+        propertyId: decodeParam(propertyId),
+        checkInDate: decodeParam(checkInDate),
+        checkOutDate: decodeParam(checkOutDate),
+        totalPrice: decodeParam(totalPrice),
+        userSession: req.session.user,
+        currentDate: getCurrentDate(),
+        propertyId,
       });
     } catch (error) {
       console.error("Error displaying payment page:", error);
       res.status(500).send("Error displaying payment page.");
     }
   },
+
 
   renderAndUpdateProfile: async (req, res) => {
     try {
