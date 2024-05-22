@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vbook4U</title>
-  <link rel="stylesheet" href="/css/userSearch.css" /> 
+  <link rel="stylesheet" href="/css/userSearch.css" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
@@ -18,16 +18,16 @@
     </div>
     <div class="search">
       <form action="/search" method="GET">
-        <input type="text" id="search" name="search" placeholder="Property, Place" value="<%= search || '' %>" required>
-        <input type="date" id="checkInDate" name="checkIn" value="<%= checkIn %>" placeholder="Check-in" required>
-        <input type="date" id="checkOutDate" name="checkOut" value="<%= checkOut %>" placeholder="Check-out" required>
+        <input type="text" id="search" name="search" placeholder="Property, Place" value="<%= search || '' %>" required />
+        <input type="text" id="checkInDate" class="date-picker" name="checkIn" value="<%= today %>" readonly placeholder="Check-in" required>
+        <input type="text" id="checkOutDate" class="date-picker" name="checkOut" value="<%= checkOut %>" readonly placeholder="Check-out" required>
         <select id="guest" name="guest" required>
-          <% for (let i = 1; i <= 10; i++) { %>
-            <option value="<%= i %>" <% if (guest == i) { %>selected<% } %>><%= i %> Guest<%= i > 1 ? 's' : '' %></option>
-          <% } %>
+            <% for (let i = 1; i <= 3; i++) { %>
+                <option value="<%= i %>"><%= i %> Guest(s)</option>
+            <% } %>
         </select>
-        <button class="search-btn">Search</button>
-      </form>
+        <button class="search-btn" type="submit">Search</button>
+    </form>
     </div>
     <% if (userSession) { %>
       <img class="img-user" src="/img/assets/User.png" alt="User Logo" onclick="window.location.href='/profile'" />
@@ -38,7 +38,7 @@
   </header>
 
   <hr>
-  
+
   <div class="main-content">
     <div class="breadcrumbs">
       <a href="/home">Home</a> > <span>Search</span>
@@ -57,7 +57,7 @@
                 </li>
               <% }); %>
             </ul>
-            
+
             <h3 class="sub-heading">Room Facilities</h3>
             <ul>
               <% ['Seating Area', 'Smoking Room', 'King Sized Bed', 'Queen Sized Bed', 'Twin Single Bed', 'Swimming Pool', 'Sea View', 'AC', 'Kitchen', 'Coffee/Tea Maker', 'Roof-Top pool', 'Game Console', 'Mountain View'].forEach(facility => { %>
@@ -66,13 +66,13 @@
                 </li>
               <% }); %>
             </ul>
-            
+
             <h3 class="sub-heading">Price</h3>
             <input class="range" type="range" id="priceRange" name="priceRange" min="3000" max="150000" value="0"><br>
             <div class="range-price">
               <span id="minPriceLabel">0</span> - <span id="maxPriceLabel">50000</span><br>
             </div>
-            
+
             <h3 class="sub-heading">Check-in Features</h3>
             <ul>
               <li><input type="checkbox" name="checkInFeatures" value="Pay at Property"> Pay at Property</li>
@@ -80,7 +80,7 @@
           </div>
           <button type="submit" class="buy-now apply-filters-btn">Apply Filters</button>
         </form>
-        
+
         <div class="button">
           <div class="top-text">Wizard Member</div>
           <div class="middle-text">Get 15% off on Vbook4U accredited properties</div>

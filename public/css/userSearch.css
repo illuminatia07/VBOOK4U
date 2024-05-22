@@ -136,8 +136,9 @@ main {
 .vbook-btn,
 .view-info,
 .buy-now {
-  padding: 4px 9px;
+  padding: 8px 20px;
   border-radius: 25px;
+  margin-top: 20px;
   font-size: small;
 }
 .logout-btn {
@@ -278,11 +279,12 @@ header {
   text-align: center;
 }
 .buy-now {
-  margin-left: 101px;
+  margin-left: 85px;
   border-color: #fff;
   color: #ff006a;
   background-color: #ffff;
   margin-top: 32px;
+  margin-bottom: 30px;
 }
 .buy-now :hover {
   border-width: 3px;

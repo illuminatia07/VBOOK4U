@@ -32,26 +32,30 @@
   <div class="view-details-container">
     <div class="div-top">
       <div class="property-images">
-        <% propertyItem.images.forEach(image => { %>
-        <img src="/img/assets/<%= image %>" alt="<%= propertyItem.propertyName %> Image" />
+        <% property.images.forEach(image => { %>
+        <img src="/img/assets/<%= image %>" alt="<%= property.propertyName %> Image" />
         <% }); %>
       </div>
-      <h2><%= propertyItem.propertyName %></h2>
+      <h2><%= property.propertyName %></h2>
       <p class="total-price">
-        Total price (taxes & fees):<br /><span class="price">₹<span id="total-price"><%= propertyPrice %></span></span>
+        Total price (taxes & fees):<br />
+        <span class="price">₹<span id="total-price"><%= totalPrice.toFixed(2) %></span></span>
       </p>
-      <button class="continue-to-book">Continue to Book</button>
+      
+      <form action="/payment" method="GET">
+        <button type="submit" class="continue-to-book">Continue to Book</button>
+      </form>
     </div>
     <div class="property-details">
       <div class="selected-dates">
         <h3>Selected Dates</h3>
         <p>
           Check-in:
-          <input type="text" id="check-in" class="datepicker" value="<%= checkIn %>" />
+          <input type="text" id="check-in" class="datepicker" value="<%= checkIn.toISOString().split('T')[0] %>" readonly />
         </p>
         <p>
           Check-out:
-          <input type="text" id="check-out" class="datepicker" value="<%= checkOut %>" />
+          <input type="text" id="check-out" class="datepicker" value="<%= checkOut.toISOString().split('T')[0] %>" readonly />
         </p>
       </div>
       <div class="hotel-policies">
@@ -65,8 +69,8 @@
       <div class="facilities-amenities">
         <h3>Facilities and Amenities</h3>
         <ul>
-          <% if (propertyItem.roomFacilities && propertyItem.roomFacilities.length > 0) { %>
-          <% propertyItem.roomFacilities.forEach(facility => { %>
+          <% if (property.roomFacilities && property.roomFacilities.length > 0) { %>
+          <% property.roomFacilities.forEach(facility => { %>
           <li><%= facility %></li>
           <% }); %>
           <% } else { %>
@@ -86,9 +90,11 @@
       </div>
       <div class="address">
         <h3>Address</h3>
-        <p><%= propertyItem.address %></p>
+        <p><%= property.address %></p>
       </div>
-      <button class="continue-to-book">Continue to Book</button>
+      <form action="/payment" method="GET">
+        <button type="submit" class="continue-to-book">Continue to Book</button>
+      </form>
     </div>
   </div>
   <footer>

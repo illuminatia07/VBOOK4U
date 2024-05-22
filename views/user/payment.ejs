@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment</title>
   <link rel="stylesheet" href="/css/payment.css" />
+  <style>
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input[type="checkbox"] {
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -13,11 +23,9 @@
     </div>
     <div class="search">
       <% if (userSession) { %>
-      <button class="logout-btn" onclick="window.location.href='/logout'">
-        Logout
-      </button>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
       <% } else { %>
-      <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+        <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
       <% } %>
     </div>
   </header>
@@ -34,7 +42,7 @@
           id="checkInDate"
           name="checkInDate"
           value="<%= checkInDate %>"
-          min="<%= getCurrentDate() %>"
+          readonly
           required
         />
       </div>
@@ -46,9 +54,9 @@
           id="checkOutDate"
           name="checkOutDate"
           value="<%= checkOutDate %>"
+          readonly
           required
-          min="<%= checkInDate %>" <!-- Set min attribute to check-in date -->
-        
+        />
       </div>
 
       <div class="form-group">
@@ -128,6 +136,7 @@
         </div>
       </div>
 
+      <input type="hidden" id="propertyPrice" value="<%= propertyPrice %>">
       <button type="submit">Book Now</button>
     </form>
   </main>
@@ -136,40 +145,6 @@
     <!-- Include your footer content here -->
   </footer>
 
-  <script>
-    // JavaScript code to calculate the total price based on the check-in and check-out dates
-    const checkInDate = document.getElementById("checkInDate");
-    const checkOutDate = document.getElementById("checkOutDate");
-    const totalPrice = document.getElementById("totalPrice");
-    checkInDate.addEventListener("change", calculateTotalPrice);
-    checkOutDate.addEventListener("change", calculateTotalPrice);
-
-    function calculateTotalPrice() {
-      const checkIn = new Date(checkInDate.value);
-      const checkOut = new Date(checkOutDate.value);
-      const timeDiff = checkOut.getTime() - checkIn.getTime();
-      const numNights = timeDiff / (1000 * 60 * 60 * 24);
-
-      if (!isNaN(numNights) && numNights >= 0) {
-        const propertyPrice = "<%= propertyPrice %>";
-        const totalCost = numNights * propertyPrice;
-        totalPrice.value = totalCost.toFixed(2);
-      } else {
-        totalPrice.value = "0.00";
-      }
-    }
-
-    // Initial calculation in case dates are already populated
-    calculateTotalPrice();
-
-    // Function to get current date in YYYY-MM-DD format
-    function getCurrentDate() {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, "0");
-      const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-      const yyyy = today.getFullYear();
-      return yyyy + "-" + mm + "-" + dd;
-    }
-  </script>
+  <script src="/js/payment.js"></script>
 </body>
 </html>

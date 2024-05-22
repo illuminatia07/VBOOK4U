@@ -1,38 +1,28 @@
-const UserAdmin = require("../models/userAdmin");
+const UserAdmin = require('../models/userAdmin'); // Ensure this path is correct
 
-const checkUserBlockedStatus = async (req, res, next) => {
-  try {
-    // Check if user session exists
-    if (!req.session.user) {
-      // If session does not exist, proceed to the next middleware or route handler
-      return next();
-    }
-
-    // Get user ID from session
-    const userId = req.session.user._id;
-
-    // Find user by ID
-    const user = await UserAdmin.findById(userId);
-
-    // Check if user is blocked
-    if (user && user.isBlocked) {
-      // If user is blocked, destroy the session and redirect to login page
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Error destroying session:", err);
+const userMiddleware = {
+  checkUserBlockedStatus: async (req, res, next) => {
+    try {
+      if (req.session && req.session.user) {
+        const user = await UserAdmin.findById(req.session.user._id);
+        if (user && user.isBlocked) {
+          req.flash("error", "Your account has been blocked. Please contact support.");
+          return res.redirect("/login");
         }
-        req.flash("error", "You are blocked. Please contact support.");
-        res.redirect("/login");
-      });
-    } else {
-      // If user is not blocked, proceed to the next middleware or route handler
+      }
       next();
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    console.error("Error checking user blocked status:", error);
-    req.flash("error", "Internal Server Error");
-    res.redirect("/login");
+  },
+  ensureAuthenticated: (req, res, next) => {
+    if (req.session && req.session.user) {
+      return next();
+    } else {
+      req.flash("error", "You must be logged in to view this page.");
+      return res.redirect("/login");
+    }
   }
 };
 
-module.exports = { checkUserBlockedStatus };
+module.exports = userMiddleware;

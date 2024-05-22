@@ -1,5 +1,3 @@
-// JavaScript for userHome.ejs
-
 // Toggle navigation menu
 const menuBtn = document.getElementById("menu-btn");
 const navLinks = document.getElementById("nav-links");
@@ -21,15 +19,27 @@ navLinks.addEventListener("click", () => {
 const checkInDate = document.getElementById("checkInDate");
 const checkOutDate = document.getElementById("checkOutDate");
 
-checkInDate.addEventListener("change", function () {
-  checkOutDate.min = checkInDate.value;
-});
-$(document).ready(function () {
-  // Get today's date
-  var today = new Date();
+// Get today's date and current time
+const today = new Date();
+const currentHour = today.getHours();
 
+// If current time is past 12 PM, set the minimum selectable date to tomorrow
+if (currentHour >= 12) {
+  today.setDate(today.getDate() + 1);
+}
+
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1); // Set minimum checkout date to one day after today
+
+// Set minimum selectable date for check-in
+checkInDate.min = today.toISOString().split('T')[0];
+
+// Set minimum selectable date for check-out (at least one day after check-in)
+checkOutDate.min = tomorrow.toISOString().split('T')[0];
+
+$(document).ready(function () {
   // Initialize check-in datepicker
-  $("#check-in").datepicker({
+  $("#checkInDate").datepicker({
     format: "yyyy-mm-dd", // Change the format to match the input field
     autoclose: true,
     todayHighlight: true,
@@ -37,23 +47,23 @@ $(document).ready(function () {
   });
 
   // Initialize check-out datepicker
-  $("#check-out").datepicker({
+  $("#checkOutDate").datepicker({
     format: "yyyy-mm-dd", // Change the format to match the input field
     autoclose: true,
     todayHighlight: true,
-    startDate: today, // Set the minimum selectable date to today
+    startDate: tomorrow, // Set the minimum selectable date to tomorrow
   });
 
   // On change event for check-in datepicker
-  $("#check-in").change(function () {
+  $("#checkInDate").change(function () {
     var selectedDate = $(this).datepicker("getDate");
     if (selectedDate !== null) {
       // Increment selected date by one day
       selectedDate.setDate(selectedDate.getDate() + 1);
       // Set start date for check-out datepicker
-      $("#check-out").datepicker("setStartDate", selectedDate);
+      $("#checkOutDate").datepicker("setStartDate", selectedDate);
       // Set selected date as default for check-out datepicker
-      $("#check-out").datepicker("setDate", selectedDate);
+      $("#checkOutDate").datepicker("setDate", selectedDate);
     }
   });
 
@@ -61,16 +71,6 @@ $(document).ready(function () {
   $("#guest").select2({
     minimumResultsForSearch: Infinity, // Disable search box
   });
-});
-
-// Initialize Select2 for guest input
-$("#guest").select2({
-  minimumResultsForSearch: Infinity, // Disable search box
-});
-
-// Initialize Select2 for guest input
-$("#guest").select2({
-  minimumResultsForSearch: Infinity, // Disable search box
 });
 
 // Get and display current date
