@@ -1,4 +1,3 @@
-// models/property.js
 const mongoose = require('mongoose');
 
 const propertySchema = new mongoose.Schema({
@@ -9,11 +8,10 @@ const propertySchema = new mongoose.Schema({
   address: { type: String, required: true },
   images: [{ type: String }],
   price: { type: Number, required: true },
-  availability: { type: Boolean, default: true }, // Added availability field with default value
+  availability: { type: Boolean, default: true },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner', required: true },
   approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }
 });
-
 
 const Property = mongoose.model('Property', propertySchema);
 

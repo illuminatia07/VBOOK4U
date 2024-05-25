@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vbook4U | Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/adminDashboard.css" />
+</head>
+<body>
+    <style>
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 50px;
+        }
+        th, td {
+            padding: 14px 150px;
+            text-align: left;
+        }
+        .breadcrumbs {
+            margin: 20px;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        .breadcrumbs a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .breadcrumbs span {
+            margin: 0 5px;
+            color: #6c757d;
+        }
+    </style>
+    <header>
+        <div class="footer-links">
+            <button class="admin-info-button"><%= admin.fullname %></button>
+            <a href="#" class="vbook4u-link">Vbook4U.com</a>
+            <form action="/admin/logout" method="POST" class="logout-form">
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+        </div>
+    </header>
+    <main>
+        <div class="breadcrumbs">
+            <a href="/admin/dashboard#">Admin Dashboard</a>
+            <span>&gt;</span>
+            
+            <span>Edit Category</span>
+        </div>
+        <form id="editCategoryForm" method="POST" action="/admin/categories/<%= category._id %>/update">
+            <table class="edit-category-table">
+                <tr>
+                    <td><label for="editCategoryName">Name:</label></td>
+                    <td>
+                        <input
+                            type="text"
+                            id="editCategoryName"
+                            name="name"
+                            required
+                            pattern="[A-Za-z0-9./#]+"
+                            title="Only letters, numbers, ., /, and # allowed"
+                            value="<%= category.name %>"
+                        />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="editCategoryDescription">Description:</label></td>
+                    <td>
+                        <textarea
+                            id="editCategoryDescription"
+                            name="description"
+                            required
+                        ><%= category.description %></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><button type="submit">Update Category</button></td>
+                </tr>
+            </table>
+        </form>
+    </main>
+</body>
+</html>

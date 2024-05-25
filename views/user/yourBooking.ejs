@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Booking Details</title>
+
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/yourBooking.css">
+</head>
+<body>
+<header>
+  <div class="vbook-box">
+    <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+  </div>
+  <div class="search">
+    <% if (userSession) { %>
+      <button class="logout-btn" onclick="window.location.href='/logout'"> Logout </button>
+    <% } else { %>
+      <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+    <% } %>
+  </div>
+</header>
+<br>
+<div class="container col-md-6">
+ 
+  <h2>Your Booking Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Check-in Date</th>
+        <th>Check-out Date</th>
+        <th>Price</th>
+        <th>Booking Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% bookings.forEach(function(booking) { %>
+        <tr>
+          <td>
+            <small style="font-weight: bold;">#id <%= booking.id %></small><br>
+            <%= booking.property.name %></td>
+          <td><%= booking.checkIn %></td>
+          <td><%= booking.checkOut %></td>
+          <td><%= booking.price %></td>
+          <td><%= booking.bookingStatus %></td>
+          <td>
+            <form action="/viewDetails" method="GET" style="display:inline;">
+              <input type="hidden" name="bookingId" value="<%= booking.id %>">
+              <button type="submit" class="bg-warning details-btn">View Details</button>
+            </form>
+            <form action="/cancelBooking" method="POST" style="display:inline;">
+              <input type="hidden" name="bookingId" value="<%= booking.id %>">
+              <button type="submit" class="cancel-btn">Cancel Booking</button>
+          </form>
+          <% if (success) { %>
+            <div class=" " role="alert">
+              <%= success %>
+            </div>
+          <% } %>
+          <% if (error) { %>
+            <div class=" " role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

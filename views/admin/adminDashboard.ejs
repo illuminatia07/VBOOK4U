@@ -36,10 +36,22 @@
         <div id="profileSection">
           <h2>Profile</h2>
           <!-- Display admin profile details here -->
-          <p>Name: <%= admin.name %></p>
-          <p>Email: <%= admin.email %></p>
-          <p>Phone No: <%= admin.phoneNumber %></p>
+          <table class="profile-table">
+            <tr>
+              <td>Name:</td>
+              <td><%= admin.fullname %></td>
+            </tr>
+            <tr>
+              <td>Email:</td>
+              <td><%= admin.email %></td>
+            </tr>
+            <tr>
+              <td>Phone No:</td>
+              <td><%= admin.phoneNumber %></td>
+            </tr>
+          </table>
         </div>
+
         <% } %>
 
         <!-- Dashboard Section -->
@@ -71,76 +83,105 @@
         </script>
 
         <!-- Owners Section -->
-        <div id="ownersSection" style="display: none">
+        <div
+          id="ownersSection"
+          class="scrollable-section1"
+          style="display: none"
+        >
           <h2>Owners</h2>
           <% if (owners.length > 0) { %>
-          <!-- Display list of owners -->
-          <ul id="ownersList">
-            <% owners.forEach(function(owner) { %>
-            <li>
-              <p>Name: <%= owner.fullname %></p>
-              <p>Email: <%= owner.email %></p>
-              <p>Phone No: <%= owner.phoneNumber %></p>
-              <!-- Add more owner details as needed -->
-              <% if (owner.isBlocked) { %>
-              <!-- If owner is blocked, show Unblock button -->
-              <form
-                method="POST"
-                action="/admin/owners/<%= owner._id %>/unblock"
-                style="display: inline"
-              >
-                <button type="submit">Unblock</button>
-              </form>
-              <% } else { %>
-              <!-- If owner is not blocked, show Block button -->
-              <form
-                method="POST"
-                action="/admin/owners/<%= owner._id %>/block"
-                style="display: inline"
-              >
-                <button type="submit">Block</button>
-              </form>
-              <% } %>
-            </li>
-            <% }); %>
-          </ul>
+          <!-- Display owners as a styled table -->
+          <table class="owners-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone No</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% owners.forEach(function(owner) { %>
+              <tr>
+                <td><%= owner.fullname %></td>
+                <td><%= owner.email %></td>
+                <td><%= owner.phoneNumber %></td>
+                <td>
+                  <% if (owner.isBlocked) { %>
+                  <!-- If owner is blocked, show Unblock button -->
+                  <form
+                    method="POST"
+                    action="/admin/owners/<%= owner._id %>/unblock"
+                    class="action-form"
+                  >
+                    <button type="submit">Unblock</button>
+                  </form>
+                  <% } else { %>
+                  <!-- If owner is not blocked, show Block button -->
+                  <form
+                    method="POST"
+                    action="/admin/owners/<%= owner._id %>/block"
+                    class="action-form"
+                  >
+                    <button type="submit">Block</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
           <% } else { %>
           <p>No owners found.</p>
           <% } %>
         </div>
 
         <!-- Users Section -->
+
         <div id="usersSection">
           <h2>Users</h2>
           <% if (users.length > 0) { %>
-          <!-- Display list of users -->
-          <ul id="usersList">
-            <% users.forEach(function(user) { %>
-            <li>
-              <p>Name: <%= user.fullname %></p>
-              <p>Email: <%= user.email %></p>
-              <p>Phone No: <%= user.phoneNumber %></p>
-              <!-- Add more user details as needed -->
-              <% if (user.isBlocked) { %>
-              <form
-                method="POST"
-                action="/admin/users/<%= user._id %>/unblock"
-                style="display: inline"
-              >
-                <button type="submit">Unblock</button>
-              </form>
-              <% } else { %>
-              <form
-                method="POST"
-                action="/admin/users/<%= user._id %>/block"
-                style="display: inline"
-              >
-                <button type="submit">Block</button>
-              </form>
-              <% } %>
-            </li>
-            <% }); %>
-          </ul>
+          <!-- Display users as a table -->
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone No</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(function(user) { %>
+              <tr>
+                <td><%= user.fullname %></td>
+                <td><%= user.email %></td>
+                <td><%= user.phoneNumber %></td>
+                <td>
+                  <% if (user.isBlocked) { %>
+                  <!-- If user is blocked, show Unblock button -->
+                  <form
+                    method="POST"
+                    action="/admin/users/<%= user._id %>/unblock"
+                    class="action-form"
+                  >
+                    <button type="submit">Unblock</button>
+                  </form>
+                  <% } else { %>
+                  <!-- If user is not blocked, show Block button -->
+                  <form
+                    method="POST"
+                    action="/admin/users/<%= user._id %>/block"
+                    class="action-form"
+                  >
+                    <button type="submit">Block</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
           <% } else { %>
           <p>No users found.</p>
           <% } %>
@@ -149,47 +190,8 @@
         <!-- Categories Section -->
         <div id="categoriesSection" style="display: none; padding: 10px 20px">
           <h2>Categories</h2>
-          <% if (categories.length > 0) { %>
-          <!-- Display existing categories here -->
-          <ul class="pt-10" id="categoriesList">
-            <% categories.forEach(function(category) { %>
-            <li>
-              <%= category.name %><br />
-              <form
-                method="POST"
-                action="/admin/categories/<%= category._id %>/delete"
-                style="display: inline"
-              >
-                <button class="btn-del" type="submit">Delete</button>
-              </form>
-              <br />
-            </li>
-            <% }); %>
-          </ul>
-          <% } else { %>
-          <p>No categories found.</p>
-          <% } %>
 
-          <!-- Add Category Form -->
-          <h3>Add New Category</h3>
-          <form id="addCategoryForm" method="POST" action="/admin/categories">
-            <label for="categoryName">Name:</label>
-            <input
-              type="text"
-              id="categoryName"
-              name="name"
-              required
-              pattern="[A-Za-z0-9./#]+"
-              title="Only letters, numbers, ., /, and # allowed"
-            />
-            <label for="categoryDescription">Description:</label>
-            <textarea
-              id="categoryDescription"
-              name="description"
-              required
-            ></textarea>
-            <button type="submit">Add Category</button>
-          </form>
+          <!-- Add New Category Form -->
 
           <!-- Error/Success Messages for Add Category -->
           <% if (addCategoryError) { %>
@@ -201,38 +203,121 @@
           <!-- Success Message for Category Deletion -->
           <% if (categoryDeletedSuccess) { %>
           <div class="success-message"><%= categoryDeletedSuccess %></div>
+          <% } %> <% if (categories.length > 0) { %>
+          <!-- Display existing categories as a table -->
+          <div class="scrollable-section2">
+            <table class="categories-table">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% categories.forEach(function(category) { %>
+                <tr>
+                  <td><%= category.name %></td>
+                  <td>
+                    <form
+                      method="POST"
+                      action="/admin/categories/<%= category._id %>/delete"
+                      style="display: inline"
+                    >
+                      <button class="btn-del" type="submit">Delete</button>
+                    </form>
+                    <form
+                      method="GET"
+                      action="/admin/categories/<%= category._id %>/edit"
+                      style="display: inline"
+                    >
+                      <button class="btn-edit" type="submit">Edit</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <p>No categories found.</p>
           <% } %>
+          <h3>Add New Category</h3>
+          <form id="addCategoryForm" method="POST" action="/admin/categories">
+            <table class="add-category-table">
+              <tr>
+                <td><label for="categoryName">Name:</label></td>
+                <td>
+                  <input
+                    type="text"
+                    id="categoryName"
+                    name="name"
+                    required
+                    pattern="[A-Za-z0-9./#]+"
+                    title="Only letters, numbers, ., /, and # allowed"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td><label for="categoryDescription">Description:</label></td>
+                <td>
+                  <textarea
+                    id="categoryDescription"
+                    name="description"
+                    required
+                  ></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><button type="submit">Add Category</button></td>
+              </tr>
+            </table>
+          </form>
         </div>
 
-        <!-- Requests Section -->
         <div id="requestsSection">
           <h2>Property Requests</h2>
           <% if (requests.length > 0) { %>
-          <!-- Display property requests here -->
-          <ul id="requestList">
-            <% requests.forEach(function(request) { %>
-            <li>
-              <h3><%= request.propertyName %></h3>
-              <p>Category: <%= request.categoryName %></p>
-              <p>Description: <%= request.description %></p>
-              <p>Address: <%= request.address %></p>
-              <p>Price: <%= request.price %></p>
-              <!-- Add more property details as needed -->
-              <form
-                method="POST"
-                action="/admin/requests/<%= request._id %>/approve"
-              >
-                <button type="submit">Approve</button>
-              </form>
-              <form
-                method="POST"
-                action="/admin/requests/<%= request._id %>/reject"
-              >
-                <button type="submit">Reject</button>
-              </form>
-            </li>
-            <% }); %>
-          </ul>
+          <!-- Display property requests as a table -->
+          <table class="requests-table">
+            <thead>
+              <tr>
+                <th>Property Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Address</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(function(request) { %>
+              <tr>
+                <td><%= request.propertyName %></td>
+                <td><%= request.categoryName %></td>
+                <td><%= request.description %></td>
+                <td><%= request.address %></td>
+                <td><%= request.price %></td>
+                <td>
+                  <form
+                    method="POST"
+                    action="/admin/requests/<%= request._id %>/approve"
+                    class="action-form"
+                  >
+                    <button type="submit">Approve</button>
+                  </form>
+                  <form
+                    method="POST"
+                    action="/admin/requests/<%= request._id %>/reject"
+                    class="action-form"
+                  >
+                    <button type="submit">Reject</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
           <% } else { %>
           <p>No property requests found.</p>
           <% } %>
@@ -244,31 +329,85 @@
         </div>
 
         <!-- Bookings Section -->
-        <div id="bookingsSection" style="display: none">
-          <!-- Content for Bookings -->
+        <div id="bookingsSection" style="overflow-x: auto">
+          <h2>Bookings</h2>
+          <% if (bookings.length > 0) { %>
+          <!-- Display bookings as a table -->
+          <div class="scrollable-section">
+            <table class="bookings-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th>User</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Payment Method</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% bookings.forEach(function(booking) { %>
+                <tr>
+                  <td>
+                    <%= booking.property ? booking.property.propertyName : 'N/A'
+                    %>
+                  </td>
+                  <td><%= booking.checkIn %></td>
+                  <td><%= booking.checkOut %></td>
+                  <td><%= booking.user ? booking.user.fullname : 'N/A' %></td>
+                  <td><%= booking.price %></td>
+                  <td><%= booking.bookingStatus %></td>
+                  <td><%= booking.payMethod %></td>
+                  <td><%= booking.name %></td>
+                  <td><%= booking.email %></td>
+                  <td><%= booking.phoneNumber %></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+          <p>No bookings found.</p>
+          <% } %>
         </div>
 
-        <div id="deletionSection" style="display: none">
+        <div
+          id="deletionSection"
+          class="scrollable-section"
+          style="display: none"
+        >
           <h2>Deletion</h2>
-          <!-- Display properties to delete -->
           <% if (properties.length > 0) { %>
-          <ul>
-            <% properties.forEach(function(properties) { %>
-            <li>
-              <p>
-                <%= properties.owner.fullname %> - <%= properties.propertyName
-                %>
-              </p>
-              <!-- Add delete button with corresponding action -->
-              <form
-                method="POST"
-                action="/admin/properties/<%= properties._id %>/delete"
-              >
-                <button class="btn-del" type="submit">Delete</button>
-              </form>
-            </li>
-            <% }); %>
-          </ul>
+          <table class="deletion-table">
+            <thead>
+              <tr>
+                <th>Owner</th>
+                <th>Property Name</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% properties.forEach(function(property) { %>
+              <tr>
+                <td><%= property.owner.fullname %></td>
+                <td><%= property.propertyName %></td>
+                <td>
+                  <!-- Add delete button with corresponding action -->
+                  <form
+                    method="POST"
+                    action="/admin/properties/<%= property._id %>/delete"
+                  >
+                    <button class="btn-del" type="submit">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
           <% } else { %>
           <p>No properties to delete.</p>
           <% } %>

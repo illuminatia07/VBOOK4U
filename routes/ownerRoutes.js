@@ -3,6 +3,7 @@ const express = require("express");
 const ownerController = require("../controllers/ownerController");
 const { checkBlockedStatus } = require("../middleware/ownerMiddleware");
 const noCache = require("nocache");
+const Property = require('../models/property');
 const router = express.Router();
 
 router.use(noCache());
@@ -25,6 +26,13 @@ router.post("/signup", ownerController.handleSignup);
 router.get("/dashboard/properties", ownerController.fetchProperties);
 router.get("/dashboard", ownerController.renderDashboard); // Dashboard route
 router.post("/dashboard/addProperty", ownerController.addProperty); // Form submission route for adding property
+router.post('/updateProfile', ownerController.updateProfile);
+router.post('/changePassword', ownerController.changePassword);
+router.post('/cancelBooking/:bookingId', ownerController.cancelBooking);
+router.get('/dashboard/editProperty/:id', ownerController.renderEditProperty);
+
+
+
 router.post(
   "/dashboard/updateAvailability/:propertyId",
   ownerController.updateAvailability
@@ -35,8 +43,10 @@ router.post(
 );
 router.post(
   "/dashboard/editProperty/:propertyId",
-  ownerController.editProperty
+  ownerController.updateProperty
 );
 router.get("/logout", ownerController.logout);
+
+
 
 module.exports = router;

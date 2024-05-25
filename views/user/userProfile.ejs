@@ -26,7 +26,7 @@
         <div id="errorMessages" class="flash-messages">
             <% if (errorMessage && errorMessage.length > 0) { %>
                 <% errorMessage.forEach(function(message) { %>
-                    <p class="flash-message error  "><%= message %></p>
+                    <p class="flash-message error"><%= message %></p>
                 <% }); %>
             <% } %>
             <% if (successMessage && successMessage.length > 0) { %>
@@ -43,7 +43,7 @@
             </div>
             <div class="form-group">
                 <label for="email">Email:</label> <br>
-                <input class="field-up" type="email" id="email" name="email" value="<%= user.email %>">
+                <input class="field-up" type="email" id="email" name="email" value="<%= user.email %>" <%= user.email ? 'readonly' : '' %>>
             </div>
             <div class="form-group">
                 <label for="phoneNumber">Phone Number:</label> <br>
@@ -61,24 +61,18 @@
                     <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
                     <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
                 </select>
-            </div> 
-            <div class="form-group">
-                <label for="newPassword">New Password:</label> <br>
-                <input class="field-up" type="password" id="newPassword" name="newPassword">
-            </div>
-            <div class="form-group">
-                <label for="retypePassword">Retype Password:</label> <br>
-                <input class="field-up" type="password" id="retypePassword" name="retypePassword">
-            </div>
-            <div class="form-group">
-                <label for="currentPassword">Current Password:</label> <br>
-                <input class="field-up" type="password" id="currentPassword" name="currentPassword">
             </div>
             <div class="form-group"><br>
                 <button class="submit-btn" type="submit">Update Profile</button>
             </div>
         </form>
+        <div class="form-group">
+            <button class="submit-btn" onclick="window.location.href='/change-password'">Change Password</button>
+        </div>
+        <div class="form-group">
+            <button class="submit-btn" onclick="window.location.href='/yourBooking'">Bookings</button>
+        </div>
     </div>
-    <script src="/js/payment.js"></script>
+    <script src="/js/userProfile.js"></script>
 </body>
 </html>

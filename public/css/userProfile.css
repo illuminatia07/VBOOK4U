@@ -80,7 +80,7 @@ background-color: #ff006a;
   font-family: "Poppins", sans-serif;
   transition: background-color 0.3s;
   padding: 10px 20px;
-  border-radius: 25px;
+  border-radius: 18px;
   font-size: small;
 }
 .range {
@@ -186,6 +186,7 @@ background-color: #ff006a;
   padding: 10px 20px;
   border-radius: 25px;
   font-size: small;
+  cursor: pointer;
 }
 
 .vbook-btn {

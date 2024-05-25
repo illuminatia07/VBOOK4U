@@ -7,6 +7,7 @@ require("dotenv").config();
 const { body, validationResult } = require("express-validator");
 const twilio = require("twilio");
 const Property = require("../models/property");
+const { findOne } = require("../models/owner");
 const decodeParam = (param) => decodeURIComponent(param || "");
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -215,16 +216,16 @@ const userController = {
 
   renderLogin: (req, res) => {
     // Check if user session exists
-    if (req.session.user) {
-      // If session exists, redirect to Home
-      return res.redirect("/home");
-    } else {
-      // If session doesn't exist, render the login page
+    if (!req.session.isAuth) {
       res.render("user/userLogin", {
         errorMessage: req.flash("error"),
         successMessage: req.flash("success"),
         userSession: req.session.user,
       });
+      
+    } else {
+      // If session exists, redirect to Home
+      return res.redirect("/home");
     }
   },
 
@@ -240,9 +241,6 @@ const userController = {
     // Store check-in and check-out dates in session
     req.session.checkIn = req.body.checkIn;
     req.session.checkOut = req.body.checkOut;
-
-    console.log("CheckIn:", req.session.checkIn);
-    console.log("CheckOut:", req.session.checkOut);
 
     res.render("user/userHome", {
       errorMessage: req.flash("error"),
@@ -268,13 +266,16 @@ const userController = {
           const passwordMatch = await bcrypt.compare(password, user.password);
           if (passwordMatch) {
             // If the passwords match, create a session for the user
+            req.session.isAuth=true;
             req.session.user = {
               _id: user._id,
               email: user.email,
-              fullname: user.fullname, // Include fullname in session data
+              fullname: user.fullname,
+               // Include fullname in session data
             };
-            req.session.save(); // Save the session to the store
-            // Redirect to the userHome
+            // req.session.admin = null; // Clear any existing admin session
+            // req.session.save(); // Save the session to the store
+            // Redirect to the user home
             return res.redirect("/home");
           } else {
             // If the passwords don't match, render the login page with an error message
@@ -397,7 +398,6 @@ const userController = {
       const today = new Date().toISOString().split("T")[0];
       console.log("CheckIn:", checkIn);
       console.log("CheckOut:", checkOut);
-      console.log("Value:", checkOut - checkIn);
 
       // Render the search results
       res.render("user/userSearch", {
@@ -521,9 +521,6 @@ const userController = {
       console.log("parsedCheckIn:", parsedCheckIn);
       console.log("parsedCheckOut:", parsedCheckOut);
 
-    
-      
-
       // Check if both check-in and check-out dates are valid
       if (
         !parsedCheckIn ||
@@ -544,13 +541,12 @@ const userController = {
         propertyName: decodedPropertyName,
       }).lean();
 
-
-      req.session.propbook={
+      req.session.propbook = {
         property,
-        checkIn:parsedCheckIn,
-       checkOut:parsedCheckOut,
+        checkIn: parsedCheckIn,
+        checkOut: parsedCheckOut,
       };
-      console.log("req.session.propbook:",req.session.propbook);
+      console.log("req.session.propbook:", req.session.propbook);
       if (!property) {
         console.log(
           "Property not found in the database for name:",
@@ -595,7 +591,7 @@ const userController = {
         name,
         email,
         phoneNumber,
-        paymentMethod
+        paymentMethod,
       } = req.body;
 
       // Create a new booking document
@@ -608,7 +604,7 @@ const userController = {
         name: name,
         email: email,
         phoneNumber: phoneNumber,
-        bookingStatus: "Pending", // Default status is set to 'Pending'
+        bookingStatus: "Confirmed", // Default status is set to 'Pending'
         payMethod: paymentMethod, // Using payment method from the request body
       });
 
@@ -616,7 +612,7 @@ const userController = {
       await newBooking.save();
 
       // Redirect or send response as needed
-      res.redirect('/profile')
+      res.redirect("/yourBooking");
     } catch (error) {
       console.error("Error booking property:", error);
       res.status(500).send("Error booking property.");
@@ -647,8 +643,6 @@ const userController = {
         totalPrice,
       } = req.query;
 
-
-
       res.render("user/payment", {
         propertyName: decodeParam(propertyName),
         propertyPrice: decodeParam(propertyPrice),
@@ -665,7 +659,6 @@ const userController = {
       res.status(500).send("Error displaying payment page.");
     }
   },
-
 
   renderAndUpdateProfile: async (req, res) => {
     try {
@@ -707,18 +700,6 @@ const userController = {
       .withMessage("Phone number must be 10 digits."),
     body("age").isInt({ gt: 0 }).withMessage("Please enter a valid age."),
     body("gender").notEmpty().withMessage("Please select a gender."),
-    body("currentPassword")
-      .notEmpty()
-      .withMessage("Current password is required."),
-    body("newPassword")
-      .custom((value, { req }) => {
-        const { retypePassword } = req.body;
-        if (value && value !== retypePassword) {
-          throw new Error("New password and retype password do not match.");
-        }
-        return true;
-      })
-      .customSanitizer((value) => value.trim()),
     async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -734,33 +715,20 @@ const userController = {
           const { _id } = req.session.user;
 
           // Retrieve updated profile information from the request body
-          const {
-            fullname,
-            phoneNumber,
-            age,
-            gender,
-            currentPassword,
-            newPassword,
-          } = req.body;
+          const { fullname, phoneNumber, age, gender, email } = req.body;
 
           // Retrieve user data from the database
           const user = await UserAdmin.findById(_id);
 
-          // Check if the current password matches the user's hashed password
-          const isPasswordValid = await bcrypt.compare(
-            currentPassword,
-            user.password
-          );
-
-          if (!isPasswordValid) {
-            req.flash("error", "Incorrect current password.");
-            return res.redirect("/profile");
+          // Check if the email can be updated
+          if (!user.email) {
+            // Check if the new email is unique
+            const existingUser = await UserAdmin.findOne({ email });
+            if (existingUser && existingUser._id.toString() !== _id) {
+              req.flash("error", "Email is already in use.");
+              return res.redirect("/profile");
+            }
           }
-
-          // Hash the new password if provided
-          const hashedNewPassword = newPassword
-            ? await bcrypt.hash(newPassword, 10)
-            : null;
 
           // Update user information in the database
           const updatedUser = await UserAdmin.findByIdAndUpdate(
@@ -770,7 +738,7 @@ const userController = {
               phoneNumber,
               age,
               gender,
-              ...(hashedNewPassword && { password: hashedNewPassword }),
+              ...(user.email ? {} : { email }), // Only update email if it's not already set
             },
             { new: true }
           );
@@ -785,11 +753,11 @@ const userController = {
 
           // Redirect to the profile page with success message
           req.flash("success", "Profile updated successfully.");
-          res.redirect("/profile");
+          return res.redirect("/profile");
         } else {
           // If user session doesn't exist, redirect to login page
           req.flash("error", "Please login to update your profile.");
-          res.redirect("/login");
+          return res.redirect("/login");
         }
       } catch (error) {
         console.error("Error updating user profile:", error);
@@ -797,10 +765,222 @@ const userController = {
           "error",
           "An error occurred while updating your profile. Please try again."
         );
-        res.redirect("/profile");
+        return res.redirect("/profile");
       }
     },
   ],
+
+  renderChangePassword: (req, res) => {
+    res.render("user/changePassword", {
+      errorMessage: req.flash("error"),
+      successMessage: req.flash("success"),
+      userSession: req.session.user,
+    });
+  },
+
+  changePassword: [
+    // Server-side validation rules
+    body("newPassword")
+      .notEmpty()
+      .withMessage("New password is required.")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long.")
+      .custom((value, { req }) => {
+        if (value === req.body.currentPassword) {
+          throw new Error(
+            "New password must be different from current password."
+          );
+        }
+        return true;
+      }),
+    body("confirmPassword")
+      .notEmpty()
+      .withMessage("Confirm password is required.")
+      .custom((value, { req }) => {
+        if (!value) {
+          // Handle case where confirm password is not provided
+          throw new Error("Confirm password is required.");
+        }
+        if (value !== req.body.newPassword) {
+          throw new Error("Passwords do not match.");
+        }
+        return true;
+      }),
+    async (req, res) => {
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          console.log("Validation Errors:", errors.array());
+          const errorMessages = errors.array().map((err) => err.msg);
+          req.flash("error", errorMessages);
+          return res.redirect("/change-password");
+        }
+
+        // Retrieve user data from session
+        const { _id } = req.session.user;
+
+        // Retrieve new password from request body
+        const { newPassword } = req.body;
+
+        // Retrieve user data from the database
+        const user = await UserAdmin.findById(_id);
+
+        // Check if current password exists
+        if (user.password) {
+          // Retrieve current password from request body
+          const { currentPassword } = req.body;
+
+          // Check if current password matches the one stored in the database
+          const passwordMatch = await bcrypt.compare(
+            currentPassword,
+            user.password
+          );
+          if (!passwordMatch) {
+            console.log("Current password is incorrect.");
+            req.flash("error", "Current password is incorrect.");
+            return res.redirect("/change-password");
+          }
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update user's password in the database
+        await UserAdmin.findByIdAndUpdate(_id, { password: hashedPassword });
+
+        // Redirect to profile page with success message
+        req.flash("success", "Password changed successfully.");
+        return res.redirect("/profile");
+      } catch (error) {
+        console.error("Error changing password:", error);
+        req.flash(
+          "error",
+          "An error occurred while changing the password. Please try again."
+        );
+        return res.redirect("/change-password");
+      }
+    },
+  ],
+  renderYourBooking: async (req, res) => {
+    try {
+        // Retrieve bookings for the current user
+        const bookings = await Booking.find({
+            user: req.session.user._id,
+        }).populate("property");
+
+        // Prepare the booking data with necessary properties for the modal
+        const bookingsWithModalData = await Promise.all(bookings.map(async (booking) => {
+            const property = booking.property;
+        
+
+            return {
+                id: booking._id,
+                property: {
+                    name: property.propertyName,
+                    imageUrl: property.images,
+                    address: property.address,
+                    ownerName: property.owner.fullname,
+                    ownerPhone: property.owner.phoneNumber,
+                },
+                checkIn: booking.checkIn,
+                checkOut: booking.checkOut,
+                price: booking.price,
+                bookingStatus: booking.bookingStatus,
+                payMethod: booking.payMethod,
+                name: booking.name,
+                email: booking.email,
+                phoneNumber: booking.phoneNumber,
+            };
+        }));
+
+        // Render the yourBooking.ejs view with the bookings data
+        res.render("user/yourBooking", {
+            bookings: bookingsWithModalData,
+            userSession: req.session.user,
+            success: req.flash("success"), error: req.flash("error")
+        });
+    } catch (error) {
+        console.error("Error fetching user bookings:", error);
+        req.flash("error", "An error occurred while fetching your bookings. Please try again.");
+        return res.redirect("/profile");
+    }
+},
+viewDetails: async (req, res) => {
+  try {
+      // Retrieve the bookingId from the request parameters
+      const bookingId = req.query.bookingId;
+
+      // Find the booking with the provided bookingId and populate the property field
+      const booking = await Booking.findById(bookingId).populate({
+          path: 'property',
+          populate: {
+              path: 'owner'
+          }
+      });
+
+      // Check if the booking exists
+      if (!booking) {
+          // If the booking does not exist, render an error page or handle it appropriately
+          return res.status(404).send("Booking not found");
+      }
+
+      // Extract propertyId from the booking
+      const propertyId = booking.property._id;
+
+      // Query the property details using the propertyId
+      const property = await Property.findById(propertyId);
+
+      // Check if the property exists
+      if (!property) {
+          // If the property does not exist, handle it appropriately
+          return res.status(404).send("Property not found");
+      }
+
+      // Pass booking and property details to the EJS template
+      res.render('user/viewDetailsBooking', {
+          userSession: req.session.user,
+          booking,
+          property,
+           bookingId: bookingId
+      });
+  } catch (err) {
+      // If an error occurs during the process, handle it appropriately
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+  }
+},
+cancelBooking: async (req, res) => {
+  try {
+    // Retrieve the bookingId from the request body
+    const bookingId = req.body.bookingId;
+
+    // Find the booking with the provided bookingId
+    const booking = await Booking.findById(bookingId);
+
+    // Check if the booking exists
+    if (!booking) {
+      // If the booking does not exist, render an error page or handle it appropriately
+      req.flash("error", "Booking not found.");
+      return res.redirect("/yourBooking");
+    }
+
+    // Update the booking status to "Cancelled"
+    booking.bookingStatus = "Cancelled";
+    await booking.save();
+
+    // Flash success message
+    req.flash("success", "Booking canceled successfully.");
+
+    // Redirect back to the dashboard
+    res.redirect("/yourBooking");
+  } catch (err) {
+    // If an error occurs during the process, handle it appropriately
+    console.error(err);
+    req.flash("error", "An error occurred while canceling booking.");
+    res.redirect("/yourBooking");
+  }
+},
+
 };
 
 module.exports = userController;

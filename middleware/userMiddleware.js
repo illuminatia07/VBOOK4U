@@ -1,10 +1,10 @@
-const UserAdmin = require('../models/userAdmin'); // Ensure this path is correct
+const User = require('../models/userAdmin'); 
 
 const userMiddleware = {
   checkUserBlockedStatus: async (req, res, next) => {
     try {
-      if (req.session && req.session.user) {
-        const user = await UserAdmin.findById(req.session.user._id);
+      if (req.session.isAuth) {
+        const user = await User.findById(req.session.user._id);
         if (user && user.isBlocked) {
           req.flash("error", "Your account has been blocked. Please contact support.");
           return res.redirect("/login");
@@ -16,7 +16,7 @@ const userMiddleware = {
     }
   },
   ensureAuthenticated: (req, res, next) => {
-    if (req.session && req.session.user) {
+    if (req.session.isAuth) {
       return next();
     } else {
       req.flash("error", "You must be logged in to view this page.");

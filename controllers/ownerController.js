@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const Owner = require("../models/owner");
 const Property = require("../models/property");
 const Category = require("../models/category");
+const Booking = require("../models/booking");
 
 const ownerController = {
   loginPost: async (req, res) => {
@@ -15,20 +16,22 @@ const ownerController = {
           successMessage: req.flash("success"),
         });
       }
-  
       // Check if the owner is blocked
       if (owner.isBlocked) {
-        req.flash("error", "Your account has been blocked. Please contact support.");
+        req.flash(
+          "error",
+          "Your account has been blocked. Please contact support."
+        );
         return res.render("propertyOwner/ownerLogin", {
           errorMessage: req.flash("error"),
           successMessage: req.flash("success"),
         });
       }
-  
+
       if (bcrypt.compareSync(password, owner.password)) {
         // Create a session for the owner
         req.session.owner = owner;
-  
+
         // Redirect to the dashboard
         return res.redirect(req.session.returnTo || "/owner/dashboard");
       } else {
@@ -43,35 +46,52 @@ const ownerController = {
       req.flash("error", "Internal Server Error");
       return res.redirect("/owner/login");
     }
-  },  
+  },
 
   renderLogin: (req, res) => {
-    req.session.returnTo = req.originalUrl; // Store the returnTo path
+    // Check if owner session exists
+    if (req.session.owner) {
+      // If session exists, redirect to owner dashboard
+      return res.redirect("/owner/dashboard");
+    }
+
+    // Store the returnTo path
+    req.session.returnTo = req.originalUrl;
+
+    // Render login page
     res.render("propertyOwner/ownerLogin", {
       errorMessage: req.flash("error"),
       successMessage: req.flash("success"),
     });
-},
+  },
 
   renderSignup: (req, res) => {
+    // Check if owner session exists
+    if (req.session.owner) {
+      // If session exists, redirect to owner dashboard
+      return res.redirect("/owner/dashboard");
+    }
+
+    // Render signup page
     res.render("propertyOwner/ownerSignup", {
       errorMessage: req.flash("error"),
       successMessage: req.flash("success"),
     });
   },
+
   fetchProperties: async (req, res) => {
     try {
       if (!req.session.owner) {
         return res.status(401).json({ error: "Unauthorized" });
       }
-  
+
       const properties = await Property.find({ owner: req.session.owner._id });
       return res.json(properties);
     } catch (error) {
       console.error("Failed to fetch properties:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
-  },  
+  },
 
   handleSignup: async (req, res) => {
     try {
@@ -131,6 +151,12 @@ const ownerController = {
 
       // Calculate total properties owned by the owner
       const totalProperties = properties.length;
+      const bookings = await Booking.find({
+        property: { $in: properties.map((property) => property._id) },
+      }).populate("property");
+
+      // Calculate total bookings
+      const totalBookings = bookings.length;
 
       // Render the dashboard template with owner details, categories, and properties
       return res.render("propertyOwner/ownerDashboard", {
@@ -138,6 +164,8 @@ const ownerController = {
         categories,
         properties,
         totalProperties,
+        bookings,
+        totalBookings,
         // Pass flash messages to the view
         successMessage: req.flash("success"),
         errorMessage: req.flash("error"),
@@ -247,6 +275,34 @@ const ownerController = {
       return res.redirect("/dashboard/updateAvailability");
     }
   },
+  cancelBooking: async (req, res) => {
+    const bookingId = req.params.bookingId;
+
+    try {
+      const booking = await Booking.findById(bookingId);
+
+      if (!booking) {
+        req.flash("error", "Booking not found.");
+        return res.redirect("/owner/dashboard");
+      }
+
+      // Update booking status to "Cancelled"
+      booking.bookingStatus = "Cancelled";
+
+      // Save the updated booking
+      await booking.save();
+
+      // Set success flash message
+      req.flash("success", "Booking successfully cancelled.");
+
+      // Redirect back to dashboard or any other appropriate page
+      return res.redirect("/owner/dashboard");
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      req.flash("error", "Failed to cancel booking. Please try again.");
+      return res.redirect("/owner/dashboard");
+    }
+  },
 
   logout: (req, res) => {
     try {
@@ -301,12 +357,12 @@ const ownerController = {
         price,
         images,
       } = req.body;
-  
+
       // Define regex patterns for validation
       const nameRegex = /^[a-zA-Z0-9\s]+$/; // Alphanumeric with spaces allowed
       const addressRegex = /^[a-zA-Z0-9\s,-]+$/; // Alphanumeric with spaces, commas, and hyphens allowed
       const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/; // Alphanumeric with spaces, commas, periods, and hyphens allowed
-  
+
       // Server-side validation
       if (
         !nameRegex.test(propertyName) ||
@@ -317,10 +373,14 @@ const ownerController = {
         isNaN(Number(price)) || // Check if price is a valid number
         Number(price) <= 0 // Check if price is greater than zero
       ) {
-        req.flash("error", "Invalid input. Please provide valid data for all fields.");
+        console.log("Validation enteed")
+        req.flash(
+          "error",
+          "Invalid input. Please provide valid data for all fields."
+        );
         return res.redirect("/owner/dashboard");
       }
-  
+
       // Find the property by ID and update its details
       await Property.findByIdAndUpdate(propertyId, {
         propertyName,
@@ -332,7 +392,7 @@ const ownerController = {
         images,
         // Add more fields as needed
       });
-  
+
       req.flash("success", "Property details updated successfully.");
       return res.redirect("/owner/dashboard");
     } catch (error) {
@@ -341,7 +401,259 @@ const ownerController = {
       return res.redirect("/owner/dashboard");
     }
   },
-      
+  updateProfile: async (req, res) => {
+    try {
+      const { fullName, phoneNumber } = req.body;
+
+      // Fetch the owner details from the session
+      const owner = req.session.owner;
+      if (!owner) {
+        req.flash("error", "Owner details not found.");
+        return res.redirect("/owner/login");
+      }
+      console.log("req.body:", req.body); // Log the request body
+      console.log(fullName, phoneNumber); // Log the fullName and phoneNumber
+      if (!/^[A-Za-z -]+$/.test(fullName)) {
+        req.flash(
+          "error",
+          "Please enter a valid name (letters, spaces, and hyphens only)"
+        );
+        return res.redirect("/owner/dashboard");
+      }
+
+      // Validate phone number
+      if (!/^[0-9]{10}$/.test(phoneNumber)) {
+        req.flash(
+          "error",
+          "Please enter a valid phone number (10 digits only)"
+        );
+        return res.redirect("/owner/dashboard");
+      }
+
+      // Update owner profile with new details
+      const updatedOwner = await Owner.findByIdAndUpdate(
+        owner._id,
+        {
+          fullname: fullName,
+          phoneNumber: phoneNumber,
+        },
+        { new: true } // Return the updated document
+      );
+      console.log("updatedOwner:", updatedOwner); // Log the updatedOwner object
+
+      // Update session with new owner details
+      req.session.owner = updatedOwner;
+
+      req.flash("success", "Profile updated successfully.");
+      return res.redirect("/owner/dashboard");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      req.flash("error", "Failed to update profile details.");
+      return res.redirect("/owner/dashboard");
+    }
+  },
+  changePassword: async (req, res) => {
+    try {
+      const { currentPassword, newPassword, confirmPassword } = req.body;
+      console.log("req body : ", req.body);
+
+      // Check if new password matches confirm password
+      if (newPassword !== confirmPassword) {
+        console.log("this password not match");
+        req.flash("error", "New password and confirm password do not match");
+        return res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+      }
+
+      // Fetch owner from database using their ID
+      const ownerId = req.session.owner._id; // Assuming ownerId is stored in the session
+      const owner = await Owner.findById(ownerId);
+      console.log(ownerId);
+      // Check if owner exists
+      if (!owner) {
+        req.flash("error", "Owner not found");
+        return res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+      }
+
+      // Check if current password matches
+      const isMatch = await bcrypt.compare(currentPassword, owner.password);
+      if (!isMatch) {
+        console.log("isMatch entered");
+        req.flash("error", "Current password is incorrect");
+        return res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+      }
+
+      // Validate new password format
+      const passwordRegex =
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{"':;?/>.<,])(?!.*\s).{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        req.flash(
+          "error",
+          "New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
+        );
+        return res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update owner's password in the database
+      const newOwner = await Owner.findByIdAndUpdate(ownerId, {
+        password: hashedPassword,
+      });
+      console.log("NewOwner :", newOwner);
+
+      req.flash("success", "Password updated successfully");
+      res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+    } catch (error) {
+      console.error("Error changing password:", error);
+      req.flash("error", "An internal server error occurred");
+      res.redirect("/owner/dashboard"); // Redirect to dashboard or any appropriate route
+    }
+  },
+  renderEditProperty: async (req, res) => {
+    try {
+      const propertyId = req.params.id;
+      const property = await Property.findById(propertyId);
+
+      const roomFacilities = [
+        "Seating Area",
+        "Smoking Room",
+        "King Sized Bed",
+        "Queen Sized Bed",
+        "Twin Single Bed",
+        "Swimming Pool",
+        "Sea View",
+        "AC",
+        "Kitchen",
+        "Coffee/Tea Maker",
+        "Roof-Top pool",
+        "Game Console",
+        "Mountain View",
+      ];
+      const categories = await Category.find();
+
+      res.render("propertyOwner/editProperty", {
+        property,
+        categories,
+        messages: req.flash("info"),
+        roomFacilities,
+      });
+    } catch (err) {
+      req.flash("error", "Error fetching property details");
+      res.redirect("/owner/dashboard");
+    }
+  },
+
+  updateProperty: async (req, res) => {
+    try {
+      // Extract the propertyId from the request parameters
+      const propertyId = req.params.propertyId;
+      console.log("Property ID:", propertyId);
+
+      // Destructure properties from the request body
+      const {
+        propertyName,
+        categoryName,
+        description,
+        roomFacilities, // Make sure this field contains an array of strings
+        address,
+        price,
+      } = req.body;
+
+      console.log( "req :",req.body);
+
+      // Handle existing images
+      let existingImages = [];
+      if (req.body.existingImages) {
+        existingImages = req.body.existingImages;
+      }
+
+      // Handle newly uploaded images
+      let newImages = [];
+      if (req.files) {
+        newImages = req.files.map((file) => file.filename);
+      }
+      console.log("newImages");
+      // Combine existing and new images
+      const images = [...existingImages, ...newImages];
+
+      // Define regex patterns for validation
+      const nameRegex = /^[a-zA-Z0-9\s]+$/; // Alphanumeric with spaces allowed
+      const addressRegex = /^[a-zA-Z0-9\s,-]+$/; // Alphanumeric with spaces, commas, and hyphens allowed
+      const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/; // Alphanumeric with spaces, commas, periods, and hyphens allowed
+
+      // Server-side validation
+      // if (
+       
+      //   !nameRegex.test(propertyName) ||
+      //   !categoryName ||
+      //   !descriptionRegex.test(description) ||
+      //   !addressRegex.test(address) ||
+      //   !price ||
+      //   isNaN(Number(price)) || // Check if price is a valid number
+      //   Number(price) <= 0 // Check if price is greater than zero
+      // ) {
+      //   console.log("Validation entered");
+      //   req.flash(
+      //     "error",
+      //     "Invalid input. Please provide valid data for all fields."
+      //   );
+      //   return res.redirect("/owner/dashboard");
+      // }
+
+      // Find the property by ID and update its details
+      const updatedProperty = await Property.findByIdAndUpdate(
+        propertyId,
+        {
+          propertyName,
+          categoryName,
+          description,
+          roomFacilities, // Update the roomFacilities field with the new array
+          address,
+          price,
+          images,
+          // Add more fields as needed
+        },
+        { new: true } // Added { new: true } to return the updated document
+      );
+
+      // Log the updated property to verify changes
+      console.log("Updated Property:", updatedProperty);
+
+      // Redirect to dashboard after successful update
+      req.flash("success", "Property details updated successfully.");
+      return res.redirect("/owner/dashboard");
+    } catch (error) {
+      // Handle errors
+      console.error("Error editing property:", error);
+      req.flash("error", "Failed to update property details.");
+      return res.redirect("/owner/dashboard");
+    }
+  },
+  removeImage: async (req, res) => {
+    try {
+      const { propertyId, imageName } = req.body;
+
+      // Find the property document and update the images array
+      const property = await Property.findByIdAndUpdate(
+        propertyId,
+        { $pull: { images: imageName } },
+        { new: true }
+      );
+
+      if (!property) {
+        req.flash('error', 'Property not found');
+        return res.redirect('/owner/dashboard');
+      }
+
+      req.flash('success', 'Image removed from the property');
+      return res.redirect('/owner/dashboard');
+    } catch (error) {
+      console.error('Error:', error);
+      req.flash('error', 'Internal server error');
+      return res.redirect('/owner/dashboard');
+    }
+  },
 };
 
 module.exports = ownerController;

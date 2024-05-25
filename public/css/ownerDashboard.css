@@ -5,6 +5,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f2f2f2;
+  font-size: small;
 }
 
 .container {
@@ -224,4 +225,143 @@ button[type="submit"]:hover {
   color: red;
   font-weight: bold;
   cursor: pointer;
+}
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.property-table th,
+.property-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.property-table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+  /* Dashboard Section Styling */
+  #dashboardSection {
+    display: none;
+    padding: 20px;
+  }
+
+  .dashboard-statistics h3,
+  .recent-bookings h3 {
+    margin-bottom: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  tr:hover {
+    background-color: #ddd;
+  }
+
+
+.property-table td button {
+  margin-right: 5px;
+}
+/* Bookings Section Styling */
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
+  max-height: 500px;
+  border-radius: 10px;
+   /* Set a maximum height for the container */
+}
+.table {
+  width: 100%; /* Ensure the table fills its container */
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 8px; /* Adjust spacing */
+  border: 1px solid #ddd; /* Add borders */
+}
+
+.table th {
+  background-color: #f2f2f2; /* Add background color to header */
+  font-weight: bold; /* Make header text bold */
+ 
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Alternate row background color */
+
+}
+
+.table tbody tr:hover {
+  background-color: #f2f2f2; /* Hover color */
+  border-radius: 10px;
+}
+
+.table tbody td button {
+  cursor: pointer; /* Add pointer cursor to buttons */
+  padding: 4px 8px; /* Adjust button padding */
+  border: none;
+  background-color: transparent;
+  color: #333;
+  border-radius: 10px;
+}
+
+.table tbody td button:hover {
+  background-color: #e6e6e6; /* Hover color for buttons */
+}
+
+/* Action Button Styles */
+.bg-warning {
+  background-color: #ffc107;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bg-warning:hover {
+  background-color: #e0a800;
+}
+/* CSS */
+#deleteSection {
+  max-height: 400px; /* Adjust as needed */
+  overflow-y: auto;
+   /* Optional: Adds a border around the scrollable section */
+  padding: 10px; /* Optional: Adds padding inside the scrollable section */
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.property-table th, .property-table td {
+  padding: 8px;
+  text-align: left;
+  
 }

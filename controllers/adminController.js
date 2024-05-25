@@ -4,18 +4,22 @@ const User = require("../models/userAdmin");
 const Category = require("../models/category"); // Import the Category model
 const Property = require("../models/property"); // Import the Property model
 const Owner = require("../models/owner");
+const Booking = require("../models/booking"); // Import the Booking model
 
 const adminController = {
   renderLogin: (req, res) => {
     if (req.session.isAdmin) {
-      res.redirect("/admin/dashboard");
+      // If an admin session exists, redirect to the admin dashboard
+      return res.redirect("/admin/dashboard");
     } else {
-      res.render("admin/adminLogin", {
+      // If no admin session exists, render the admin login page
+      return res.render("admin/adminLogin", {
         errorMessage: req.flash("error"),
         successMessage: req.flash("success"),
       });
     }
   },
+
   displayPendingRequests: async (req, res) => {
     try {
       // Query properties with "Pending" approval status and populate the owner details
@@ -76,8 +80,12 @@ const adminController = {
       }
       if (user.isAdmin && bcrypt.compareSync(password, user.password)) {
         // Set session variables upon successful login
-        req.session.user = user;
         req.session.isAdmin = true;
+        req.session.admin = {
+          _id: user._id,
+          email: email,
+        };
+        req.session.user = null; // Clear any existing user session
         return res.redirect("/admin/dashboard");
       } else {
         req.flash("error", "Invalid email or password");
@@ -96,9 +104,13 @@ const adminController = {
         req.flash("error", "You are not authorized to access this page");
         return res.redirect("/admin/login");
       }
+
       const owners = await Owner.find();
-      const { email } = req.session.user;
+      const { email } = req.session.admin;
       const admin = await User.findOne({ email });
+      const bookings = await Booking.find()
+        .populate("property")
+        .populate("user");
 
       if (!admin) {
         req.flash("error", "Admin not found");
@@ -123,6 +135,7 @@ const adminController = {
         owners,
         categories,
         requests: pendingRequests,
+        bookings,
         properties,
         users, // Pass users to the view
         messages: req.flash(), // Pass flash messages to the view
@@ -332,6 +345,48 @@ const adminController = {
       console.error("Error unblocking user:", error);
       req.flash("error", "Failed to unblock user.");
       return res.redirect("/admin/dashboard");
+    }
+  },
+  getEditCategoryPage: async (req, res) => {
+    try {
+      const categoryId = req.params.categoryId;
+      // Fetch the category details from your database based on categoryId
+      const category = await Category.findById(categoryId);
+      const { email } = req.session.admin;
+      const admin = await User.findOne({ email });
+      // Render the editCategory.ejs template with the category data
+      res.render("admin/editCategory", { admin, category: category });
+    } catch (error) {
+      // Handle errors
+      console.error("Error fetching category:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+  
+  updateCategory: async (req, res) => {
+    const categoryId = req.params.categoryId;
+    const { name, description } = req.body;
+
+    try {
+      // Find the category by ID and update its name and description
+      const updatedCategory = await Category.findByIdAndUpdate(
+        categoryId,
+        { name, description },
+        { new: true }
+      );
+
+      if (!updatedCategory) {
+        req.flash("error", "Category not found");
+        return res.redirect("/admin/dashboard"); // Redirect to dashboard with error flash message
+      }
+
+      // Category updated successfully
+      req.flash("success", "Category updated successfully");
+      return res.redirect("/admin/dashboard"); // Redirect to dashboard with success flash message
+    } catch (err) {
+      console.error("Error updating category:", err);
+      req.flash("error", "Internal server error");
+      return res.redirect("/admin/dashboard"); // Redirect to dashboard with error flash message
     }
   },
 };

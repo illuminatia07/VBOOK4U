@@ -12,7 +12,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 // Public routes
 router.get("/", userController.renderUserHome);
 router.get("/login", userController.renderLogin);
-router.post("/login", userMiddleware.checkUserBlockedStatus, userController.loginPost);
+router.post("/login", userController.loginPost);
 router.get("/signup", userController.renderSignup);
 router.post("/signup", userController.handleSignup);
 router.get("/verifyOTP", userController.renderOTP);
@@ -23,14 +23,18 @@ router.get("/search", userController.searchProperty);
 router.get("/applyFilters", userController.applyFilters);
 router.get('/home', userController.renderUserHome);
 
-
 // Protected routes (middleware applied)
-router.use(userMiddleware.ensureAuthenticated, userMiddleware.checkUserBlockedStatus);
+// router.use(userMiddleware.ensureAuthenticated, userMiddleware.checkUserBlockedStatus);
 
 router.get('/payment', userMiddleware.ensureAuthenticated, userController.displayPaymentPage);
 router.get("/profile", userMiddleware.ensureAuthenticated, userController.renderAndUpdateProfile);
-router.get("/propertyDetails",userMiddleware.ensureAuthenticated, userController.renderPropertyDetails);
+router.get("/propertyDetails", userMiddleware.ensureAuthenticated, userController.renderPropertyDetails);
 router.post("/profile", userMiddleware.ensureAuthenticated, userController.updateProfile);
+router.get("/change-password", userMiddleware.ensureAuthenticated, userController.renderChangePassword);
+router.post("/change-password", userMiddleware.ensureAuthenticated, userController.changePassword);
 router.post("/bookProperty", userMiddleware.ensureAuthenticated, userController.bookProperty);
+router.get("/yourBooking", userMiddleware.ensureAuthenticated, userController.renderYourBooking);
+router.get("/viewDetails", userMiddleware.ensureAuthenticated, userController.viewDetails);
+router.post("/cancelBooking", userMiddleware.ensureAuthenticated, userController.cancelBooking);
 
 module.exports = router;
