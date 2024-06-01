@@ -322,26 +322,27 @@ h2 {
   
 .error-message,
 .success-message {
-  margin-top: -27px;
+  margin-top: 0px;
   padding: 8px;
+  color: #000;
   border-radius: 4px;
 }
 
 .error-message {
   
-  color: #ff0000;
+  color: #000000;
 }
 
 .success-message {
  
-  color: #37ff00;
+  color: #000000;
 }
 
 button[type="submit"] {
   background-color: #ff006f;
   color: #fff;
   border: none;
-  padding: 5px 10px;
+  padding: 14px 31px;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -412,10 +413,7 @@ p {
 
   /* Style for the users section */
   #usersSection {
-    max-height: 260px; /* Set a maximum height for the div */
-    overflow-y: auto; /* Add vertical scrollbar when content overflows */
-    overflow-x: hidden; /* Hide horizontal scrollbar */
-    margin-bottom: 20px; /* Add some space at the bottom */
+   margin-bottom: 20px; /* Add some space at the bottom */
   }
 
   /* Style for the table */

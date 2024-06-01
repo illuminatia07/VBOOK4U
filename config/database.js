@@ -1,6 +1,7 @@
 // database.js
 const mongoose = require('mongoose');
 
+
 // MongoDB connection string
 const mongoURI = 'mongodb://localhost:27017/vbook4u';
 

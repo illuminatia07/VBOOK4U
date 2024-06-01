@@ -44,6 +44,22 @@ $(document).ready(function () {
     autoclose: true,
     todayHighlight: true,
     startDate: today, // Set the minimum selectable date to today
+  }).on("changeDate", function (e) {
+    // Get the selected check-in date
+    var selectedDate = new Date(e.date);
+    // Set the minimum selectable date for the checkout datepicker to be one day after the selected check-in date
+    var minCheckOutDate = new Date(selectedDate);
+    minCheckOutDate.setDate(selectedDate.getDate() + 1);
+
+    // Update the start date of checkout datepicker
+    $("#checkOutDate").datepicker("setStartDate", minCheckOutDate);
+    // Clear the checkout date if it is before the new start date
+    var currentCheckOutDate = $("#checkOutDate").datepicker("getDate");
+    if (currentCheckOutDate && currentCheckOutDate <= minCheckOutDate) {
+      $("#checkOutDate").datepicker("clearDates");
+    }
+    // Set the minimum date attribute for the checkout input field
+    checkOutDate.min = minCheckOutDate.toISOString().split('T')[0];
   });
 
   // Initialize check-out datepicker
@@ -54,27 +70,14 @@ $(document).ready(function () {
     startDate: tomorrow, // Set the minimum selectable date to tomorrow
   });
 
-  // On change event for check-in datepicker
-  $("#checkInDate").change(function () {
-    var selectedDate = $(this).datepicker("getDate");
-    if (selectedDate !== null) {
-      // Increment selected date by one day
-      selectedDate.setDate(selectedDate.getDate() + 1);
-      // Set start date for check-out datepicker
-      $("#checkOutDate").datepicker("setStartDate", selectedDate);
-      // Set selected date as default for check-out datepicker
-      $("#checkOutDate").datepicker("setDate", selectedDate);
-    }
-  });
-
   // Initialize Select2 for guest input
   $("#guest").select2({
     minimumResultsForSearch: Infinity, // Disable search box
   });
-});
 
-// Get and display current date
-const currentDate = new Date();
-const options = { day: "numeric", month: "short", year: "numeric" };
-const formattedDate = currentDate.toLocaleDateString("en-US", options);
-document.getElementById("currentDate").textContent = formattedDate;
+  // Get and display current date
+  const currentDate = new Date();
+  const options = { day: "numeric", month: "short", year: "numeric" };
+  const formattedDate = currentDate.toLocaleDateString("en-US", options);
+  document.getElementById("currentDate").textContent = formattedDate;
+});

@@ -1,0 +1,47 @@
+<!-- editProfile.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="/css/editProfile.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="/owner/dashboard">Dashboard</a> &gt; <span>Edit Profile</span>
+        </nav>
+        <h2>Edit Profile</h2>
+        
+        <% if (errorMessage && errorMessage.length > 0) { %>
+            <div class="error-message">
+                <%= errorMessage %>
+            </div>
+        <% } %>
+        <% if (successMessage && successMessage.length > 0) { %>
+            <div class="success-message">
+                <%= successMessage %>
+            </div>
+        <% } %>
+        
+        <form action="/owner/updateProfile" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" value="<%= owner.fullname %>" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" value="<%= owner.phoneNumber %>" required>
+            </div>
+            <div class="form-group">
+                <label for="profilePicture">Profile Picture</label>
+                <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
+            </div>
+            
+            <button type="submit">Update Profile</button>
+        </form>
+
+    </div>
+</body>
+</html>

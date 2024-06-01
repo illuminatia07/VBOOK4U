@@ -871,13 +871,15 @@ const userController = {
         // Prepare the booking data with necessary properties for the modal
         const bookingsWithModalData = await Promise.all(bookings.map(async (booking) => {
             const property = booking.property;
-        
+
+            // Extract image URLs from the property
+            const imageUrls = property.images.map(image => `/uploads/properties/${image}`);
 
             return {
                 id: booking._id,
                 property: {
                     name: property.propertyName,
-                    imageUrl: property.images,
+                    imageUrl: imageUrls, // Pass image URLs here
                     address: property.address,
                     ownerName: property.owner.fullname,
                     ownerPhone: property.owner.phoneNumber,
@@ -897,7 +899,8 @@ const userController = {
         res.render("user/yourBooking", {
             bookings: bookingsWithModalData,
             userSession: req.session.user,
-            success: req.flash("success"), error: req.flash("error")
+            success: req.flash("success"), 
+            error: req.flash("error")
         });
     } catch (error) {
         console.error("Error fetching user bookings:", error);
@@ -905,6 +908,7 @@ const userController = {
         return res.redirect("/profile");
     }
 },
+
 viewDetails: async (req, res) => {
   try {
       // Retrieve the bookingId from the request parameters
@@ -936,12 +940,15 @@ viewDetails: async (req, res) => {
           return res.status(404).send("Property not found");
       }
 
+      // Log the property object to verify the structure and image URLs
+      console.log("Property:", property);
+
       // Pass booking and property details to the EJS template
       res.render('user/viewDetailsBooking', {
           userSession: req.session.user,
           booking,
           property,
-           bookingId: bookingId
+          bookingId: bookingId
       });
   } catch (err) {
       // If an error occurs during the process, handle it appropriately
@@ -949,6 +956,7 @@ viewDetails: async (req, res) => {
       res.status(500).send("Internal Server Error");
   }
 },
+
 cancelBooking: async (req, res) => {
   try {
     // Retrieve the bookingId from the request body

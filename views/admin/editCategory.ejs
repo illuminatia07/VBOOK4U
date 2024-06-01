@@ -29,6 +29,24 @@
             margin: 0 5px;
             color: #6c757d;
         }
+        .message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+        }
+        .message.error {
+          
+            color: #721c24;
+          
+        }
+        .message.success {
+         
+            color: #155724;
+         
+        }
     </style>
     <header>
         <div class="footer-links">
@@ -43,9 +61,14 @@
         <div class="breadcrumbs">
             <a href="/admin/dashboard#">Admin Dashboard</a>
             <span>&gt;</span>
-            
             <span>Edit Category</span>
         </div>
+        <% if (error && error.length > 0) { %>
+            <div class="message error"><%= error %></div>
+        <% } %>
+        <% if (success && success.length > 0) { %>
+            <div class="message success"><%= success %></div>
+        <% } %>
         <form id="editCategoryForm" method="POST" action="/admin/categories/<%= category._id %>/update">
             <table class="edit-category-table">
                 <tr>

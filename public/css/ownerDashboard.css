@@ -15,6 +15,73 @@ body {
   margin: auto;
 }
 
+.profile-info {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.profile-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.profile-table td:first-child {
+  font-weight: bold;
+  width: 30%;
+}
+
+.profile-pic {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.edit-btn {
+  position: relative;
+  margin-left: -10px;
+  padding: 10px 20px;
+  background-color: #ff0048;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.edit-btn:hover {
+  background-color: #b3002a;
+}
+
+.delete-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
 .sidebar {
   width: 200px;
   height: 500px;
@@ -85,7 +152,7 @@ h2 {
 
 .vbook4u-link {
   background-color: rgb(255, 0, 128);
-  padding: 10px 20px;
+  padding: 15px 20px;
   border-top-left-radius: 10px;
   border-radius: 10px;
   color: white;
@@ -206,15 +273,15 @@ button[type="submit"]:hover {
   max-height: 100px;
   margin: 5px;
 }
-.delete-btn{
-    background-color: #ff006f;
-    color: #fff;
-    border: none;
-    margin-top: 10px;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.delete-btn {
+  background-color: #ff006f;
+  color: #fff;
+  border: none;
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .image-preview button {
@@ -242,41 +309,41 @@ button[type="submit"]:hover {
   text-align: left;
 }
 
-  /* Dashboard Section Styling */
-  #dashboardSection {
-    display: none;
-    padding: 20px;
-  }
+/* Dashboard Section Styling */
+#dashboardSection {
+  display: none;
+  padding: 20px;
+}
 
-  .dashboard-statistics h3,
-  .recent-bookings h3 {
-    margin-bottom: 10px;
-  }
+.dashboard-statistics h3,
+.recent-bookings h3 {
+  margin-bottom: 10px;
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
 
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
 
-  th {
-    background-color: #f2f2f2;
-  }
+th {
+  background-color: #f2f2f2;
+}
 
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
 
-  tr:hover {
-    background-color: #ddd;
-  }
-
+tr:hover {
+  background-color: #ddd;
+}
 
 .property-table td button {
   margin-right: 5px;
@@ -288,7 +355,7 @@ button[type="submit"]:hover {
   max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
   max-height: 500px;
   border-radius: 10px;
-   /* Set a maximum height for the container */
+  /* Set a maximum height for the container */
 }
 .table {
   width: 100%; /* Ensure the table fills its container */
@@ -304,12 +371,10 @@ button[type="submit"]:hover {
 .table th {
   background-color: #f2f2f2; /* Add background color to header */
   font-weight: bold; /* Make header text bold */
- 
 }
 
 .table tbody tr:nth-child(even) {
   background-color: #f9f9f9; /* Alternate row background color */
-
 }
 
 .table tbody tr:hover {
@@ -347,7 +412,7 @@ button[type="submit"]:hover {
 #deleteSection {
   max-height: 400px; /* Adjust as needed */
   overflow-y: auto;
-   /* Optional: Adds a border around the scrollable section */
+  /* Optional: Adds a border around the scrollable section */
   padding: 10px; /* Optional: Adds padding inside the scrollable section */
 }
 
@@ -360,8 +425,70 @@ button[type="submit"]:hover {
   border-collapse: collapse;
 }
 
-.property-table th, .property-table td {
+.property-table th,
+.property-table td {
   padding: 8px;
   text-align: left;
-  
+}
+.profile-card,
+.edit-profile-container {
+  max-width: 400px;
+  margin: 0px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.profile-picture {
+  flex-shrink: 0;
+}
+
+.profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-details {
+  text-align: left;
+  flex-grow: 1;
+}
+
+.edit-profile-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: #ff0062;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.edit-profile-container:hover,
+button[type="submit"]:hover {
+  background-color: #b30036;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="file"] {
+  display: block;
+  margin-top: 10px;
 }

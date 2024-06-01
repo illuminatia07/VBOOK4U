@@ -29,9 +29,9 @@
       <small style="font-weight: bold;">Booking: #id <%= booking.id %></small><br>
       <br>
  
-        <% property.images.forEach(image => { %>
-        <img class="property-images" src="/img/assets/<%= image %>" alt="<%= property.propertyName %> Image" />
-        <% }); %>
+      <% property.images.forEach(image => { %>
+        <img class="property-images" src="<%= image %>" alt="<%= property.propertyName %> Image">
+    <% }); %>
      
       <p class="card-text"><strong>Check-in Date:</strong> <%= booking.checkIn %></p>
       <p class="card-text"><strong>Check-out Date:</strong> <%= booking.checkOut %></p>

@@ -33,9 +33,9 @@
     <div class="div-top">
       <div class="property-images">
         <% property.images.forEach(image => { %>
-        <img src="/img/assets/<%= image %>" alt="<%= property.propertyName %> Image" />
+            <img src="<%= image %>" alt="<%= property.propertyName %> Image">
         <% }); %>
-      </div>
+    </div>
       <h2><%= property.propertyName %></h2>
       <p class="total-price">
         Total price (taxes & fees):<br />

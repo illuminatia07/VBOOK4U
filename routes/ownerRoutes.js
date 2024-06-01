@@ -3,8 +3,12 @@ const express = require("express");
 const ownerController = require("../controllers/ownerController");
 const { checkBlockedStatus } = require("../middleware/ownerMiddleware");
 const noCache = require("nocache");
-const Property = require('../models/property');
+const Property = require("../models/property");
 const router = express.Router();
+const {
+  uploadProfilePicture,
+  uploadPropertyImage,
+} = require("../middleware/multer");
 
 router.use(noCache());
 router.use((req, res, next) => {
@@ -24,14 +28,19 @@ router.post("/", ownerController.loginPost);
 router.get("/signup", ownerController.renderSignup);
 router.post("/signup", ownerController.handleSignup);
 router.get("/dashboard/properties", ownerController.fetchProperties);
-router.get("/dashboard", ownerController.renderDashboard); // Dashboard route
-router.post("/dashboard/addProperty", ownerController.addProperty); // Form submission route for adding property
-router.post('/updateProfile', ownerController.updateProfile);
-router.post('/changePassword', ownerController.changePassword);
-router.post('/cancelBooking/:bookingId', ownerController.cancelBooking);
-router.get('/dashboard/editProperty/:id', ownerController.renderEditProperty);
+router.get("/dashboard", ownerController.renderDashboard);
 
+// Ensure this route is correctly defined and not duplicated
+router.post(
+  "/updateProfile",
+  uploadProfilePicture.single("profilePicture"),
+  ownerController.updateProfile
+);
 
+router.post("/changePassword", ownerController.changePassword);
+router.post("/cancelBooking/:bookingId", ownerController.cancelBooking);
+router.get("/dashboard/editProperty/:id", ownerController.renderEditProperty);
+router.get("/editProfile", ownerController.renderEditProfilePage);
 
 router.post(
   "/dashboard/updateAvailability/:propertyId",
@@ -41,12 +50,17 @@ router.post(
   "/dashboard/deleteProperty/:propertyId",
   ownerController.deleteProperty
 );
+
 router.post(
-  "/dashboard/editProperty/:propertyId",
-  ownerController.updateProperty
+  "/dashboard/addProperty",
+  uploadPropertyImage.array("images", 5),
+  (req, res, next) => {
+      console.log("Request Files:", req.files);
+      next();
+  },
+  ownerController.addProperty
 );
+router.get("/changePassword", ownerController.renderChangePasswordPage);
 router.get("/logout", ownerController.logout);
-
-
 
 module.exports = router;

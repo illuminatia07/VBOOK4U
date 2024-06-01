@@ -19,9 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
         startDate: today,
         autoclose: true
     }).on('changeDate', function (e) {
-        const checkInDate = e.date;
-        checkInDate.setDate(checkInDate.getDate() + 1);
-        $(checkOutDateElement).datepicker('setStartDate', checkInDate);
+        const checkInDate = new Date(e.date);
+        const nextDay = new Date(checkInDate);
+        nextDay.setDate(checkInDate.getDate() + 1);
+        $(checkOutDateElement).datepicker('setStartDate', nextDay);
     });
 
     $(checkOutDateElement).datepicker({

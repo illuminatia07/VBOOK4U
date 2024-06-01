@@ -24,9 +24,9 @@ router.use(adminMiddleware.isAdmin); // This will apply isAdmin middleware to al
 
 router.get("/dashboard", adminMiddleware.ensureAdminAuthenticated, adminController.renderDashboard);
 router.post("/categories", adminController.addCategory);
-router.get("/requests", adminController.displayPendingRequests);
-router.post("/requests/:id/approve", adminController.approveRequest);
-router.post("/requests/:id/reject", adminController.rejectRequest);
+router.get('/requests', adminController.displayPendingRequests);
+router.post('/requests/:id/approve', adminController.approveRequest);
+router.post('/requests/:id/reject', adminController.rejectRequest);
 router.get("/deletion", adminController.renderDeletion);
 router.post('/categories/:id/delete', adminController.deleteCategory);
 router.post("/users/:id/block", adminController.blockUser); // Route to block a user

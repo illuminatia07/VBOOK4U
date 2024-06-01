@@ -22,53 +22,64 @@ const adminController = {
 
   displayPendingRequests: async (req, res) => {
     try {
-      // Query properties with "Pending" approval status and populate the owner details
-      const pendingRequests = await Property.find({
-        approvalStatus: "Pending",
-      }).populate("owner");
+        const pendingRequests = await Property.find({ approvalStatus: "Pending" }).populate("owner");
+        const admin = await User.findOne({ email: req.session.admin.email });
 
-      // Render admin dashboard with pending requests
-      res.render("admin/adminDashboard", { admin, requests: pendingRequests });
+        if (!admin) {
+            req.flash("error", "Admin not found");
+            return res.redirect("/admin/login");
+        }
+
+        const flashMessages = {
+            error: req.flash("error"),
+        };
+
+        res.render("admin/adminDashboard", {
+            admin,
+            requests: pendingRequests,
+            messages: flashMessages,
+        });
     } catch (error) {
-      console.error("Error displaying pending requests:", error);
-      req.flash("error", "Failed to fetch pending requests.");
-      return res.redirect("/admin/dashboard");
+        console.error("Error displaying pending requests:", error);
+        req.flash("error", "Failed to fetch pending requests.");
+        return res.redirect("/admin/dashboard");
     }
-  },
+},
 
-  rejectRequest: async (req, res) => {
-    try {
-      const requestId = req.params.id;
+rejectRequest: async (req, res) => {
+  try {
+    const requestId = req.params.id;
 
-      // Find the property by ID and delete it
-      await Property.findByIdAndDelete(requestId);
+    // Find the property by ID and delete it
+    await Property.findByIdAndDelete(requestId);
 
-      req.flash("success", "Property rejected and deleted successfully.");
-      return res.redirect("/admin/requests");
-    } catch (error) {
-      console.error("Error rejecting request:", error);
-      req.flash("error", "Failed to reject property.");
-      return res.redirect("/admin/requests");
-    }
-  },
+    req.flash("success", "Property rejected and deleted successfully.");
+    return res.redirect("/admin/requests");
+  } catch (error) {
+    console.error("Error rejecting request:", error);
+    req.flash("error", "Failed to reject property.");
+    return res.redirect("/admin/requests");
+  }
+},
 
-  approveRequest: async (req, res) => {
-    try {
-      const requestId = req.params.id;
+approveRequest: async (req, res) => {
+  try {
+    const requestId = req.params.id;
 
-      // Find the property by ID and update its approval status to "Approved"
-      await Property.findByIdAndUpdate(requestId, {
-        approvalStatus: "Approved",
-      });
+    // Find the property by ID and update its approval status to "Approved"
+    await Property.findByIdAndUpdate(requestId, {
+      approvalStatus: "Approved",
+    });
 
-      req.flash("success", "Property approved successfully.");
-      return res.redirect("/admin/requests");
-    } catch (error) {
-      console.error("Error approving request:", error);
-      req.flash("error", "Failed to approve property.");
-      return res.redirect("/admin/requests");
-    }
-  },
+    req.flash("success", "Property approved successfully.");
+    return res.redirect("/admin/requests");
+  } catch (error) {
+    console.error("Error approving request:", error);
+    req.flash("error", "Failed to approve property.");
+    return res.redirect("/admin/requests");
+  }
+},
+
 
   loginPost: async (req, res) => {
     const { email, password } = req.body;
@@ -100,74 +111,72 @@ const adminController = {
 
   renderDashboard: async (req, res) => {
     try {
-      if (!req.session.isAdmin) {
-        req.flash("error", "You are not authorized to access this page");
-        return res.redirect("/admin/login");
-      }
+        if (!req.session.isAdmin) {
+            req.flash("error", "You are not authorized to access this page");
+            return res.redirect("/admin/login");
+        }
 
-      const owners = await Owner.find();
-      const { email } = req.session.admin;
-      const admin = await User.findOne({ email });
-      const bookings = await Booking.find()
-        .populate("property")
-        .populate("user");
+        const owners = await Owner.find();
+        const { email } = req.session.admin;
+        const admin = await User.findOne({ email });
+        const bookings = await Booking.find().populate("property").populate("user");
 
-      if (!admin) {
-        req.flash("error", "Admin not found");
-        return res.redirect("/admin/login");
-      }
+        if (!admin) {
+            req.flash("error", "Admin not found");
+            return res.redirect("/admin/login");
+        }
 
-      const categories = await Category.find();
-      const pendingRequests = await Property.find({
-        approvalStatus: "Pending",
-      }).populate("owner");
-      const properties = await Property.find().populate("owner");
+        const categories = await Category.find();
+        const pendingRequests = await Property.find({ approvalStatus: "Pending" }).populate("owner");
+        const properties = await Property.find().populate("owner");
+        const users = await User.find();
 
-      // Fetch all users
-      const users = await User.find();
+        const flashMessages = {
+            error: req.flash("error"),
+            success: req.flash("success"),
+            addCategoryError: req.flash("error"),
+            addCategorySuccess: req.flash("success"),
+            categoryDeletedSuccess: req.flash("success"),
+        };
 
-      // Pass the success message directly to the adminDashboard.ejs file
-      const successMessage = req.flash("success");
-
-      // Render admin dashboard with admin info, categories, pending requests, properties, and users
-      res.render("admin/adminDashboard", {
-        admin,
-        owners,
-        categories,
-        requests: pendingRequests,
-        bookings,
-        properties,
-        users, // Pass users to the view
-        messages: req.flash(), // Pass flash messages to the view
-        addCategoryError: req.flash("error"),
-        addCategorySuccess: successMessage, // Pass success message to the view
-        categoryDeletedSuccess: req.flash("success"),
-      });
+        res.render("admin/adminDashboard", {
+            admin,
+            owners,
+            categories,
+            requests: pendingRequests,
+            bookings,
+            properties,
+            users,
+            messages: flashMessages,
+        });
     } catch (error) {
-      console.error("Error rendering dashboard:", error);
-      req.flash("error", "Internal Server Error");
-      return res.redirect("/admin/login");
+        console.error("Error rendering dashboard:", error);
+        req.flash("error", "Internal Server Error");
+        return res.redirect("/admin/login");
     }
   },
 
   renderDeletion: async (req, res) => {
     try {
-      // Fetch all properties and populate the owner details
-      const properties = await Property.find().populate("owner");
+        const properties = await Property.find().populate("owner");
 
-      // Render admin dashboard with properties to delete
-      res.render("admin/adminDashboard", {
-        admin: req.session.user,
-        properties: properties,
-        addCategoryError: req.flash("error"),
-        categoryDeletedSuccess: categoryDeletedSuccess, // Pass categoryDeletedSuccess to the view
-      });
+        const flashMessages = {
+            error: req.flash("error"),
+            addCategoryError: req.flash("error"),
+            categoryDeletedSuccess: req.flash("success"),
+        };
+
+        res.render("admin/adminDashboard", {
+            admin: req.session.user,
+            properties: properties,
+            messages: flashMessages,
+        });
     } catch (error) {
-      console.error("Error rendering deletion:", error);
-      req.flash("error", "Internal Server Error");
-      return res.redirect("/admin/dashboard");
+        console.error("Error rendering deletion:", error);
+        req.flash("error", "Internal Server Error");
+        return res.redirect("/admin/dashboard");
     }
-  },
+},
   deleteProperty: async (req, res) => {
     const propertyId = req.params.id;
     try {
@@ -197,16 +206,23 @@ const adminController = {
         return res.redirect("/admin/dashboard");
       }
 
-      // Check if the category already exists
-      const existingCategory = await Category.findOne({ name: name });
+      // Normalize the category name by converting to lowercase and removing whitespace
+      const normalizedCategoryName = name.toLowerCase().replace(/\s+/g, "");
+
+      // Check if the category already exists (case-insensitive, ignoring whitespace)
+      const existingCategory = await Category.findOne({
+        normalizedName: normalizedCategoryName,
+      });
+
       if (existingCategory) {
         req.flash("error", "Category already exists");
         return res.redirect("/admin/dashboard");
       }
 
       const newCategory = new Category({
-        name: name,
-        description: description,
+        name: name.trim(), // Save the original name with proper case and spacing
+        description: description.trim(),
+        normalizedName: normalizedCategoryName, // Store the normalized name for future checks
       });
 
       await newCategory.save();
@@ -214,7 +230,7 @@ const adminController = {
       return res.redirect("/admin/dashboard");
     } catch (error) {
       console.error("Error adding category:", error);
-      req.flash("error", "Failed to add category");
+      req.flash("", "Failed to add category");
       return res.redirect("/admin/dashboard");
     }
   },
@@ -349,46 +365,91 @@ const adminController = {
   },
   getEditCategoryPage: async (req, res) => {
     try {
-      const categoryId = req.params.categoryId;
-      // Fetch the category details from your database based on categoryId
-      const category = await Category.findById(categoryId);
-      const { email } = req.session.admin;
-      const admin = await User.findOne({ email });
-      // Render the editCategory.ejs template with the category data
-      res.render("admin/editCategory", { admin, category: category });
+        const categoryId = req.params.categoryId;
+        const category = await Category.findById(categoryId);
+        const admin = await User.findOne({ email: req.session.admin.email });
+
+        if (!admin) {
+            req.flash("error", "Admin not found");
+            return res.redirect("/admin/login");
+        }
+
+        const flashMessages = {
+            error: req.flash("error"),
+            success: req.flash("success"),
+        };
+
+        if (req.session.admin) {
+            res.render("admin/editCategory", {
+                admin,
+                category,
+                messages: flashMessages,
+            });
+        } else {
+            res.render("admin/adminLogin", { error: "You are not authorized to this page" });
+        }
     } catch (error) {
-      // Handle errors
-      console.error("Error fetching category:", error);
-      res.status(500).send("Internal Server Error");
+        console.error("Error fetching category:", error);
+        res.status(500).send("Internal Server Error");
     }
-  },
-  
+},
+
   updateCategory: async (req, res) => {
     const categoryId = req.params.categoryId;
     const { name, description } = req.body;
-
+  
+    // Check if an admin user is logged in
+    if (!req.session.isAdmin) {
+      req.flash("error", "You are not authorized to perform this action");
+      return res.redirect("/admin/login");
+    }
+  
     try {
+      if (!name || !description) {
+        req.flash("error", "Please provide both name and description");
+        return res.redirect(`/admin/categories/${categoryId}/edit`);
+      }
+  
+      // Normalize the category name by converting to lowercase and removing whitespace
+      const normalizedCategoryName = name.toLowerCase().replace(/\s+/g, "");
+  
+      // Check if another category already exists with the new name (case-insensitive, ignoring whitespace)
+      const existingCategory = await Category.findOne({
+        normalizedName: normalizedCategoryName,
+        _id: { $ne: categoryId } // Exclude the current category from the check
+      });
+  
+      if (existingCategory) {
+        req.flash("error", "Category with this name already exists");
+        return res.redirect(`/admin/categories/${categoryId}/edit`);
+      }
+  
       // Find the category by ID and update its name and description
       const updatedCategory = await Category.findByIdAndUpdate(
         categoryId,
-        { name, description },
+        {
+          name: name.trim(), // Save the original name with proper case and spacing
+          description: description.trim(),
+          normalizedName: normalizedCategoryName // Update the normalized name for future checks
+        },
         { new: true }
       );
-
+  
       if (!updatedCategory) {
         req.flash("error", "Category not found");
         return res.redirect("/admin/dashboard"); // Redirect to dashboard with error flash message
       }
-
+  
       // Category updated successfully
       req.flash("success", "Category updated successfully");
       return res.redirect("/admin/dashboard"); // Redirect to dashboard with success flash message
     } catch (err) {
       console.error("Error updating category:", err);
       req.flash("error", "Internal server error");
-      return res.redirect("/admin/dashboard"); // Redirect to dashboard with error flash message
+      return res.redirect(`/admin/categories/${categoryId}/edit`); // Redirect to edit page with error flash message
     }
   },
+  
 };
 
 module.exports = adminController;

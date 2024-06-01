@@ -99,16 +99,17 @@
               <div class="property-details">
                 <div class="property-images">
                   <% propertyItem.images.forEach(image => { %>
-                    <img src="/img/assets/<%= image %>" alt="<%= propertyItem.propertyName %> Image">
+                      <img src="<%= image %>" alt="<%= propertyItem.propertyName %> Image">
                   <% }); %>
-                </div>
+              </div>
+              
                 <div class="property-info">
                   <h3 class="property-heading"><%= propertyItem.propertyName %></h3>
                   <p class="property-detail"><span style="font-weight: bold;">DESCRIPTION:</span> <br><span style="font-style: italic; font-size: 12px;"><%= propertyItem.description %></span></p>
                   <p class="property-detail"><span style="font-weight: bold;">ADDRESS:</span> <br><span style="font-style: italic; font-size: 12px;"><%= propertyItem.address %></span></p>
                   <p class="property-detail"><span style="font-weight: bold;">PRICE:</span> <span style="color: #4d750b; font-size: 16px;">₹<%= propertyItem.price %></span></p>
                   <button class="view-info">View Details</button>
-                  <button class="view-info">Book Now</button>
+              
                 </div>
               </div>
             </div>

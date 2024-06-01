@@ -3,7 +3,7 @@ const express = require("express");
 const session = require("express-session");
 const flash = require("express-flash");
 const path = require("path");
-const { body, validationResult } = require('express-validator');
+const { body, validationResult } = require("express-validator");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const ownerRoutes = require("./routes/ownerRoutes");
@@ -31,12 +31,15 @@ app.use("/scripts", express.static(path.join(__dirname, "scripts")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Set up session 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "your-secret-key",
-  resave: false,
-  saveUninitialized: true,
-}));
+// Set up session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
 
 // Set up flash middleware
 app.use(flash());
@@ -47,8 +50,6 @@ app.use(passport.session());
 
 // Set up no-cache middleware
 app.use(noCache());
-
-
 
 // Set up routes with middleware
 app.use("/", userRoutes);
