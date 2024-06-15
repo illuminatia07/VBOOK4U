@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="/css/adminDashboard.css" />
   </head>
   <body>
-
     <header>
       <div class="footer-links">
         <button class="admin-info-button"><%= admin.fullname %></button>
@@ -15,6 +14,19 @@
         </form>
       </div>
     </header>
+    <% if (messages.error && messages.error.length > 0) { %>
+    <div id="error-message" class="error-message">
+      <% messages.error.forEach(function(msg) { %>
+      <p><%= msg %></p>
+      <% }); %>
+    </div>
+    <% } %> <% if (messages.success && messages.success.length > 0) { %>
+    <div id="success-message" class="success-message">
+      <% messages.success.forEach(function(msg) { %>
+      <p><%= msg %></p>
+      <% }); %>
+    </div>
+    <% } %>
     <script>
       // Function to hide flash messages after 2 seconds
       function hideFlashMessages() {
@@ -32,21 +44,7 @@
       // Call the function after the DOM is fully loaded
       document.addEventListener("DOMContentLoaded", hideFlashMessages);
     </script>
-    <% if (messages.error && messages.error.length > 0) { %>
-      <div id="error-message" class="error-message">
-        <% messages.error.forEach(function(msg) { %>
-          <p><%= msg %></p>
-        <% }); %>
-      </div>
-    <% } %>
 
-    <% if (messages.success && messages.success.length > 0) { %>
-      <div id="success-message" class="success-message">
-        <% messages.success.forEach(function(msg) { %>
-          <p><%= msg %></p>
-        <% }); %>
-      </div>
-    <% } %>
     <div class="container">
       <!-- Sidebar -->
       <div class="sidebar">
@@ -57,8 +55,10 @@
         <a href="#" id="categoriesLink">CATEGORIES</a>
         <a href="#" id="salesReportLink">SALES REPORT</a>
         <a href="#" id="bookingsLink">BOOKINGS</a>
-        <a href="#" id="deletionLink">DELETION</a>
+        <a href="#" id="couponLink">COUPONS</a>
+        <a href="#" id="editCouponLink">EDIT COUPON</a>
         <a href="#" id="requestLink">REQUESTS</a>
+
         <!-- Added REQUESTS link -->
       </div>
 
@@ -221,39 +221,48 @@
         <!-- Categories Section -->
         <div id="categoriesSection" style="display: none; padding: 10px 20px">
           <h2>Categories</h2>
-        
+
           <% if (messages.categoryDeletedSuccess.length > 0) { %>
-            <div id="success-message" class="success-message"><%= messages.categoryDeletedSuccess[0] %></div>
-          <% } %>
-          <% if (categories.length > 0) { %>
-            <!-- Display existing categories as a table -->
-            <div class="scrollable-section2">
-              <table class="categories-table">
-                <thead>
-                  <tr>
-                    <th>Category Name</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% categories.forEach(function(category) { %>
-                    <tr>
-                      <td><%= category.name %></td>
-                      <td>
-                        <form method="POST" action="/admin/categories/<%= category._id %>/delete" style="display: inline">
-                          <button class="btn-del" type="submit">Delete</button>
-                        </form>
-                        <form method="GET" action="/admin/categories/<%= category._id %>/edit" style="display: inline">
-                          <button class="btn-edit" type="submit">Edit</button>
-                        </form>
-                      </td>
-                    </tr>
-                  <% }); %>
-                </tbody>
-              </table>
-            </div>
+          <div id="success-message" class="success-message">
+            <%= messages.categoryDeletedSuccess[0] %>
+          </div>
+          <% } %> <% if (categories.length > 0) { %>
+          <!-- Display existing categories as a table -->
+          <div class="scrollable-section2">
+            <table class="categories-table">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% categories.forEach(function(category) { %>
+                <tr>
+                  <td><%= category.name %></td>
+                  <td>
+                    <form
+                      method="POST"
+                      action="/admin/categories/<%= category._id %>/delete"
+                      style="display: inline"
+                    >
+                      <button class="btn-del" type="submit">Delete</button>
+                    </form>
+                    <form
+                      method="GET"
+                      action="/admin/categories/<%= category._id %>/edit"
+                      style="display: inline"
+                    >
+                      <button class="btn-edit" type="submit">Edit</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
           <% } else { %>
-            <p>No categories found.</p>
+          <p>No categories found.</p>
           <% } %>
           <h3>Add New Category</h3>
           <form id="addCategoryForm" method="POST" action="/admin/categories">
@@ -274,7 +283,10 @@
               <tr>
                 <td><label for="categoryDescription">Description:</label></td>
                 <td>
-                  <textarea id="categoryDescription" name="description"></textarea>
+                  <textarea
+                    id="categoryDescription"
+                    name="description"
+                  ></textarea>
                 </td>
               </tr>
               <tr>
@@ -292,13 +304,150 @@
 
         <!-- Bookings Section -->
         <div id="bookingsSection" style="display: none">
-          <!-- Content for Bookings -->
+          <h2>Bookings</h2>
+          <div class="scrollable-section1">
+            <div class="scroll-stripe">
+              <table class="bookings-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Property Name</th>
+                    <th>User</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% bookings.forEach(function(booking) { %>
+                  <tr>
+                    <td><%= booking._id %></td>
+                    <td><%= booking.property.propertyName %></td>
+                    <td><%= booking.user.fullname %></td>
+                    <td>₹<%= booking.price %></td>
+                    <td><%= booking.bookingStatus %></td>
+                    <td>
+                      <% if (booking.bookingStatus !== 'Cancelled') { %>
+                      <!-- Only show the cancel button if the booking status is not 'Cancelled' -->
+                      <form
+                        method="POST"
+                        action="/admin/bookings/<%= booking._id %>/cancel"
+                        class="action-form"
+                      >
+                        <button type="submit">Cancel</button>
+                      </form>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <!-- Deletion Section -->
-        <div id="deletionSection" style="display: none">
-          <!-- Content for Deletion -->
-        </div>
+      <!-- Coupon Section -->
+<div id="couponSection" style="display: none; padding: 20px">
+  <h2 style="margin-bottom: 20px">Create Coupon</h2>
+  <form action="/admin/coupons/create" method="POST">
+    <div style="margin-bottom: 10px">
+      <label for="couponName" style="display: inline-block; width: 120px">Coupon Name:</label>
+      <input type="text" id="couponName" name="couponName" required maxlength="50" style="width: 200px; padding: 5px" />
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="category" style="display: inline-block; width: 120px">Category:</label>
+      <select id="category" name="category" style="width: 200px; padding: 5px">
+        <!-- Populate with available categories -->
+        <% categories.forEach(function(category) { %>
+          <option value="<%= category._id %>"><%= category.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="expirationDate" style="display: inline-block; width: 120px">Expiration Date:</label>
+      <input type="date" id="expirationDate" name="expirationDate" required style="width: 200px; padding: 5px" />
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="fixedValue" style="display: inline-block; width: 120px">Fixed Value:</label>
+      <select id="fixedValue" name="fixedValue" style="width: 200px; padding: 5px">
+        <option value="100">₹100</option>
+        <option value="200">₹200</option>
+        <option value="300">₹300</option>
+        <option value="400">₹400</option>
+        <option value="500">₹500</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 10px">
+      <label for="payMethod" style="display: inline-block; width: 120px">Payment Method:</label>
+      <select id="payMethod" name="payMethod" style="width: 200px; padding: 5px">
+        <option value="Online">Online</option>
+        <option value="PayAtProperty">Pay at Property</option>
+      </select>
+    </div>
+    <button type="submit" style="padding: 8px 16px; background-color: #ff0051; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      Create Coupon
+    </button>
+  </form>
+</div>
+
+
+
+      <!-- Edit Coupon Section -->
+<div id="editCouponSection" style="display: none; padding: 20px">
+  <h2>Edit Coupon</h2>
+  <% if (coupon && coupon.length > 0) { %>
+  <table class="edit-coupon-table">
+    <thead>
+      <tr>
+        <th>Coupon Name</th>
+        <th>Category</th>
+        <th>Expiration Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% coupon.forEach(function(coupon) { %>
+      <tr>
+        <td><%= coupon.code %></td>
+        <td><%= coupon.category.name %></td>
+        <td><%= coupon.expirationDate %></td>
+        <td>
+          <form action="/admin/coupons/update/<%= coupon._id %>" method="POST">
+            <!-- Editable fields -->
+            <input type="text" name="code" value="<%= coupon.code %>" required>
+            <select name="category" required>
+              <!-- Populate with available categories -->
+              <% categories.forEach(function(category) { %>
+              <option value="<%= category._id %>" <%= coupon.category.toString() === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+              <% }); %>
+            </select>
+            <input type="date" name="expirationDate" value="<%= coupon.expirationDate %>" required>
+            <!-- Hidden input to send the coupon ID -->
+            <input type="hidden" name="couponId" value="<%= coupon._id %>">
+            <button
+              type="submit"
+              style="
+                padding: 8px 16px;
+                background-color: #ff0051;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+              "
+            >
+              Update
+            </button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } else { %>
+  <p>No coupons found.</p>
+  <% } %>
+</div>
+
 
         <!-- Requests Section -->
         <div id="requestSection" style="display: none">
@@ -346,7 +495,6 @@
             <% } %>
           </div>
         </div>
-        
       </div>
     </div>
     <script>
@@ -358,54 +506,61 @@
         var categoriesLink = document.getElementById("categoriesLink");
         var salesReportLink = document.getElementById("salesReportLink");
         var bookingsLink = document.getElementById("bookingsLink");
-        var deletionLink = document.getElementById("deletionLink");
+        var couponLink = document.getElementById("couponLink");
         var requestLink = document.getElementById("requestLink");
-
+        var editCouponLink = document.getElementById("editCouponLink"); // Added editCouponLink
+    
         profileLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("profileSection");
         });
-
+    
         dashboardLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("dashboardSection");
         });
-
+    
         ownersLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("ownersSection");
         });
-
+    
         usersLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("usersSection");
         });
-
+    
         categoriesLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("categoriesSection");
         });
-
+    
         salesReportLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("salesReportSection");
         });
-
+    
         bookingsLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("bookingsSection");
         });
-
-        deletionLink.addEventListener("click", function (event) {
+    
+        couponLink.addEventListener("click", function (event) {
           event.preventDefault();
-          displaySection("deletionSection");
+          displaySection("couponSection");
         });
-
+    
         requestLink.addEventListener("click", function (event) {
           event.preventDefault();
           displaySection("requestSection");
         });
+    
+        editCouponLink.addEventListener("click", function (event) { // Added event listener for editCouponLink
+          event.preventDefault();
+          displaySection("editCouponSection"); // Display the editCouponSection
+        });
       });
     </script>
+    
   </body>
 </html>

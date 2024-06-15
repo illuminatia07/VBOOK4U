@@ -35,35 +35,36 @@
         <% property.images.forEach(image => { %>
             <img src="<%= image %>" alt="<%= property.propertyName %> Image">
         <% }); %>
-    </div>
+      </div>
       <h2><%= property.propertyName %></h2>
       <p class="total-price">
         Total price (taxes & fees):<br />
         <span class="price">₹<span id="total-price"><%= totalPrice.toFixed(2) %></span></span>
       </p>
-      
-     <form action="/payment" method="GET">
-  <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
-  <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
-  <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
-  <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
-  <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
-  <button type="submit" class="continue-to-book">Continue to Book</button>
-</form>
+      <!-- End Coupon Code Section -->
+      <form action="/payment" method="GET">
+        <input type="hidden" name="propertyId" value="<%= encodeURIComponent(property._id) %>" />
+        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
+        <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
+        <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
+        <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
+        <input type="hidden" name="totalPrice" id="total-price-hidden" value="<%= totalPrice %>" />
+        <button type="submit" class="continue-to-book">Continue to Book</button>
+      </form>
     </div>
     <div class="property-details">
       <div class="selected-dates">
         <h3>Selected Dates</h3>
         <p>
-         <div class="check">
-         Check-in:
-          <span id="check-in-display"><%= checkIn.toISOString().split('T')[0] %></span>
-        </div>
-       </p>
+          <div class="check">
+            Check-in:
+            <span id="check-in-display"><%= checkIn.toISOString().split('T')[0] %></span>
+          </div>
+        </p>
         <p>
-          <div class="check"> 
-          Check-out:
-          <span id="check-out-display"><%= checkOut.toISOString().split('T')[0] %></span>
+          <div class="check">
+            Check-out:
+            <span id="check-out-display"><%= checkOut.toISOString().split('T')[0] %></span>
           </div>
         </p>
       </div>
@@ -102,11 +103,11 @@
         <p><%= property.address %></p>
       </div>
       <form action="/payment" method="GET">
-        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>">
-        <input type="hidden" name="propertyPrice" value="<%= property.price %>">
-        <input type="hidden" name="checkInDate" id="check-in-hidden-2">
-        <input type="hidden" name="checkOutDate" id="check-out-hidden-2">
-        <input type="hidden" name="totalPrice" id="total-price-hidden-2">
+        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
+        <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
+        <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
+        <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
+        <input type="hidden" name="totalPrice" id="total-price-hidden-2" value="<%= totalPrice %>" />
         <button type="submit" class="continue-to-book">Continue to Book</button>
       </form>
     </div>

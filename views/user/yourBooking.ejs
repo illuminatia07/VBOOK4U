@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Booking Details</title>
-
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/yourBooking.css">
 </head>
@@ -23,9 +22,20 @@
 </header>
 <br>
 <div class="container col-md-6">
- 
   <h2>Your Booking Details</h2>
-  <table>
+
+  <% if (successMessage && successMessage.length > 0) { %>
+    <div class="alert" role="alert" id="success-message">
+      <%= successMessage %>
+    </div>
+  <% } %>
+  <% if (errorMessage && errorMessage.length > 0) { %>
+    <div class="alert" role="alert" id="error-message">
+      <%= errorMessage %>
+    </div>
+  <% } %>
+
+  <table class="table">
     <thead>
       <tr>
         <th>Property</th>
@@ -33,6 +43,7 @@
         <th>Check-out Date</th>
         <th>Price</th>
         <th>Booking Status</th>
+        <th>Coupon Used</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -40,36 +51,69 @@
       <% bookings.forEach(function(booking) { %>
         <tr>
           <td>
-            <small style="font-weight: bold;">#id <%= booking.id %></small><br>
-            <%= booking.property.name %></td>
+            <small class="booking-id">#id <%= booking.id %></small><br>
+            <%= booking.property.name %>
+          </td>
           <td><%= booking.checkIn %></td>
           <td><%= booking.checkOut %></td>
           <td><%= booking.price %></td>
           <td><%= booking.bookingStatus %></td>
+          <td><%= booking.couponName %></td>
           <td>
             <form action="/viewDetails" method="GET" style="display:inline;">
               <input type="hidden" name="bookingId" value="<%= booking.id %>">
-              <button type="submit" class="bg-warning details-btn">View Details</button>
+              <button type="submit" class="view-details-btn">View Details</button>
             </form>
-            <form action="/cancelBooking" method="POST" style="display:inline;">
-              <input type="hidden" name="bookingId" value="<%= booking.id %>">
-              <button type="submit" class="cancel-btn">Cancel Booking</button>
-          </form>
-          <% if (success) { %>
-            <div class=" " role="alert">
-              <%= success %>
-            </div>
-          <% } %>
-          <% if (error) { %>
-            <div class=" " role="alert">
-              <%= error %>
-            </div>
-          <% } %>
+            <% if (booking.bookingStatus !== 'Cancelled') { %>
+              <form action="/cancelBooking" method="POST" style="display:inline;">
+                <input type="hidden" name="bookingId" value="<%= booking.id %>">
+                <button type="submit" class="cancel-btn">Cancel Booking</button>
+              </form>
+            <% } %>
           </td>
         </tr>
       <% }); %>
     </tbody>
   </table>
+
+  <!-- Pagination Controls -->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      <% } %>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
 </div>
+
+<script>
+  // Hide success and error messages after 2 seconds
+  setTimeout(() => {
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+    if (successMessage) {
+      successMessage.style.display = 'none';
+    }
+    if (errorMessage) {
+      errorMessage.style.display = 'none';
+    }
+  }, 5000);
+</script>
 </body>
 </html>

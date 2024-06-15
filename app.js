@@ -10,11 +10,13 @@ const ownerRoutes = require("./routes/ownerRoutes");
 const passport = require("./config/passport");
 const db = require("./config/database");
 const noCache = require("nocache");
-const userMiddleware = require("./middleware/userMiddleware");
-const adminMiddleware = require("./middleware/adminMiddleware"); // Add this line
+
+
 
 // Create an Express application
 const app = express();
+
+
 
 // Set up MongoDB connection
 db.once("open", () => {

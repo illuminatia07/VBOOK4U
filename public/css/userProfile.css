@@ -1,22 +1,21 @@
 /* userProfile.css */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
 body {
   font-family: "Poppins", sans-serif;
   justify-content: center;
   align-items: center;
   background-color: #ffffff;
 }
+
 .title {
   color: #ffffff; /* Pink color */
-}
-.field-down{
-   
-    margin-left: 200px;
 }
 
 .subtitle {
   color: #ff0080; /* Pink color */
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .detail {
@@ -28,12 +27,9 @@ body {
   color: red; /* Red color for error message */
 }
 
-/* Additional Styles from userSearch.css */
-
 .logout-btn {
   background-color: #ff006a;
   border: none;
-  margin-left: 950px;
   color: #fff;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
@@ -41,6 +37,9 @@ body {
   padding: 10px 20px;
   border-radius: 25px;
   font-size: small;
+  position: absolute;
+  right: 20px;
+  top: 20px;
 }
 
 .main-content {
@@ -55,25 +54,33 @@ body {
 .sub-heading {
   font-size: large;
 }
-.field-up{
-    padding: 10px 50px;
-    border: 1px #ff0051;
-    border-radius: 5px;
-    border: #ff0051;
-    border-color: #ff0051;
-    color: #ff0051;
-    background-color: #f2f2f2;
-}
-.form-group {
-    margin-bottom: 20px;
-    color: #ff0051;
-  }
 
-  .container{
-    margin-left: 200px;
-  }
-.submit-btn{
-background-color: #ff006a;
+.field-up {
+  padding: 10px;
+  border: 1px solid #ff0051;
+  border-radius: 5px;
+  color: #ff0051;
+  background-color: #f2f2f2;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  color: #ff0051;
+}
+
+.container {
+  width: 50%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.submit-btn {
+  background-color: #ff006a;
   border: none;
   color: #fff;
   cursor: pointer;
@@ -83,6 +90,11 @@ background-color: #ff006a;
   border-radius: 18px;
   font-size: small;
 }
+
+.submit-btn:hover {
+  background-color: #ff0051;
+}
+
 .range {
   margin-left: 50px;
 }
@@ -378,4 +390,27 @@ a:hover {
 
 .copyright {
   font-size: 12px;
+}
+
+/* Profile Table Styles */
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.profile-table td {
+  padding: 10px;
+  vertical-align: middle;
+}
+
+.profile-table label {
+  display: inline-block;
+  font-weight: bold;
+}
+
+.profile-table input,
+.profile-table select {
+  width: 100%;
+  box-sizing: border-box;
 }

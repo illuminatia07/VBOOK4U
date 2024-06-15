@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking Details</title>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/yourBooking.css">
+  <link rel="stylesheet" href="/css/viewDetailBooking.css">
 </head>
 <body>
 <header>
@@ -36,14 +36,15 @@
       <p class="card-text"><strong>Check-in Date:</strong> <%= booking.checkIn %></p>
       <p class="card-text"><strong>Check-out Date:</strong> <%= booking.checkOut %></p>
       <p class="card-text"><strong>Check-in Time:</strong> 12:00 PM </p>
-      <p class="card-text"><strong>Check-in Date:</strong> 11:00 AM </p>
-      <p class="card-text"><strong>Price:</strong> <%= booking.price %></p>
+      <p class="card-text"><strong>Check-out Time:</strong> 11:00 AM </p>
+      <p class="card-text"><strong>Price:</strong> ₹<%= booking.price %></p>
       <p class="card-text"><strong>Booking Status:</strong> <%= booking.bookingStatus %></p>
-      <p class="card-text"><strong>User Name:</strong> <%= booking.name %></p>
-      <p class="card-text"><strong>User Email:</strong> <%= booking.email %></p>
-      <p class="card-text"><strong>User Phone:</strong> <%= booking.phoneNumber %></p>
+      <p class="card-text"><strong>Name:</strong> <%= booking.name %></p>
+      <p class="card-text"><strong>Email:</strong> <%= booking.email %></p>
+      <p class="card-text"><strong>Phone:</strong> <%= booking.phoneNumber %></p>
       <p class="card-text"><strong>Owner Name:</strong> <%= booking.property.owner.fullname %></p>
       <p class="card-text"><strong>Owner Phone:</strong> <%= booking.property.owner.phoneNumber %></p>
+      <p class="card-text"><strong>Coupon Code:</strong> <%= booking.couponName ? booking.couponName : "None"  %></p>
       <a href="/yourBooking" class="btn btn-primary">Back to Bookings</a>
     </div>
   </div>

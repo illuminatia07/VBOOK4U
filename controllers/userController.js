@@ -2,7 +2,10 @@ const bcrypt = require("bcrypt");
 const UserAdmin = require("../models/userAdmin");
 const Category = require("../models/category");
 const passport = require("../config/passport");
+const mongoose = require("mongoose");
+const isValidObjectId = mongoose.Types.ObjectId.isValid;
 const Booking = require("../models/booking");
+const Coupon = require("../models/coupon");
 require("dotenv").config();
 const { body, validationResult } = require("express-validator");
 const twilio = require("twilio");
@@ -14,13 +17,21 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN,
   process.env.TWILIO_PERSONAL_NUMBER
 );
-
+const razorpay = require("razorpay");
+const razorpayInstance = new razorpay({
+  key_id: "rzp_test_KMrm8VgRyKa92K",
+  key_secret: "KKfvq2OqDnHkSXpejhkqysar",
+});
 function getCurrentDate() {
   const today = new Date();
   const dd = String(today.getDate()).padStart(2, "0");
   const mm = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
   const yyyy = today.getFullYear();
   return yyyy + "-" + mm + "-" + dd;
+}
+function redirectWithQueryParams(res, baseUrl, params) {
+  const queryParams = new URLSearchParams(params).toString();
+  return res.redirect(`${baseUrl}?${queryParams}`);
 }
 
 const userController = {
@@ -222,7 +233,6 @@ const userController = {
         successMessage: req.flash("success"),
         userSession: req.session.user,
       });
-      
     } else {
       // If session exists, redirect to Home
       return res.redirect("/home");
@@ -266,12 +276,12 @@ const userController = {
           const passwordMatch = await bcrypt.compare(password, user.password);
           if (passwordMatch) {
             // If the passwords match, create a session for the user
-            req.session.isAuth=true;
+            req.session.isAuth = true;
             req.session.user = {
               _id: user._id,
               email: user.email,
               fullname: user.fullname,
-               // Include fullname in session data
+              // Include fullname in session data
             };
             // req.session.admin = null; // Clear any existing admin session
             // req.session.save(); // Save the session to the store
@@ -356,31 +366,6 @@ const userController = {
           { address: { $regex: new RegExp(search, "i") } },
         ];
       }
-
-      // If category is provided, filter by category
-      if (category) {
-        searchQuery.categoryName = category;
-      }
-
-      // If roomFacilities is provided, filter by roomFacilities
-      if (roomFacilities) {
-        // Convert roomFacilities to an array if it's a single value
-        const selectedRoomFacilities = Array.isArray(roomFacilities)
-          ? roomFacilities
-          : [roomFacilities];
-        // Add a condition to check if any of the selected room facilities are in the property's roomFacilities array
-        searchQuery.roomFacilities = { $in: selectedRoomFacilities };
-      }
-
-      // If priceRange is provided, filter by priceRange
-      if (priceRange) {
-        const [minPrice, maxPrice] = priceRange.split("-");
-        searchQuery.price = {
-          $gte: parseInt(minPrice),
-          $lte: parseInt(maxPrice),
-        };
-      }
-
       // Fetch properties based on the search query
       const properties = await Property.find(searchQuery)
         .skip((page - 1) * propertiesPerPage)
@@ -395,7 +380,7 @@ const userController = {
       const totalPages = Math.ceil(totalCount / propertiesPerPage);
 
       // Get today's date
-      const today = new Date().toISOString().split("T")[0];
+      // const today = new Date().toISOString().split("T")[0];
       console.log("CheckIn:", checkIn);
       console.log("CheckOut:", checkOut);
 
@@ -414,7 +399,7 @@ const userController = {
         userSession: req.session.user,
         propertyCount: properties.length,
         totalPages: totalPages,
-        today, // Pass today's date to the template
+        // Pass today's date to the template
       });
     } catch (error) {
       next(error);
@@ -547,6 +532,7 @@ const userController = {
         checkOut: parsedCheckOut,
       };
       console.log("req.session.propbook:", req.session.propbook);
+
       if (!property) {
         console.log(
           "Property not found in the database for name:",
@@ -556,14 +542,14 @@ const userController = {
       }
 
       // Calculate the availability and pricing based on the dates and guest count
-      // This is a simplified example, assuming the Property model has pricing details
       const numberOfNights = Math.ceil(
         (parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24)
       );
       const totalPrice = property.price * numberOfNights;
-      console.log("NoNight :", numberOfNights);
-      console.log("PriceOfPro :", property.price);
-      console.log("TotalPrice : ", totalPrice);
+      console.log("NoNight:", numberOfNights);
+      console.log("PriceOfPro:", property.price);
+      console.log("TotalPrice:", totalPrice);
+
       // Render the property details page
       res.render("user/viewDetails", {
         property,
@@ -571,92 +557,13 @@ const userController = {
         checkOut: parsedCheckOut,
         guest,
         userSession,
+        couponMessage: req.flash("couponMessage"),
         search,
         totalPrice,
         numberOfNights,
       });
     } catch (error) {
       next(error);
-    }
-  },
-
-  bookProperty: async (req, res, next) => {
-    try {
-      // Extracting data from the request body
-      const {
-        propertyId,
-        checkInDate,
-        checkOutDate,
-        totalPrice,
-        name,
-        email,
-        phoneNumber,
-        paymentMethod,
-      } = req.body;
-
-      // Create a new booking document
-      const newBooking = new Booking({
-        property: req.session.propbook.property._id, // Using propertyId from the request body
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        user: req.session.user, // Assuming you have user session available
-        price: totalPrice,
-        name: name,
-        email: email,
-        phoneNumber: phoneNumber,
-        bookingStatus: "Confirmed", // Default status is set to 'Pending'
-        payMethod: paymentMethod, // Using payment method from the request body
-      });
-
-      // Save the booking document to the database
-      await newBooking.save();
-
-      // Redirect or send response as needed
-      res.redirect("/yourBooking");
-    } catch (error) {
-      console.error("Error booking property:", error);
-      res.status(500).send("Error booking property.");
-    }
-  },
-
-  displayPaymentPage: async (req, res, next) => {
-    try {
-      if (!req.session.user) {
-        req.flash("error", "You must be logged in to view the payment page.");
-        return res.redirect("/login");
-      }
-
-      const getCurrentDate = () => {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, "0");
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const yyyy = today.getFullYear();
-        return yyyy + "-" + mm + "-" + dd;
-      };
-
-      const {
-        propertyName,
-        propertyPrice,
-        propertyId,
-        checkInDate,
-        checkOutDate,
-        totalPrice,
-      } = req.query;
-
-      res.render("user/payment", {
-        propertyName: decodeParam(propertyName),
-        propertyPrice: decodeParam(propertyPrice),
-        propertyId: decodeParam(propertyId),
-        checkInDate: decodeParam(checkInDate),
-        checkOutDate: decodeParam(checkOutDate),
-        totalPrice: decodeParam(totalPrice),
-        userSession: req.session.user,
-        currentDate: getCurrentDate(),
-        propertyId,
-      });
-    } catch (error) {
-      console.error("Error displaying payment page:", error);
-      res.status(500).send("Error displaying payment page.");
     }
   },
 
@@ -863,132 +770,541 @@ const userController = {
   ],
   renderYourBooking: async (req, res) => {
     try {
-        // Retrieve bookings for the current user
-        const bookings = await Booking.find({
-            user: req.session.user._id,
-        }).populate("property");
-
-        // Prepare the booking data with necessary properties for the modal
-        const bookingsWithModalData = await Promise.all(bookings.map(async (booking) => {
-            const property = booking.property;
-
-            // Extract image URLs from the property
-            const imageUrls = property.images.map(image => `/uploads/properties/${image}`);
-
-            return {
-                id: booking._id,
-                property: {
-                    name: property.propertyName,
-                    imageUrl: imageUrls, // Pass image URLs here
-                    address: property.address,
-                    ownerName: property.owner.fullname,
-                    ownerPhone: property.owner.phoneNumber,
-                },
-                checkIn: booking.checkIn,
-                checkOut: booking.checkOut,
-                price: booking.price,
-                bookingStatus: booking.bookingStatus,
-                payMethod: booking.payMethod,
-                name: booking.name,
-                email: booking.email,
-                phoneNumber: booking.phoneNumber,
-            };
-        }));
-
-        // Render the yourBooking.ejs view with the bookings data
-        res.render("user/yourBooking", {
-            bookings: bookingsWithModalData,
-            userSession: req.session.user,
-            success: req.flash("success"), 
-            error: req.flash("error")
-        });
+      const userId = req.session.user._id;
+      const page = parseInt(req.query.page) || 1; // Get the current page from query parameters, default is 1
+      const limit = 5; // Number of bookings per page
+      const skip = (page - 1) * limit;
+  
+      // Retrieve bookings for the current user with pagination
+      const bookings = await Booking.find({
+        user: userId,
+      })
+      .populate("property")
+      .sort({ dateInitiated: -1 }) // Sort by dateInitiated field in descending order (most recent first)
+      .skip(skip)
+      .limit(limit);
+  
+      const totalBookings = await Booking.countDocuments({ user: userId });
+      const totalPages = Math.ceil(totalBookings / limit);
+  
+      // Prepare the booking data with necessary properties for the modal
+      const bookingsWithModalData = await Promise.all(
+        bookings.map(async (booking) => {
+          const property = booking.property;
+  
+          // Extract image URLs from the property
+          const imageUrls = property.images.map(
+            (image) => `/uploads/properties/${image}`
+          );
+  
+          // Get the coupon name (if any)
+          const couponName = booking.couponName ? booking.couponName : "None";
+  
+          return {
+            id: booking._id,
+            property: {
+              name: property.propertyName,
+              imageUrl: imageUrls,
+              address: property.address,
+              ownerName: property.owner.fullname,
+              ownerPhone: property.owner.phoneNumber,
+            },
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            price: booking.price,
+            bookingStatus: booking.bookingStatus,
+            payMethod: booking.payMethod,
+            name: booking.name,
+            email: booking.email,
+            phoneNumber: booking.phoneNumber,
+            couponName: couponName, // Add the coupon name to the booking object
+          };
+        })
+      );
+  
+      // Render the yourBooking.ejs view with the bookings data
+      res.render("user/yourBooking", {
+        bookings: bookingsWithModalData,
+        userSession: req.session.user,
+        currentPage: page,
+        totalPages: totalPages,
+        successMessage: req.flash("success"),
+        errorMessage: req.flash("error"),
+      });
     } catch (error) {
-        console.error("Error fetching user bookings:", error);
-        req.flash("error", "An error occurred while fetching your bookings. Please try again.");
-        return res.redirect("/profile");
+      console.error("Error fetching user bookings:", error);
+      req.flash(
+        "error",
+        "An error occurred while fetching your bookings. Please try again."
+      );
+      return res.redirect("/profile");
     }
-},
-
-viewDetails: async (req, res) => {
-  try {
-      // Retrieve the bookingId from the request parameters
+  },
+  
+  viewDetails: async (req, res) => {
+    try {
+      // Retrieve the bookingId from the request query
       const bookingId = req.query.bookingId;
 
-      // Find the booking with the provided bookingId and populate the property field
+      const bookings = await Booking.find({
+        user: req.session.user._id,
+      }).populate("property");
+
+      // Prepare the booking data with necessary properties for the modal
+      const bookingsWithModalData = await Promise.all(
+        bookings.map(async (booking) => {
+          const property = booking.property;
+
+          // Extract image URLs from the property
+          const imageUrls = property.images.map(
+            (image) => `/uploads/properties/${image}`
+          );
+
+          return {
+            id: booking._id,
+            property: {
+              name: property.propertyName,
+              imageUrl: imageUrls, // Pass image URLs here
+              address: property.address,
+              ownerName: property.owner.fullname,
+              ownerPhone: property.owner.phoneNumber,
+            },
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            price: booking.price,
+            bookingStatus: booking.bookingStatus,
+            payMethod: booking.payMethod,
+            name: booking.name,
+            email: booking.email,
+            phoneNumber: booking.phoneNumber,
+          };
+        })
+      );
+
+      // Fetch the booking details from the database
       const booking = await Booking.findById(bookingId).populate({
-          path: 'property',
-          populate: {
-              path: 'owner'
-          }
+        path: "property",
+        populate: {
+          path: "owner",
+        },
       });
 
       // Check if the booking exists
       if (!booking) {
-          // If the booking does not exist, render an error page or handle it appropriately
-          return res.status(404).send("Booking not found");
+        req.flash("error", "Booking not found");
       }
 
       // Extract propertyId from the booking
-      const propertyId = booking.property._id;
 
+      const propertyId = booking.property;
       // Query the property details using the propertyId
       const property = await Property.findById(propertyId);
 
       // Check if the property exists
       if (!property) {
-          // If the property does not exist, handle it appropriately
-          return res.status(404).send("Property not found");
+        req.flash("error", "Property not found");
       }
 
       // Log the property object to verify the structure and image URLs
       console.log("Property:", property);
 
       // Pass booking and property details to the EJS template
-      res.render('user/viewDetailsBooking', {
-          userSession: req.session.user,
-          booking,
-          property,
-          bookingId: bookingId
+      res.render("user/viewDetailsBooking", {
+        bookings: bookingsWithModalData,
+        userSession: req.session.user,
+        booking,
+        property,
+        bookingId: bookingId,
       });
-  } catch (err) {
-      // If an error occurs during the process, handle it appropriately
+    } catch (err) {
       console.error(err);
       res.status(500).send("Internal Server Error");
-  }
-},
-
-cancelBooking: async (req, res) => {
-  try {
-    // Retrieve the bookingId from the request body
-    const bookingId = req.body.bookingId;
-
-    // Find the booking with the provided bookingId
-    const booking = await Booking.findById(bookingId);
-
-    // Check if the booking exists
-    if (!booking) {
-      // If the booking does not exist, render an error page or handle it appropriately
-      req.flash("error", "Booking not found.");
-      return res.redirect("/yourBooking");
     }
+  },
 
-    // Update the booking status to "Cancelled"
-    booking.bookingStatus = "Cancelled";
-    await booking.save();
+  cancelBooking: async (req, res) => {
+    try {
+      // Retrieve the bookingId from the request body
+      const bookingId = req.body.bookingId;
 
-    // Flash success message
-    req.flash("success", "Booking canceled successfully.");
+      // Find the booking with the provided bookingId
+      const booking = await Booking.findById(bookingId);
 
-    // Redirect back to the dashboard
-    res.redirect("/yourBooking");
-  } catch (err) {
-    // If an error occurs during the process, handle it appropriately
-    console.error(err);
-    req.flash("error", "An error occurred while canceling booking.");
-    res.redirect("/yourBooking");
-  }
-},
+      // Check if the booking exists
+      if (!booking) {
+        // If the booking does not exist, render an error page or handle it appropriately
+        req.flash("error", "Booking not found.");
+        return res.redirect("/yourBooking");
+      }
 
+      // Update the booking status to "Cancelled"
+      booking.bookingStatus = "Cancelled";
+      await booking.save();
+
+      // Flash success message
+      req.flash("success", "Booking canceled successfully.");
+
+      // Redirect back to the dashboard
+      res.redirect("/yourBooking");
+    } catch (err) {
+      // If an error occurs during the process, handle it appropriately
+      console.error(err);
+      req.flash("error", "An error occurred while canceling booking.");
+      res.redirect("/yourBooking");
+    }
+  },
+  displayPaymentPage: async (req, res, next) => {
+    try {
+      // Check if the user is logged in
+      if (!req.session.user) {
+        req.flash("error", "You must be logged in to view the payment page.");
+        return res.redirect("/login");
+      }
+      const userSession = req.session.user;
+      console.log("User : userID", req.session.user, req.session.user._id);
+      console.log("UserSession : ", userSession);
+      // Function to get current date
+      const getCurrentDate = () => {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, "0");
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const yyyy = today.getFullYear();
+        return yyyy + "-" + mm + "-" + dd;
+      };
+
+      // Destructuring request query parameters
+      const {
+        propertyName,
+        propertyPrice,
+        checkInDate,
+        checkOutDate,
+        paymentMethod,
+        orderId,
+        totalPrice,
+      } = req.query;
+      console.log("REQ.QUERY :", req.query);
+      // Fetch the propertyId based on the propertyName
+      // Decode and trim property name
+      const decodedPropertyName = decodeURIComponent(propertyName).trim();
+
+      // Log the decoded property name
+      console.log("Decoded Property Name:", decodedPropertyName);
+
+      // Query the database for the property details
+      const property = await Property.findOne({
+        propertyName: decodedPropertyName,
+      }).lean();
+
+      req.session.propbook = {
+        property,
+      };
+      console.log("req.session.propbook:", req.session.propbook);
+
+      // Rendering the payment page and passing necessary data
+      res.render("user/payment", {
+        propertyName: decodeURIComponent(propertyName),
+        propertyPrice: decodeURIComponent(propertyPrice),
+        property,
+        checkInDate: decodeURIComponent(checkInDate),
+        checkOutDate: decodeURIComponent(checkOutDate),
+        totalPrice: decodeURIComponent(totalPrice),
+        userSession: req.session.user,
+        currentDate: getCurrentDate(),
+        paymentMethod: paymentMethod,
+        messages: req.flash(),
+        orderId: orderId,
+        property,
+      });
+      res.locals.userSession = req.session.user;
+    } catch (error) {
+      console.error("Error displaying payment page:", error);
+      res.status(500).send("Error displaying payment page.");
+    }
+  },
+  applyCoupon: async (req, res) => {
+    try {
+      const { couponCode, propertyName, paymentMethod, totalPrice } = req.body;
+      const userId = req.session.user._id;
+      console.log("COUPON BODY : ", req.body);
+      console.log("ID : ", userId);
+
+      const coupon = await Coupon.findOne({ code: couponCode }).populate(
+        "category"
+      );
+      if (!coupon) {
+        const errorMessage = "Invalid coupon code.";
+        req.flash("error", errorMessage);
+        return res.status(404).json({ success: false, message: errorMessage });
+      }
+
+      const property = await Property.findOne({ propertyName });
+      if (!property || coupon.category.name !== property.categoryName) {
+        const errorMessage =
+          "Coupon is not applicable for this property category.";
+        req.flash("error", errorMessage);
+        return res.status(400).json({ success: false, message: errorMessage });
+      }
+
+      if (coupon.expirationDate < new Date()) {
+        const errorMessage = "Coupon has expired.";
+        req.flash("error", errorMessage);
+        return res.status(400).json({ success: false, message: errorMessage });
+      }
+
+      if (coupon.payMethod && coupon.payMethod !== paymentMethod) {
+        const errorMessage = `Coupon is only valid for ${coupon.payMethod} payments.`;
+        req.flash("error", errorMessage);
+        return res.status(400).json({ success: false, message: errorMessage });
+      }
+
+      const user = await UserAdmin.findById(userId);
+      if (user.usedCoupons.includes(coupon._id)) {
+        const errorMessage = "You have already used this coupon.";
+        req.flash("error", errorMessage);
+        return res.status(400).json({ success: false, message: errorMessage });
+      }
+
+      // Apply the discount
+      const newPrice = totalPrice - coupon.fixedValue;
+
+      const successMessage = `Coupon applied successfully! You saved ₹${coupon.fixedValue}.`;
+      req.flash("success", successMessage);
+      return res.json({ success: true, newPrice, message: successMessage });
+    } catch (error) {
+      console.error("Error applying coupon:", error);
+      const errorMessage = "An error occurred while applying the coupon.";
+      req.flash("error", errorMessage);
+      res.status(500).json({ success: false, message: errorMessage });
+    }
+  },
+
+  bookProperty: async (req, res, next) => {
+    const {
+      propertyName,
+      checkInDate,
+      checkOutDate,
+      totalPrice,
+      name,
+      email,
+      phoneNumber,
+      paymentMethod,
+      couponCode,
+    } = req.body;
+
+    try {
+      if (paymentMethod !== "PayAtProperty") {
+        req.flash("error", "The payment method is not Pay at property");
+        return res.redirect("/payment");
+      }
+
+      let discount = 0;
+
+      if (couponCode) {
+        const coupon = await Coupon.findOne({ code: couponCode }).populate(
+          "category"
+        );
+        if (!coupon) {
+          req.flash("error", "Invalid coupon code.");
+          return res.redirect("/payment");
+        }
+
+        const property = await Property.findOne({ propertyName });
+        if (!property) {
+          req.flash("error", "Property not found.");
+          return res.redirect("/payment");
+        }
+
+        if (coupon.category.name !== property.categoryName) {
+          req.flash(
+            "error",
+            "Coupon is not applicable for this property category."
+          );
+          return res.redirect("/payment");
+        }
+
+        if (coupon.expirationDate < new Date()) {
+          req.flash("error", "Coupon has expired.");
+          return res.redirect("/payment");
+        }
+
+        if (coupon.payMethod && coupon.payMethod !== paymentMethod) {
+          req.flash(
+            "error",
+            `Coupon is only valid for ${coupon.payMethod} payments.`
+          );
+          return res.redirect("/payment");
+        }
+
+        discount = coupon.fixedValue;
+      }
+
+      const property = await Property.findOne({ propertyName });
+      if (!property) {
+        req.flash("error", "Property not found.");
+        return res.redirect("/payment");
+      }
+
+      const propertyId = property._id;
+      const finalPrice = parseFloat(totalPrice) - discount;
+
+      const newBooking = new Booking({
+        property: propertyId,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        user: req.session.user._id,
+        price: finalPrice,
+        name,
+        email,
+        phoneNumber,
+        bookingStatus: "Confirmed",
+        payMethod: "PayAtProperty",
+        couponName: couponCode,
+        dateInitiated: new Date(),
+      });
+      // Update user coupon usage
+      const userId = req.session.user._id;
+      const user = await UserAdmin.findById(userId);
+      const coupon = await Coupon.findOne({ code: couponName });
+      if (coupon) {
+        user.usedCoupons.push(coupon._id);
+      }
+
+      await user.save();
+
+      await newBooking.save();
+      return res.redirect("/yourBooking");
+    } catch (error) {
+      console.error("Error booking property:", error);
+      req.flash("error", "Error booking property.");
+      return res.redirect("/payment");
+    }
+  },
+
+  createOrder: async (req, res) => {
+    try {
+      const {
+        totalPrice,
+        checkIn,
+        checkOut,
+        payMethod,
+        propertyId,
+        name,
+        email,
+        phoneNumber,
+        couponName,
+      } = req.body;
+
+      console.log("BODY REQ:", req.body);
+
+      if (!propertyId) {
+        console.error("Property not specified.");
+        return res.status(400).json({
+          success: false,
+          error: "Property not specified.",
+        });
+      }
+
+      const propertyDetails = await Property.findById(propertyId);
+      if (!propertyDetails) {
+        console.error("Property not found.");
+        return res.status(404).json({
+          success: false,
+          error: "Property not found.",
+        });
+      }
+      if (!isValidObjectId(propertyId)) {
+        console.error("Invalid ObjectId for property:", propertyId);
+        return res.status(400).json({
+          success: false,
+          error: "Invalid property ID.",
+        });
+      }
+
+      let finalPrice = totalPrice;
+
+      if (couponName) {
+        try {
+          const coupon = await Coupon.findOne({ code: couponName }).populate(
+            "category"
+          );
+          if (!coupon) {
+            throw new Error("Invalid coupon code.");
+          }
+
+          const property = await Property.findOne({ _id: propertyId });
+          if (!property || coupon.category.name !== property.categoryName) {
+            throw new Error(
+              "Coupon is not applicable for this property category."
+            );
+          }
+
+          if (coupon.expirationDate < new Date()) {
+            throw new Error("Coupon has expired.");
+          }
+
+          if (coupon.payMethod && coupon.payMethod !== payMethod) {
+            throw new Error(
+              `Coupon is only valid for ${coupon.payMethod} payments.`
+            );
+          }
+
+          finalPrice = totalPrice - coupon.fixedValue;
+        } catch (error) {
+          console.error("Invalid coupon:", error.message);
+          return res.status(400).json({
+            success: false,
+            error: error.message,
+          });
+        }
+      }
+
+      const options = {
+        amount: finalPrice * 100, // Amount in smallest currency unit (paise)
+        currency: "INR",
+        receipt: "receipt#1",
+        payment_capture: 1, // Auto capture payment after successful payment
+      };
+
+      const order = await razorpayInstance.orders.create(options);
+
+      const newBooking = new Booking({
+        property: propertyId,
+        checkIn,
+        checkOut,
+        user: req.session.user._id,
+        price: finalPrice,
+        payMethod,
+        name,
+        propertyId,
+        email,
+        phoneNumber,
+        couponName,
+        dateInitiated: new Date(),
+      });
+      console.log("Booking :", newBooking);
+      const userId = req.session.user._id;
+      const user = await UserAdmin.findById(userId);
+      const coupon = await Coupon.findOne({ code: couponName });
+      if (coupon) {
+        user.usedCoupons.push(coupon._id);
+      }
+
+      await user.save();
+      await newBooking.save();
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        amount: order.amount,
+      });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error creating order.",
+      });
+    }
+  },
 };
 
 module.exports = userController;

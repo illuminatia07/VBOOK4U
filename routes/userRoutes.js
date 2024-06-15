@@ -2,7 +2,7 @@ const express = require("express");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
 const passport = require("../config/passport");
-
+const { Booking } = require("../models/booking"); // Assuming you have a Booking model
 const router = express.Router();
 
 // Google Sign-In routes
@@ -23,18 +23,20 @@ router.get("/search", userController.searchProperty);
 router.get("/applyFilters", userController.applyFilters);
 router.get('/home', userController.renderUserHome);
 
-// Protected routes (middleware applied)
-// router.use(userMiddleware.ensureAuthenticated, userMiddleware.checkUserBlockedStatus);
-
+// Protected routes
 router.get('/payment', userMiddleware.ensureAuthenticated, userController.displayPaymentPage);
 router.get("/profile", userMiddleware.ensureAuthenticated, userController.renderAndUpdateProfile);
 router.get("/propertyDetails", userMiddleware.ensureAuthenticated, userController.renderPropertyDetails);
 router.post("/profile", userMiddleware.ensureAuthenticated, userController.updateProfile);
 router.get("/change-password", userMiddleware.ensureAuthenticated, userController.renderChangePassword);
 router.post("/change-password", userMiddleware.ensureAuthenticated, userController.changePassword);
-router.post("/bookProperty", userMiddleware.ensureAuthenticated, userController.bookProperty);
+router.post("/payment", userMiddleware.ensureAuthenticated, userController.bookProperty);
 router.get("/yourBooking", userMiddleware.ensureAuthenticated, userController.renderYourBooking);
 router.get("/viewDetails", userMiddleware.ensureAuthenticated, userController.viewDetails);
 router.post("/cancelBooking", userMiddleware.ensureAuthenticated, userController.cancelBooking);
+router.post('/apply-coupon', userMiddleware.ensureAuthenticated, userController.applyCoupon);
+router.post("/createOrder", userMiddleware.ensureAuthenticated, userController.createOrder);
+
+
 
 module.exports = router;

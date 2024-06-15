@@ -38,14 +38,10 @@
             text-align: center;
         }
         .message.error {
-          
             color: #721c24;
-          
         }
         .message.success {
-         
             color: #155724;
-         
         }
     </style>
     <header>
@@ -64,10 +60,10 @@
             <span>Edit Category</span>
         </div>
         <% if (error && error.length > 0) { %>
-            <div class="message error"><%= error %></div>
+            <div class="message error"><%= error[0] %></div>
         <% } %>
         <% if (success && success.length > 0) { %>
-            <div class="message success"><%= success %></div>
+            <div class="message success"><%= success[0] %></div>
         <% } %>
         <form id="editCategoryForm" method="POST" action="/admin/categories/<%= category._id %>/update">
             <table class="edit-category-table">

@@ -19,15 +19,15 @@
     <div class="search">
       <form action="/search" method="GET">
         <input type="text" id="search" name="search" placeholder="Property, Place" value="<%= search || '' %>" required />
-        <input type="text" id="checkInDate" class="date-picker" name="checkIn" value="<%= today %>" readonly placeholder="Check-in" required>
+        <input type="text" id="checkInDate" class="date-picker" name="checkIn" value="<%= checkIn %>" readonly placeholder="Check-in" required>
         <input type="text" id="checkOutDate" class="date-picker" name="checkOut" value="<%= checkOut %>" readonly placeholder="Check-out" required>
         <select id="guest" name="guest" required>
-            <% for (let i = 1; i <= 3; i++) { %>
-                <option value="<%= i %>"><%= i %> Guest(s)</option>
-            <% } %>
+          <% for (let i = 1; i <= 3; i++) { %>
+            <option value="<%= i %>"><%= i %> Guest(s)</option>
+          <% } %>
         </select>
         <button class="search-btn" type="submit">Search</button>
-    </form>
+      </form>
     </div>
     <% if (userSession) { %>
       <img class="img-user" src="/img/assets/User.png" alt="User Logo" onclick="window.location.href='/profile'" />
@@ -96,20 +96,19 @@
         <% if (properties && properties.length > 0) { %>
           <% properties.forEach(propertyItem => { %>
             <div class="property">
+              <input type="hidden" name="propertyId" value="<%= propertyItem._id %>">
               <div class="property-details">
                 <div class="property-images">
                   <% propertyItem.images.forEach(image => { %>
-                      <img src="<%= image %>" alt="<%= propertyItem.propertyName %> Image">
+                    <img src="<%= image %>" alt="<%= propertyItem.propertyName %> Image">
                   <% }); %>
-              </div>
-              
+                </div>
                 <div class="property-info">
                   <h3 class="property-heading"><%= propertyItem.propertyName %></h3>
                   <p class="property-detail"><span style="font-weight: bold;">DESCRIPTION:</span> <br><span style="font-style: italic; font-size: 12px;"><%= propertyItem.description %></span></p>
                   <p class="property-detail"><span style="font-weight: bold;">ADDRESS:</span> <br><span style="font-style: italic; font-size: 12px;"><%= propertyItem.address %></span></p>
                   <p class="property-detail"><span style="font-weight: bold;">PRICE:</span> <span style="color: #4d750b; font-size: 16px;">₹<%= propertyItem.price %></span></p>
-                  <button class="view-info">View Details</button>
-              
+                  <button class="view-info" data-id="<%= propertyItem._id %>">View Details</button>
                 </div>
               </div>
             </div>

@@ -25,72 +25,68 @@
     </header>
 
     <main>
-      <form id="paymentForm" action="/bookProperty" method="POST">
+      <form id="paymentForm" method="POST">
+        <input type="hidden" name="userSession" value="<%= userSession._id %>" />
+        <input type="hidden" name="checkInDate" value="<%= checkInDate %>" />
+        <input type="hidden" name="checkOutDate" value="<%= checkOutDate %>" />
+        <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
+        <input type="hidden" name="propertyId" value="<%= property._id %>">
+        <input type="hidden" name="propertyName" value="<%= propertyName %>">
+
         <h1>Payment</h1>
         <div class="property-info">
           <h2>Property: <%= propertyName %></h2>
-          <input type="hidden" name="propertyId" value="<%= propertyId %>">
           <p>Check-in Date: <span><%= checkInDate %></span></p>
           <p>Check-out Date: <span><%= checkOutDate %></span></p>
           <p>Total Price: <span class="total-price">₹<%= totalPrice %></span></p>
         </div>
 
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            required
-            pattern="[a-zA-Z\s]+"
-          /><br />
-          <small class="error-message">
-            Please enter a valid name (letters and spaces only).
-          </small>
+        <% if (messages.error && messages.error.length > 0) { %>
+          <% messages.error.forEach(function(msg) { %>
+            <div class="flash-message error"><%= msg %></div>
+          <% }); %>
+        <% } %> 
+        <% if (messages.success && messages.success.length > 0) { %>
+          <% messages.success.forEach(function(msg) { %>
+            <div class="flash-message success"><%= msg %></div>
+          <% }); %>
+        <% } %>
+        
+
+        <div class="form-group coupon-group">
+          <input type="text" id="couponCode" class="coupon-field" name="couponCode" placeholder="Enter coupon code" /><br />
+          <button class="coupon" type="button" name="applyCouponBtn" id="applyCouponBtn">Apply Coupon</button>
+          <p id="couponMessage" class="error-message"></p>
         </div>
 
         <div class="form-group">
-          <label for="email">Email:</label>
+          <label for="name">Name:</label> <br />
+          <input type="text" id="name" name="name" required pattern="[a-zA-Z\s]+" /><br />
+          <small class="error-message">Please enter a valid name (letters and spaces only).</small>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label> <br />
           <input type="email" id="email" name="email" required /><br />
-          <small class="error-message">
-            Please enter a valid email address.
-          </small>
+          <small class="error-message">Please enter a valid email address.</small>
         </div>
 
         <div class="form-group">
-          <label for="phone">Phone Number:</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phoneNumber"
-            required
-            pattern="[0-9]{10}"
-          /><br />
-          <small class="error-message">
-            Please enter a valid 10-digit phone number.
-          </small>
+          <label for="phone">Phone Number:</label> <br />
+          <input type="tel" id="phone" name="phoneNumber" required pattern="[0-9]{10}" /><br />
+          <small class="error-message">Please enter a valid 10-digit phone number.</small>
         </div>
 
         <div class="form-group">
           <label>
-            <input
-              type="checkbox"
-              id="ageConfirmation"
-              name="ageConfirmation"
-              required
-            />
+            <input type="checkbox" id="ageConfirmation" name="ageConfirmation" required />
             I confirm that I am above 18 years of age.
           </label>
         </div>
 
         <div class="form-group">
           <label>
-            <input
-              type="checkbox"
-              id="idProofConfirmation"
-              name="idProofConfirmation"
-              required
-            />
+            <input type="checkbox" id="idProofConfirmation" name="idProofConfirmation" required />
             I confirm that I will provide a valid ID proof during check-in.
           </label>
         </div>
@@ -99,39 +95,25 @@
           <label for="paymentMethod">Payment Method:</label>
           <div class="payment-options">
             <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="online"
-                required
-              />
+              <input type="radio" name="paymentMethod" value="Online" required />
               Online Payment
             </label>
             <label>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="PayAtProperty"
-                required
-              />
+              <input type="radio" name="paymentMethod" value="PayAtProperty" required />
               Pay at Property
             </label>
           </div>
         </div>
 
-        <input type="hidden" name="propertyName" value="<%= propertyName %>" />
-        <input type="hidden" name="checkInDate" value="<%= checkInDate %>" />
-        <input type="hidden" name="checkOutDate" value="<%= checkOutDate %>" />
-        <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
-
-        <button type="submit">Book Now</button>
+        <button type="submit" id="bookNowBtn" style="display: none">Book Now</button>
+        <button class="btn-online" type="button" id="payOnlineBtn" style="display: none">Pay Online</button>
       </form>
     </main>
 
     <footer>
       <!-- Footer content -->
     </footer>
-
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/payment.js"></script>
   </body>
 </html>

@@ -6,73 +6,78 @@
     <title>User Profile</title>
     <link rel="stylesheet" href="/css/userProfile.css">
 </head>
+<body>
 <header>
     <div class="vbook-box">
         <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
     </div>
     <div class="search">
         <% if (userSession) { %>
-                <button class="logout-btn" onclick="window.location.href='/logout'"> Logout </button>
-            </a>
+            <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
         <% } else { %>
             <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
         <% } %>
     </div>
 </header>
-<body>
-    <div class="container">
-        <h2 class="subtitle">User Details</h2>
+<div class="container">
+    <h2 class="subtitle">User Details</h2>
 
-        <div id="errorMessages" class="flash-messages">
-            <% if (errorMessage && errorMessage.length > 0) { %>
-                <% errorMessage.forEach(function(message) { %>
-                    <p class="flash-message error"><%= message %></p>
-                <% }); %>
-            <% } %>
-            <% if (successMessage && successMessage.length > 0) { %>
-                <% successMessage.forEach(function(message) { %>
-                    <p class="flash-message success"><%= message %></p>
-                <% }); %>
-            <% } %>
-        </div>
-
-        <form action="/profile" method="post" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="fullname">Full Name:</label> <br>
-                <input class="field-up" type="text" id="fullname" name="fullname" value="<%= user.fullname %>">
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label> <br>
-                <input class="field-up" type="email" id="email" name="email" value="<%= user.email %>" <%= user.email ? 'readonly' : '' %>>
-            </div>
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number:</label> <br>
-                <input class="field-up" type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phoneNumber %>">
-            </div>
-            <div class="form-group">
-                <label for="age">Age:</label> <br>
-                <input class="field-up" type="number" id="age" name="age" value="<%= user.age %>">
-            </div>
-            <div class="form-group ">
-                <label for="gender">Gender:</label> <br>
-                <select class="field-up" id="gender" name="gender">
-                    <option value="">Select Gender</option>
-                    <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
-                    <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
-                    <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
-                </select>
-            </div>
-            <div class="form-group"><br>
-                <button class="submit-btn" type="submit">Update Profile</button>
-            </div>
-        </form>
-        <div class="form-group">
-            <button class="submit-btn" onclick="window.location.href='/change-password'">Change Password</button>
-        </div>
-        <div class="form-group">
-            <button class="submit-btn" onclick="window.location.href='/yourBooking'">Bookings</button>
-        </div>
+    <div id="errorMessages" class="flash-messages">
+        <% if (errorMessage && errorMessage.length > 0) { %>
+            <% errorMessage.forEach(function(message) { %>
+                <p class="flash-message error"><%= message %></p>
+            <% }); %>
+        <% } %>
+        <% if (successMessage && successMessage.length > 0) { %>
+            <% successMessage.forEach(function(message) { %>
+                <p class="flash-message success"><%= message %></p>
+            <% }); %>
+        <% } %>
     </div>
-    <script src="/js/userProfile.js"></script>
+
+    <form action="/profile" method="post" onsubmit="return validateForm()">
+        <table class="profile-table">
+            <tr>
+                <td><label for="fullname">Full Name:</label></td>
+                <td><input class="field-up" type="text" id="fullname" name="fullname" value="<%= user.fullname %>"></td>
+            </tr>
+            <tr>
+                <td><label for="email">Email:</label></td>
+                <td><input class="field-up" type="email" id="email" name="email" value="<%= user.email %>" <%= user.email ? 'readonly' : '' %>></td>
+            </tr>
+            <tr>
+                <td><label for="phoneNumber">Phone Number:</label></td>
+                <td><input class="field-up" type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phoneNumber %>"></td>
+            </tr>
+            <tr>
+                <td><label for="age">Age:</label></td>
+                <td><input class="field-up" type="number" id="age" name="age" value="<%= user.age %>"></td>
+            </tr>
+            <tr>
+                <td><label for="gender">Gender:</label></td>
+                <td>
+                    <select class="field-up" id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                        <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                        <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button class="submit-btn" type="submit">Update Profile</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div class="form-group">
+        <button class="submit-btn" onclick="window.location.href='/change-password'">Change Password</button>
+    </div>
+    <div class="form-group">
+        <button class="submit-btn" onclick="window.location.href='/yourBooking'">Bookings</button>
+    </div>
+</div>
+<script src="/js/userProfile.js"></script>
 </body>
 </html>

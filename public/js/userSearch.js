@@ -49,40 +49,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add event listener to all elements with the class "view-info"
-    document.querySelectorAll('.view-info').forEach(button => {
-        button.addEventListener('click', function() {
-            const propertyElement = this.closest('.property');
-            const propertyName = propertyElement.querySelector('.property-heading').textContent;
-            const description = propertyElement.querySelector('.property-detail:nth-child(2) span').textContent;
-            const address = propertyElement.querySelector('.property-detail:nth-child(3) span').textContent;
-            const price = propertyElement.querySelector('.property-detail:nth-child(4) span').textContent;
-            const images = Array.from(propertyElement.querySelectorAll('.property-images img')).map(img => img.src);
+    // Add event listener to all elements with the class "view-info"
+document.querySelectorAll('.view-info').forEach(button => {
+    button.addEventListener('click', function() {
+        const propertyElement = this.closest('.property');
+        const propertyName = propertyElement.querySelector('.property-heading').textContent;
+        const description = propertyElement.querySelector('.property-detail:nth-child(2) span').textContent;
+        const address = propertyElement.querySelector('.property-detail:nth-child(3) span').textContent;
+        const price = propertyElement.querySelector('.property-detail:nth-child(4) span').textContent;
+        const images = Array.from(propertyElement.querySelectorAll('.property-images img')).map(img => img.src);
+        const propertyId = this.getAttribute('data-id'); // Get property ID
 
-            // Create a property object to pass to localStorage
-            const property = {
-                propertyName,
-                description,
-                address,
-                price,
-                images
-            };
+        // Create a property object to pass to localStorage
+        const property = {
+            propertyName,
+            description,
+            address,
+            price,
+            images
+        };
 
-            // Store the property data in localStorage
-            localStorage.setItem('selectedProperty', JSON.stringify(property));
+        // Store the property data in localStorage
+        localStorage.setItem('selectedProperty', JSON.stringify(property));
 
-            // Get check-in and check-out dates
-            const checkIn = document.getElementById('checkInDate').value;
-            const checkOut = document.getElementById('checkOutDate').value;
+        // Get check-in and check-out dates
+        const checkIn = document.getElementById('checkInDate').value;
+        const checkOut = document.getElementById('checkOutDate').value;
 
-            if (!checkIn || !checkOut) {
-                alert('Please select check-in and check-out dates.');
-                return;
-            }
+        if (!checkIn || !checkOut) {
+            alert('Please select check-in and check-out dates.');
+            return;
+        }
 
-            // Redirect to the property details page with dates
-            window.location.href = `/propertyDetails?propertyName=${encodeURIComponent(propertyName)}&checkIn=${checkIn}&checkOut=${checkOut}`;
-        });
+        // Redirect to the property details page with dates
+        window.location.href = `/propertyDetails?propertyName=${encodeURIComponent(propertyName)}&checkIn=${checkIn}&checkOut=${checkOut}&propertyId=${encodeURIComponent(propertyId)}`;
     });
+});
 
     // Add an event listener to the price range input
     document.getElementById('priceRange').addEventListener('input', function() {

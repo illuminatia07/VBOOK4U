@@ -20,7 +20,7 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   price: {
-    type: Number, // Ensure the price field is consistent with the Property model
+    type: Number,
     required: true,
   },
   bookingStatus: {
@@ -30,7 +30,7 @@ const bookingSchema = new mongoose.Schema({
   },
   payMethod: {
     type: String,
-    enum: ["online", "PayAtProperty"],
+    enum: ["Online", "PayAtProperty"],
     required: true,
   },
   name: {
@@ -44,6 +44,14 @@ const bookingSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     required: true,
+  },
+  couponName: {
+    type: String,
+    default: null,
+  },
+  dateInitiated: {
+    type: Date,
+    default: Date.now,
   },
 });
 

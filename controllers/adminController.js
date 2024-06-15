@@ -5,6 +5,7 @@ const Category = require("../models/category"); // Import the Category model
 const Property = require("../models/property"); // Import the Property model
 const Owner = require("../models/owner");
 const Booking = require("../models/booking"); // Import the Booking model
+const Coupon = require("../models/coupon");
 
 const adminController = {
   renderLogin: (req, res) => {
@@ -22,64 +23,65 @@ const adminController = {
 
   displayPendingRequests: async (req, res) => {
     try {
-        const pendingRequests = await Property.find({ approvalStatus: "Pending" }).populate("owner");
-        const admin = await User.findOne({ email: req.session.admin.email });
+      const pendingRequests = await Property.find({
+        approvalStatus: "Pending",
+      }).populate("owner");
+      const admin = await User.findOne({ email: req.session.admin.email });
 
-        if (!admin) {
-            req.flash("error", "Admin not found");
-            return res.redirect("/admin/login");
-        }
+      if (!admin) {
+        req.flash("error", "Admin not found");
+        return res.redirect("/admin/login");
+      }
 
-        const flashMessages = {
-            error: req.flash("error"),
-        };
+      const flashMessages = {
+        error: req.flash("error"),
+      };
 
-        res.render("admin/adminDashboard", {
-            admin,
-            requests: pendingRequests,
-            messages: flashMessages,
-        });
+      res.render("admin/adminDashboard", {
+        admin,
+        requests: pendingRequests,
+        messages: flashMessages,
+      });
     } catch (error) {
-        console.error("Error displaying pending requests:", error);
-        req.flash("error", "Failed to fetch pending requests.");
-        return res.redirect("/admin/dashboard");
+      console.error("Error displaying pending requests:", error);
+      req.flash("error", "Failed to fetch pending requests.");
+      return res.redirect("/admin/dashboard");
     }
-},
+  },
 
-rejectRequest: async (req, res) => {
-  try {
-    const requestId = req.params.id;
+  rejectRequest: async (req, res) => {
+    try {
+      const requestId = req.params.id;
 
-    // Find the property by ID and delete it
-    await Property.findByIdAndDelete(requestId);
+      // Find the property by ID and delete it
+      await Property.findByIdAndDelete(requestId);
 
-    req.flash("success", "Property rejected and deleted successfully.");
-    return res.redirect("/admin/requests");
-  } catch (error) {
-    console.error("Error rejecting request:", error);
-    req.flash("error", "Failed to reject property.");
-    return res.redirect("/admin/requests");
-  }
-},
+      req.flash("success", "Property rejected and deleted successfully.");
+      return res.redirect("/admin/requests");
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      req.flash("error", "Failed to reject property.");
+      return res.redirect("/admin/requests");
+    }
+  },
 
-approveRequest: async (req, res) => {
-  try {
-    const requestId = req.params.id;
+  approveRequest: async (req, res) => {
+    try {
+      const requestId = req.params.id;
 
-    // Find the property by ID and update its approval status to "Approved"
-    await Property.findByIdAndUpdate(requestId, {
-      approvalStatus: "Approved",
-    });
+      // Find the property by ID and update its approval status to "Approved"
+      await Property.findByIdAndUpdate(requestId, {
+        approvalStatus: "Approved",
+      });
 
-    req.flash("success", "Property approved successfully.");
-    return res.redirect("/admin/requests");
-  } catch (error) {
-    console.error("Error approving request:", error);
-    req.flash("error", "Failed to approve property.");
-    return res.redirect("/admin/requests");
-  }
-},
-
+      req.flash("success", "Property approved successfully.");
+      return res.redirect("/admin/requests");
+    } catch (error) {
+      console.error("Error approving request:", error);
+      req.flash("error", "Failed to approve property.");
+      return res.redirect("/admin/requests");
+    }
+  },
 
   loginPost: async (req, res) => {
     const { email, password } = req.body;
@@ -96,7 +98,6 @@ approveRequest: async (req, res) => {
           _id: user._id,
           email: email,
         };
-        req.session.user = null; // Clear any existing user session
         return res.redirect("/admin/dashboard");
       } else {
         req.flash("error", "Invalid email or password");
@@ -111,72 +112,77 @@ approveRequest: async (req, res) => {
 
   renderDashboard: async (req, res) => {
     try {
-        if (!req.session.isAdmin) {
-            req.flash("error", "You are not authorized to access this page");
-            return res.redirect("/admin/login");
-        }
-
-        const owners = await Owner.find();
-        const { email } = req.session.admin;
-        const admin = await User.findOne({ email });
-        const bookings = await Booking.find().populate("property").populate("user");
-
-        if (!admin) {
-            req.flash("error", "Admin not found");
-            return res.redirect("/admin/login");
-        }
-
-        const categories = await Category.find();
-        const pendingRequests = await Property.find({ approvalStatus: "Pending" }).populate("owner");
-        const properties = await Property.find().populate("owner");
-        const users = await User.find();
-
-        const flashMessages = {
-            error: req.flash("error"),
-            success: req.flash("success"),
-            addCategoryError: req.flash("error"),
-            addCategorySuccess: req.flash("success"),
-            categoryDeletedSuccess: req.flash("success"),
-        };
-
-        res.render("admin/adminDashboard", {
-            admin,
-            owners,
-            categories,
-            requests: pendingRequests,
-            bookings,
-            properties,
-            users,
-            messages: flashMessages,
-        });
-    } catch (error) {
-        console.error("Error rendering dashboard:", error);
-        req.flash("error", "Internal Server Error");
+      if (!req.session.isAdmin) {
+        req.flash("error", "You are not authorized to access this page");
         return res.redirect("/admin/login");
+      }
+
+      const owners = await Owner.find();
+      const { email } = req.session.admin;
+      const admin = await User.findOne({ email });
+      const bookings = await Booking.find().populate("property").populate("user");
+
+      if (!admin) {
+        req.flash("error", "Admin not found");
+        return res.redirect("/admin/login");
+      }
+
+      const categories = await Category.find();
+      const pendingRequests = await Property.find({ approvalStatus: "Pending" }).populate("owner");
+      const properties = await Property.find().populate("owner");
+      const users = await User.find();
+
+      // Populate the category field for each coupon
+      const coupon = await Coupon.find().populate("category");
+
+      const flashMessages = {
+        error: req.flash("error"),
+        success: req.flash("success"),
+        addCategoryError: req.flash("error"),
+        addCategorySuccess: req.flash("success"),
+        categoryDeletedSuccess: req.flash("success"),
+      };
+
+      res.render("admin/adminDashboard", {
+        admin,
+        owners,
+        categories,
+        requests: pendingRequests,
+        bookings,
+        properties,
+        coupon, // Pass the populated coupons array to the template
+        users,
+        messages: flashMessages,
+      });
+    } catch (error) {
+      console.error("Error rendering dashboard:", error);
+      req.flash("error", "Internal Server Error");
+      return res.redirect("/admin/login");
     }
   },
 
+
   renderDeletion: async (req, res) => {
     try {
-        const properties = await Property.find().populate("owner");
+      const properties = await Property.find().populate("owner");
 
-        const flashMessages = {
-            error: req.flash("error"),
-            addCategoryError: req.flash("error"),
-            categoryDeletedSuccess: req.flash("success"),
-        };
+      const flashMessages = {
+        error: req.flash("error"),
+        addCategoryError: req.flash("error"),
+        categoryDeletedSuccess: req.flash("success"),
+      };
 
-        res.render("admin/adminDashboard", {
-            admin: req.session.user,
-            properties: properties,
-            messages: flashMessages,
-        });
+      res.render("admin/adminDashboard", {
+        admin: req.session.user,
+        properties: properties,
+        messages: flashMessages,
+      });
     } catch (error) {
-        console.error("Error rendering deletion:", error);
-        req.flash("error", "Internal Server Error");
-        return res.redirect("/admin/dashboard");
+      console.error("Error rendering deletion:", error);
+      req.flash("error", "Internal Server Error");
+      return res.redirect("/admin/dashboard");
     }
-},
+  },
   deleteProperty: async (req, res) => {
     const propertyId = req.params.id;
     try {
@@ -365,81 +371,84 @@ approveRequest: async (req, res) => {
   },
   getEditCategoryPage: async (req, res) => {
     try {
-        const categoryId = req.params.categoryId;
-        const category = await Category.findById(categoryId);
-        const admin = await User.findOne({ email: req.session.admin.email });
-
-        if (!admin) {
-            req.flash("error", "Admin not found");
-            return res.redirect("/admin/login");
-        }
-
-        const flashMessages = {
-            error: req.flash("error"),
-            success: req.flash("success"),
-        };
-
-        if (req.session.admin) {
-            res.render("admin/editCategory", {
-                admin,
-                category,
-                messages: flashMessages,
-            });
-        } else {
-            res.render("admin/adminLogin", { error: "You are not authorized to this page" });
-        }
+      const categoryId = req.params.categoryId;
+      const category = await Category.findById(categoryId);
+      const admin = await User.findOne({ email: req.session.admin.email });
+  
+      if (!admin) {
+        req.flash("error", "Admin not found");
+        return res.redirect("/admin/login");
+      }
+  
+      const flashMessages = {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      };
+  
+      if (req.session.admin) {
+        res.render("admin/editCategory", {
+          admin,
+          category,
+          error: flashMessages.error,
+          success: flashMessages.success,
+        });
+      } else {
+        res.render("admin/adminLogin", {
+          error: "You are not authorized to access this page",
+        });
+      }
     } catch (error) {
-        console.error("Error fetching category:", error);
-        res.status(500).send("Internal Server Error");
+      console.error("Error fetching category:", error);
+      res.status(500).send("Internal Server Error");
     }
-},
+  },  
 
   updateCategory: async (req, res) => {
     const categoryId = req.params.categoryId;
     const { name, description } = req.body;
-  
+
     // Check if an admin user is logged in
     if (!req.session.isAdmin) {
       req.flash("error", "You are not authorized to perform this action");
       return res.redirect("/admin/login");
     }
-  
+
     try {
       if (!name || !description) {
         req.flash("error", "Please provide both name and description");
         return res.redirect(`/admin/categories/${categoryId}/edit`);
       }
-  
+
       // Normalize the category name by converting to lowercase and removing whitespace
       const normalizedCategoryName = name.toLowerCase().replace(/\s+/g, "");
-  
+
       // Check if another category already exists with the new name (case-insensitive, ignoring whitespace)
       const existingCategory = await Category.findOne({
         normalizedName: normalizedCategoryName,
-        _id: { $ne: categoryId } // Exclude the current category from the check
+        _id: { $ne: categoryId }, // Exclude the current category from the check
       });
-  
+
       if (existingCategory) {
         req.flash("error", "Category with this name already exists");
         return res.redirect(`/admin/categories/${categoryId}/edit`);
       }
-  
+
       // Find the category by ID and update its name and description
       const updatedCategory = await Category.findByIdAndUpdate(
         categoryId,
         {
           name: name.trim(), // Save the original name with proper case and spacing
           description: description.trim(),
-          normalizedName: normalizedCategoryName // Update the normalized name for future checks
+          normalizedName: normalizedCategoryName, // Update the normalized name for future checks
         },
         { new: true }
       );
-  
+
       if (!updatedCategory) {
         req.flash("error", "Category not found");
         return res.redirect("/admin/dashboard"); // Redirect to dashboard with error flash message
       }
-  
+
       // Category updated successfully
       req.flash("success", "Category updated successfully");
       return res.redirect("/admin/dashboard"); // Redirect to dashboard with success flash message
@@ -449,7 +458,90 @@ approveRequest: async (req, res) => {
       return res.redirect(`/admin/categories/${categoryId}/edit`); // Redirect to edit page with error flash message
     }
   },
+  cancelBooking: async (req, res) => {
+    try {
+      const bookingId = req.params.id;
+      // Find the booking by ID
+      const booking = await Booking.findById(bookingId);
+
+      if (!booking) {
+        req.flash("error", "Booking not found");
+        return res.status(404).redirect("/admin/dashboard");
+      }
+
+      // Update booking status to "Cancelled"
+      booking.bookingStatus = "Cancelled";
+      await booking.save();
+
+      req.flash("success", "Booking cancelled successfully");
+      return res.redirect("/admin/dashboard"); // Redirect back to the dashboard or any other appropriate route
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Internal Server Error");
+      return res.status(500).redirect("/admin/dashboard");
+    }
+  },
+  createCoupon: async (req, res) => {
+    try {
+      // Extract coupon data from request body
+      const { couponName, category, expirationDate, fixedValue, payMethod } = req.body;
+      const alphanumericPattern = /^[a-zA-Z0-9]+$/;
   
+      // Check if the coupon name matches the alphanumeric pattern
+      if (!alphanumericPattern.test(couponName)) {
+        req.flash("error", "Coupon name can only contain alphanumeric characters");
+        return res.redirect("/admin/dashboard"); // Redirect back to the dashboard with an error message
+      }
+  
+      // Check if the coupon already exists
+      const existingCoupon = await Coupon.findOne({ code: couponName.toUpperCase() });
+      if (existingCoupon) {
+        req.flash("error", "Coupon with the same code already exists");
+        return res.redirect("/admin/dashboard"); // Redirect back to the dashboard with an error message
+      }
+  
+      // Save the new coupon to the database
+      const coupon = await Coupon.create({
+        code: couponName.toUpperCase(), // Convert coupon name to uppercase
+        category,
+        expirationDate,
+        fixedValue, // Add the fixed value to the coupon
+        payMethod, // Add the payment method to the coupon
+        used: false, // Assuming the coupon is initially not used
+      });
+  
+      // Redirect to a success page or send a success response
+      req.flash("success", "Coupon created successfully");
+      res.redirect("/admin/dashboard");
+    } catch (error) {
+      console.error("Error creating coupon:", error);
+      // Handle errors appropriately, e.g., send an error response
+      req.flash("error", "An error occurred while creating the coupon");
+      res.redirect("/admin/dashboard");
+    }
+  },
+  
+  updateCoupon: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { couponName, category } = req.body;
+
+      // Find the coupon by ID and update its details
+      const updatedCoupon = await Coupon.findByIdAndUpdate(id, { code: couponName.toUpperCase(), category });
+
+      if (!updatedCoupon) {
+        req.flash("error", "Coupon not found");
+        return res.redirect("/admin/dashboard");
+      }
+
+      req.flash("success", "Coupon updated successfully");
+      res.redirect("/admin/dashboard");
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+      req.flash("error", "An error occurred while updating the coupon");
+      res.redirect("/admin/dashboard");
+    }
+  },
 };
 
 module.exports = adminController;

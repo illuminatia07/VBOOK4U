@@ -35,6 +35,10 @@ router.post("/owners/:id/block", adminController.blockOwner); // Route to block 
 router.post("/owners/:id/unblock", adminController.unblockOwner);
 router.get('/categories/:categoryId/edit', adminController.getEditCategoryPage);
 router.post('/categories/:categoryId/update', adminController.updateCategory);
+router.post("/bookings/:id/cancel", adminController.cancelBooking);
+router.post("/coupons/create", adminController.createCoupon);
+router.post("/coupons/update/:id", adminController.updateCoupon);
+
 
 router.post("/logout", adminController.logout);
 

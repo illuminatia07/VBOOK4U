@@ -1,6 +1,8 @@
 /* Global Styles */
 html, body {
   height: 100%;
+ 
+ 
   font-family: "Poppins", sans-serif;
 }
 
@@ -8,10 +10,21 @@ body {
   margin: 0;
   padding: 0;
   position: relative;
+  overflow-x: hidden;
   padding-bottom: 100px; /* Height of the footer */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+.btn-online{
+  background-color: #ff006a;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+  align-self: center;
 }
 
 .error-message {
@@ -137,6 +150,19 @@ button[type="submit"]:hover {
 }
 .search {
   margin-right: 20px;
+}
+.coupon {
+  border: 1px #ccc;
+  color: #ffffff;
+  background-color: #ff0051;
+  padding: 10px 20px;
+  border-radius: 5px;
+  gap: 20px;
+  cursor: pointer;
+}
+.coupon-field{
+  width: 50%;
+  padding: 0px 10px;
 }
 .logout-btn {
   position: absolute;

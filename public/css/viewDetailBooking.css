@@ -1,0 +1,93 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+  font-size: 15px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.card {
+  border-radius: 3px;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.property-images {
+  width: 100px;
+  height: 70px;
+  display: inline-block;
+  margin-bottom: 10px;
+  border-radius: 2px;
+}
+
+.card-text {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background-color: #ff0048;
+  border-color: #ff0048;
+  transition: background-color 0.3s ease;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.btn-primary:hover {
+  background-color: #e6003e;
+  border-color: #d6003a;
+}
+
+.vbook-btn,
+.logout-btn {
+  padding: 5px 10px;
+  border-radius: 2px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.vbook-btn {
+  background-color: #ff0048;
+  color: #fff;
+  border: none;
+}
+
+.logout-btn {
+  background-color: #ff0048;
+  color: #fff;
+  border: none;
+  margin-left: auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background-color: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
