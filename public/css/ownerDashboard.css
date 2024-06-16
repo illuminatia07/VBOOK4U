@@ -346,25 +346,27 @@ tr:hover {
 }
 
 .property-table td button {
-  margin-right: 5px;
+  margin-right: 2px;
 }
 /* Bookings Section Styling */
 .table-container {
   overflow-x: auto; /* Enable horizontal scrolling */
   overflow-y: auto; /* Enable vertical scrolling */
   max-width: 100%; /* Ensure the container doesn't exceed the viewport width */
-  max-height: 500px;
+  max-height: 500px; /* Decrease the max-height */
   border-radius: 10px;
   /* Set a maximum height for the container */
 }
+
 .table {
   width: 100%; /* Ensure the table fills its container */
   border-collapse: collapse;
+  font-size: small; /* Adjust font size */
 }
 
 .table th,
 .table td {
-  padding: 8px; /* Adjust spacing */
+  padding: 5px; /* Adjust padding */
   border: 1px solid #ddd; /* Add borders */
 }
 
@@ -398,13 +400,16 @@ tr:hover {
 /* Action Button Styles */
 .bg-warning {
   background-color: #ffc107;
-  color: #fff;
+  color: #ff0040;
   border: none;
-  padding: 8px 16px;
+  padding: 6px 12px; /* Adjust button padding */
   border-radius: 4px;
   cursor: pointer;
 }
 
+.bg-warning:hover {
+  background-color: #e0a800;
+}
 .bg-warning:hover {
   background-color: #e0a800;
 }

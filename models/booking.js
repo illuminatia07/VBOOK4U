@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
-  property: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Property",
-    required: true,
-  },
+    property: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Property'
+    },
   checkIn: {
     type: String,
     required: true,

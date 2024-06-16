@@ -10,7 +10,7 @@ const propertySchema = new mongoose.Schema({
   price: { type: Number, required: true },
   availability: { type: Boolean, default: true },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner', required: true },
-  approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }
+  approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
 });
 
 const Property = mongoose.model('Property', propertySchema);

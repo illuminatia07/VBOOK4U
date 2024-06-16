@@ -143,6 +143,7 @@ const ownerController = {
       // Fetch categories from the database
       const categories = await Category.find();
 
+
       // Fetch the owner details from the session
       const owner = req.session.owner;
       if (!owner) {

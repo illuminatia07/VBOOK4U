@@ -25,7 +25,7 @@
           >ADD PROPERTIES</a
         >
         <a href="#" id="deleteLink">OPERATIONS</a>
-        <a href="#" id="couponsLink">COUPONS</a>
+      
       </div>
 
       <!-- Main Content -->
@@ -118,7 +118,7 @@
                   <td><%= booking.checkIn %></td>
                   <td><%= booking.checkOut %></td>
                   <td><%= booking.price %> ₹</td>
-                  <td><%= booking.couponName %></td>
+                  <td><%= booking.couponName ? booking.couponName : "NONE" %></td>
                   <td><%= booking.bookingStatus %></td>
                 </tr>
                 <% }); %>

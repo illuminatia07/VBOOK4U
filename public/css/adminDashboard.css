@@ -584,3 +584,11 @@ p {
   overflow-y: auto;
   max-height: 301px;
 }
+.styled-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}

@@ -23,21 +23,23 @@ router.post("/login", adminController.loginPost);
 router.use(adminMiddleware.isAdmin); // This will apply isAdmin middleware to all routes below
 
 router.get("/dashboard", adminMiddleware.ensureAdminAuthenticated, adminController.renderDashboard);
-router.post("/categories", adminController.addCategory);
-router.get('/requests', adminController.displayPendingRequests);
-router.post('/requests/:id/approve', adminController.approveRequest);
-router.post('/requests/:id/reject', adminController.rejectRequest);
-router.get("/deletion", adminController.renderDeletion);
-router.post('/categories/:id/delete', adminController.deleteCategory);
-router.post("/users/:id/block", adminController.blockUser); // Route to block a user
-router.post("/users/:id/unblock", adminController.unblockUser); // Route to unblock a user
-router.post("/owners/:id/block", adminController.blockOwner); // Route to block an owner
-router.post("/owners/:id/unblock", adminController.unblockOwner);
-router.get('/categories/:categoryId/edit', adminController.getEditCategoryPage);
-router.post('/categories/:categoryId/update', adminController.updateCategory);
-router.post("/bookings/:id/cancel", adminController.cancelBooking);
-router.post("/coupons/create", adminController.createCoupon);
-router.post("/coupons/update/:id", adminController.updateCoupon);
+router.post('/admin/sales-report',adminMiddleware.ensureAdminAuthenticated, adminController.renderDashboard);
+router.post("/categories", adminMiddleware.ensureAdminAuthenticated, adminController.addCategory);
+router.get('/requests', adminMiddleware.ensureAdminAuthenticated, adminController.displayPendingRequests);
+router.post('/requests/:id/approve',adminMiddleware.ensureAdminAuthenticated, adminController.approveRequest);
+router.post('/requests/:id/reject',adminMiddleware.ensureAdminAuthenticated, adminController.rejectRequest);
+router.get("/deletion",adminMiddleware.ensureAdminAuthenticated, adminController.renderDeletion);
+router.post('/categories/:id/delete',adminMiddleware.ensureAdminAuthenticated, adminController.deleteCategory);
+router.post("/users/:id/block",adminMiddleware.ensureAdminAuthenticated, adminController.blockUser); // Route to block a user
+router.post("/users/:id/unblock",adminMiddleware.ensureAdminAuthenticated, adminController.unblockUser); // Route to unblock a user
+router.post("/owners/:id/block",adminMiddleware.ensureAdminAuthenticated, adminController.blockOwner); // Route to block an owner
+router.post("/owners/:id/unblock",adminMiddleware.ensureAdminAuthenticated, adminController.unblockOwner);
+router.get('/categories/:categoryId/edit',adminMiddleware.ensureAdminAuthenticated, adminController.getEditCategoryPage);
+router.post('/categories/:categoryId/update',adminMiddleware.ensureAdminAuthenticated, adminController.updateCategory);
+router.post("/bookings/:id/cancel",adminMiddleware.ensureAdminAuthenticated, adminController.cancelBooking);
+router.post("/coupons/create",adminMiddleware.ensureAdminAuthenticated, adminController.createCoupon);
+router.post("/coupons/update/:id",adminMiddleware.ensureAdminAuthenticated, adminController.updateCoupon);
+router.post('/coupons/delete/:id',adminMiddleware.ensureAdminAuthenticated, adminController.deleteCoupon);
 
 
 router.post("/logout", adminController.logout);
