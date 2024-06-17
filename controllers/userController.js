@@ -117,6 +117,7 @@ const userController = {
             fullname: reloadedUser.fullname,
             // Add any other properties you want to include in the session
           };
+          console.log(req.session.user);
           // Flash message
           req.flash("success", "Signed in successfully!");
           // Redirect to userHome or wherever you want after successful authentication
@@ -348,13 +349,14 @@ const userController = {
         guest,
         page = 1,
       } = req.query;
+      console.log("Search : ", req.query);
       const { checkIn, checkOut } = req.query;
 
       // Store check-in and check-out dates in session
       req.session.checkIn = checkIn;
       req.session.checkOut = checkOut;
 
-      const propertiesPerPage = 5;
+      const propertiesPerPage = 4;
 
       // Construct the initial search query
       const searchQuery = {};
@@ -362,14 +364,22 @@ const userController = {
       // If search term is provided, search by property name or address
       if (search) {
         searchQuery.$or = [
-          { propertyName: { $regex: new RegExp(search, "i") } },
-          { address: { $regex: new RegExp(search, "i") } },
+          { $and: [{ propertyName: { $regex: new RegExp(search, "i") } }, { availability: true }] },
+          { $and: [{ address: { $regex: new RegExp(search, "i") } }, { availability: true }] },
         ];
+      } else {
+        searchQuery.availability = true;
       }
+      console.log("SEARCH QUERY : ", searchQuery);
+
       // Fetch properties based on the search query
       const properties = await Property.find(searchQuery)
         .skip((page - 1) * propertiesPerPage)
         .limit(propertiesPerPage);
+      console.log("SEARCH QUERY PTS: ", properties);
+
+      // Store properties in session
+      req.session.properties = properties;
 
       // Fetch categories from the database
       const categories = await Category.find(); // Assuming this fetches all categories
@@ -379,8 +389,6 @@ const userController = {
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / propertiesPerPage);
 
-      // Get today's date
-      // const today = new Date().toISOString().split("T")[0];
       console.log("CheckIn:", checkIn);
       console.log("CheckOut:", checkOut);
 
@@ -399,94 +407,91 @@ const userController = {
         userSession: req.session.user,
         propertyCount: properties.length,
         totalPages: totalPages,
-        // Pass today's date to the template
       });
     } catch (error) {
       next(error);
     }
   },
 
-  // Function to apply filters
   applyFilters: async (req, res, next) => {
     try {
-      const {
-        search,
-        category,
-        roomFacilities,
-        priceRange,
-        checkIn,
-        checkOut,
-        guest,
-        page = 1,
-      } = req.query;
-      const filter = {};
+      const { category, roomFacilities, priceRange, search,page = 1, } = req.query;
+      const { checkIn, checkOut } = req.query;
 
-      // Construct the search query
-      const searchQuery = {};
-      if (search) {
-        searchQuery.$or = [
-          { propertyName: { $regex: new RegExp(search, "i") } },
-          { address: { $regex: new RegExp(search, "i") } },
-        ];
-      }
+      // Store check-in and check-out dates in session
+      req.session.checkIn = checkIn;
+      req.session.checkOut = checkOut;
+
+      // Retrieve properties from session
+      const properties = req.session.properties || [];
+      const categories = await Category.find();
 
       // Construct the filter object based on the query parameters
+      let filteredProperties = properties;
+
       if (category) {
         const selectedCategories = Array.isArray(category)
           ? category
           : [category];
-        filter.categoryName = { $in: selectedCategories };
+        filteredProperties = filteredProperties.filter((property) =>
+          selectedCategories.includes(property.categoryName)
+        );
+        console.log("FilteredProp and SelectedCats :",filteredProperties, selectedCategories);
       }
+      
       if (roomFacilities) {
-        filter.roomFacilities = { $in: roomFacilities };
+        filteredProperties = filteredProperties.filter((property) =>
+          property.roomFacilities.some((facility) =>
+            roomFacilities.includes(facility)
+          )
+        );
+        console.log("RoomFacility :",filteredProperties, );
       }
+     
+
       if (priceRange) {
         if (priceRange.includes("-")) {
           const [minPrice, maxPrice] = priceRange.split("-").map(parseFloat);
           if (!isNaN(minPrice) && !isNaN(maxPrice)) {
-            filter.price = { $gte: minPrice, $lte: maxPrice };
+            filteredProperties = filteredProperties.filter(
+              (property) =>
+                property.price >= minPrice && property.price <= maxPrice
+            );
           } else {
             throw new Error("Invalid price range");
           }
         } else {
           const price = parseFloat(priceRange);
           if (!isNaN(price)) {
-            filter.price = { $lte: price };
+            filteredProperties = filteredProperties.filter(
+              (property) => property.price <= price
+            );
           } else {
             throw new Error("Invalid price range");
           }
         }
+        console.log("PriceRange :",filteredProperties, );
       }
-
-      // Combine the search query and filter query
-      const combinedQuery = { ...searchQuery, ...filter };
-
-      // Fetch properties based on the combined query
-      const properties = await Property.find(combinedQuery);
-      const propertiesPerPage = 5;
-      // Fetch categories from the database
-      const categories = await Category.find();
-      // Calculate total number of properties
-      const totalCount = await Property.countDocuments(searchQuery);
+     
       // Calculate total number of pages
+      const propertiesPerPage = 4;
+      const totalCount = filteredProperties.length;
       const totalPages = Math.ceil(totalCount / propertiesPerPage);
 
-      // Render the userSearch.ejs view with filtered properties, categories, and other data
+      // Render the userSearch.ejs view with filtered properties
       res.render("user/userSearch", {
-        search: search || "", // Ensure that search is properly passed with a default value
         category,
         roomFacilities,
+        search: search || "",
         priceRange,
+        properties: filteredProperties,
+        categories,
         checkIn,
         checkOut,
-        guest,
-        properties,
-        categories,
         currentPage: page,
+        propertyCount: filteredProperties.length,
+        totalPages: totalPages,
         userSession: req.session.user,
-        propertyCount: properties.length,
-        totalPages: totalPages, // Pass the propertyCount variable
-        // Add any other necessary data
       });
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -774,32 +779,32 @@ const userController = {
       const page = parseInt(req.query.page) || 1; // Get the current page from query parameters, default is 1
       const limit = 5; // Number of bookings per page
       const skip = (page - 1) * limit;
-  
+
       // Retrieve bookings for the current user with pagination
       const bookings = await Booking.find({
         user: userId,
       })
-      .populate("property")
-      .sort({ dateInitiated: -1 }) // Sort by dateInitiated field in descending order (most recent first)
-      .skip(skip)
-      .limit(limit);
-  
+        .populate("property")
+        .sort({ dateInitiated: -1 }) // Sort by dateInitiated field in descending order (most recent first)
+        .skip(skip)
+        .limit(limit);
+
       const totalBookings = await Booking.countDocuments({ user: userId });
       const totalPages = Math.ceil(totalBookings / limit);
-  
+
       // Prepare the booking data with necessary properties for the modal
       const bookingsWithModalData = await Promise.all(
         bookings.map(async (booking) => {
           const property = booking.property;
-  
+
           // Extract image URLs from the property
           const imageUrls = property.images.map(
             (image) => `/uploads/properties/${image}`
           );
-  
+
           // Get the coupon name (if any)
           const couponName = booking.couponName ? booking.couponName : "None";
-  
+
           return {
             id: booking._id,
             property: {
@@ -821,7 +826,7 @@ const userController = {
           };
         })
       );
-  
+
       // Render the yourBooking.ejs view with the bookings data
       res.render("user/yourBooking", {
         bookings: bookingsWithModalData,
@@ -840,7 +845,7 @@ const userController = {
       return res.redirect("/profile");
     }
   },
-  
+
   viewDetails: async (req, res) => {
     try {
       // Retrieve the bookingId from the request query

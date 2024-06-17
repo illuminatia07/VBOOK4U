@@ -73,26 +73,14 @@
               <span id="minPriceLabel">0</span> - <span id="maxPriceLabel">50000</span><br>
             </div>
 
-            <h3 class="sub-heading">Check-in Features</h3>
-            <ul>
-              <li><input type="checkbox" name="checkInFeatures" value="Pay at Property"> Pay at Property</li>
-            </ul>
+            
           </div>
           <button type="submit" class="buy-now apply-filters-btn">Apply Filters</button>
         </form>
-
-        <div class="button">
-          <div class="top-text">Wizard Member</div>
-          <div class="middle-text">Get 15% off on Vbook4U accredited properties</div>
-          <div class="bottom-text">
-            <span class="vbook-text">Vbook4U.com</span>
-          </div>
-        </div>
-        <button class="buy-now">Buy Now</button>
       </div>
 
       <div class="properties-box">
-        <h2><%= propertyCount %> Properties Found</h2>
+        <h2><%= properties.length %> Properties Found</h2>
         <% if (properties && properties.length > 0) { %>
           <% properties.forEach(propertyItem => { %>
             <div class="property">

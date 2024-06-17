@@ -143,7 +143,6 @@ const ownerController = {
       // Fetch categories from the database
       const categories = await Category.find();
 
-
       // Fetch the owner details from the session
       const owner = req.session.owner;
       if (!owner) {
@@ -200,7 +199,13 @@ const ownerController = {
 
       const ownerId = req.session.owner._id;
 
-      if (!propertyName || !categoryName || !description || !address || !price) {
+      if (
+        !propertyName ||
+        !categoryName ||
+        !description ||
+        !address ||
+        !price
+      ) {
         req.flash("error", "All fields are required.");
         return res.redirect("/owner/dashboard");
       }
@@ -212,7 +217,9 @@ const ownerController = {
         return res.redirect("/owner/dashboard");
       }
 
-      const images = req.files.map((file) => `/uploads/properties/${file.filename}`);
+      const images = req.files.map(
+        (file) => `/uploads/properties/${file.filename}`
+      );
 
       const newProperty = new Property({
         propertyName,
@@ -225,7 +232,7 @@ const ownerController = {
         owner: ownerId,
         approvalStatus: "Pending",
       });
-
+      console.log("NewProperty : ", newProperty);
       await newProperty.save();
 
       req.flash(
@@ -342,69 +349,10 @@ const ownerController = {
     }
   },
 
-  editProperty: async (req, res) => {
-    try {
-      const propertyId = req.params.propertyId;
-      // Get updated property details from the request body
-      const {
-        propertyName,
-        categoryName,
-        description,
-        roomFacilities,
-        address,
-        price,
-        images,
-      } = req.body;
-
-      // Define regex patterns for validation
-      const nameRegex = /^[a-zA-Z0-9\s]+$/; // Alphanumeric with spaces allowed
-      const addressRegex = /^[a-zA-Z0-9\s,-]+$/; // Alphanumeric with spaces, commas, and hyphens allowed
-      const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/; // Alphanumeric with spaces, commas, periods, and hyphens allowed
-
-      // Server-side validation
-      if (
-        !nameRegex.test(propertyName) ||
-        !categoryName ||
-        !descriptionRegex.test(description) ||
-        !addressRegex.test(address) ||
-        !price ||
-        isNaN(Number(price)) || // Check if price is a valid number
-        Number(price) <= 0 // Check if price is greater than zero
-      ) {
-        console.log("Validation enteed");
-        req.flash(
-          "error",
-          "Invalid input. Please provide valid data for all fields."
-        );
-        return res.redirect("/owner/dashboard");
-      }
-
-      // Find the property by ID and update its details
-      await Property.findByIdAndUpdate(propertyId, {
-        propertyName,
-        categoryName,
-        description,
-        roomFacilities,
-        address,
-        price,
-        images,
-        // Add more fields as needed
-      });
-
-      req.flash("success", "Property details updated successfully.");
-      return res.redirect("/owner/dashboard");
-    } catch (error) {
-      console.error("Error editing property:", error);
-      req.flash("error", "Failed to update property details.");
-      return res.redirect("/owner/dashboard");
-    }
-  },
-
   renderEditProperty: async (req, res) => {
     try {
       const propertyId = req.params.id;
       const property = await Property.findById(propertyId);
-
       const roomFacilities = [
         "Seating Area",
         "Smoking Room",
@@ -433,91 +381,67 @@ const ownerController = {
       res.redirect("/owner/dashboard");
     }
   },
-
-  updateProperty: async (req, res) => {
+  editProperty: async (req, res) => {
     try {
-      // Extract the propertyId from the request parameters
-      const propertyId = req.params.propertyId;
-      console.log("Property ID:", propertyId);
-
-      // Destructure properties from the request body
+      const propertyId = req.params.id;
       const {
         propertyName,
         categoryName,
         description,
-        roomFacilities, // Make sure this field contains an array of strings
+        roomFacilities,
         address,
         price,
+        existingImages = [],
       } = req.body;
-
-      console.log("req :", req.body);
-
-      // Handle existing images
-      let existingImages = [];
-      if (req.body.existingImages) {
-        existingImages = req.body.existingImages;
-      }
 
       // Handle newly uploaded images
       let newImages = [];
       if (req.files) {
-        newImages = req.files.map((file) => file.filename);
+        newImages = req.files.map((file) => `/uploads/properties/${file.filename}`);
       }
-      console.log("newImages");
+
       // Combine existing and new images
       const images = [...existingImages, ...newImages];
 
       // Define regex patterns for validation
-      const nameRegex = /^[a-zA-Z0-9\s]+$/; // Alphanumeric with spaces allowed
-      const addressRegex = /^[a-zA-Z0-9\s,-]+$/; // Alphanumeric with spaces, commas, and hyphens allowed
-      const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/; // Alphanumeric with spaces, commas, periods, and hyphens allowed
+      const nameRegex = /^[a-zA-Z0-9\s]+$/;
+      const addressRegex = /^[a-zA-Z0-9\s,-]+$/;
+      const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/;
 
       // Server-side validation
-      // if (
-
-      //   !nameRegex.test(propertyName) ||
-      //   !categoryName ||
-      //   !descriptionRegex.test(description) ||
-      //   !addressRegex.test(address) ||
-      //   !price ||
-      //   isNaN(Number(price)) || // Check if price is a valid number
-      //   Number(price) <= 0 // Check if price is greater than zero
-      // ) {
-      //   console.log("Validation entered");
-      //   req.flash(
-      //     "error",
-      //     "Invalid input. Please provide valid data for all fields."
-      //   );
-      //   return res.redirect("/owner/dashboard");
-      // }
+      if (
+        !nameRegex.test(propertyName) ||
+        !categoryName ||
+        !descriptionRegex.test(description) ||
+        !addressRegex.test(address) ||
+        !price ||
+        isNaN(Number(price)) ||
+        Number(price) <= 0
+      ) {
+        req.flash(
+          "error",
+          "Invalid input. Please provide valid data for all fields."
+        );
+        return res.redirect(`/owner/dashboard/editProperty/${propertyId}`);
+      }
 
       // Find the property by ID and update its details
-      const updatedProperty = await Property.findByIdAndUpdate(
-        propertyId,
-        {
-          propertyName,
-          categoryName,
-          description,
-          roomFacilities, // Update the roomFacilities field with the new array
-          address,
-          price,
-          images,
-          // Add more fields as needed
-        },
-        { new: true } // Added { new: true } to return the updated document
-      );
+      await Property.findByIdAndUpdate(propertyId, {
+        propertyName,
+        categoryName,
+        description,
+        roomFacilities,
+        address,
+        price,
+        images,
+      });
 
-      // Log the updated property to verify changes
-      console.log("Updated Property:", updatedProperty);
-
-      // Redirect to dashboard after successful update
       req.flash("success", "Property details updated successfully.");
       return res.redirect("/owner/dashboard");
     } catch (error) {
-      // Handle errors
       console.error("Error editing property:", error);
       req.flash("error", "Failed to update property details.");
-      return res.redirect("/owner/dashboard");
+      return res.redirect(`/owner/dashboard/editProperty/${req.params.id}`);
     }
   },
   renderEditProfilePage: (req, res) => {
@@ -544,41 +468,47 @@ const ownerController = {
       try {
         const { fullName, phoneNumber } = req.body;
         const profilePicture = req.file;
-  
+
         // Validate full name
         const fullNameRegex = /^[a-zA-Z\s]+$/;
         if (!fullNameRegex.test(fullName)) {
-          req.flash("error", "Full name should only contain alphabets and spaces.");
+          req.flash(
+            "error",
+            "Full name should only contain alphabets and spaces."
+          );
           return res.redirect("/owner/editProfile");
         }
-  
+
         // Validate phone number
         const phoneNumberRegex = /^\d{10}$/;
         if (!phoneNumberRegex.test(phoneNumber)) {
-          req.flash("error", "Phone number should contain only numbers and must be 10 digits long.");
+          req.flash(
+            "error",
+            "Phone number should contain only numbers and must be 10 digits long."
+          );
           return res.redirect("/owner/editProfile");
         }
-  
+
         if (!req.session.owner) {
           req.flash("error", "Unauthorized access.");
           return res.redirect("/owner/login");
         }
-  
+
         const owner = await Owner.findById(req.session.owner._id);
         if (!owner) {
           req.flash("error", "Owner not found.");
           return res.redirect("/owner/editProfile");
         }
-  
+
         owner.fullname = fullName;
         owner.phoneNumber = phoneNumber;
         if (profilePicture) {
           owner.profilePicture = `/uploads/${profilePicture.filename}`;
           req.session.owner.profilePicture = owner.profilePicture;
         }
-  
+
         await owner.save();
-  
+
         req.flash("success", "Profile updated successfully.");
         return res.redirect("/owner/editProfile");
       } catch (error) {
@@ -588,7 +518,7 @@ const ownerController = {
       }
     },
   ],
-  
+
   changePassword: async (req, res) => {
     try {
       const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -630,9 +560,12 @@ const ownerController = {
         req.flash("error", "New password and confirm password do not match.");
         return res.redirect("/owner/changePassword");
       }
-      
+
       if (currentPassword === newPassword) {
-        req.flash("error", "New password cannot be the same as the current password.");
+        req.flash(
+          "error",
+          "New password cannot be the same as the current password."
+        );
         return res.redirect("/owner/changePassword");
       }
 
@@ -652,7 +585,6 @@ const ownerController = {
     }
   },
   renderChangePasswordPage: (req, res) => {
-    
     try {
       if (!req.session.owner) {
         req.flash("error", "Unauthorized access.");

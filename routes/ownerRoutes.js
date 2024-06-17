@@ -4,6 +4,9 @@ const ownerController = require("../controllers/ownerController");
 const { checkBlockedStatus } = require("../middleware/ownerMiddleware");
 const noCache = require("nocache");
 const Property = require("../models/property");
+const path = require('path');
+const multer = require('multer');
+const upload = multer({ dest: path.join(__dirname, '../public/uploads/properties') });
 const router = express.Router();
 const {
   uploadProfilePicture,
@@ -40,6 +43,7 @@ router.post(
 router.post("/changePassword", ownerController.changePassword);
 router.post("/cancelBooking/:bookingId", ownerController.cancelBooking);
 router.get("/dashboard/editProperty/:id", ownerController.renderEditProperty);
+router.post("/dashboard/editProperty/:id", upload.array('images', 10), ownerController.editProperty);
 router.get("/editProfile", ownerController.renderEditProfilePage);
 
 router.post(
@@ -48,7 +52,7 @@ router.post(
 );
 router.post(
   "/dashboard/deleteProperty/:propertyId",
-  ownerController.deleteProperty
+  ownerController.deleteProperty 
 );
 
 router.post(

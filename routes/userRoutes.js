@@ -20,7 +20,7 @@ router.post("/verifyOTP", userController.verifyOTP);
 router.post("/logout", userController.logout);
 router.get("/logout", userController.renderLogout);
 router.get("/search", userController.searchProperty);
-router.get("/applyFilters", userController.applyFilters);
+router.get("/applyFilters",userController.applyFilters);
 router.get('/home', userController.renderUserHome);
 
 // Protected routes

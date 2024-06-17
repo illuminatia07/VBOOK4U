@@ -3,8 +3,49 @@
 <head>
   <title>Edit Property</title>
   <link rel="stylesheet" href="/css/adminDashboard.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
   <style>
    /* Move to external CSS for better maintenance */
+   .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: hidden;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 2% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .close {
+      color: #aaaaaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #cropperImage {
+      max-width: 100%;
+      max-height: 400px;
+    }
    h2 {
       text-align: center;
     }
@@ -12,6 +53,7 @@
       display: flex;
       flex-direction: column;
       margin-bottom: 20px;
+      overflow-x: hidden;
     }
     .edit-property-form {
       max-width: 600px;
@@ -60,13 +102,22 @@
       border-radius: 50%;
       cursor: pointer;
     }
+    .edit-btn {
+      padding: 5px 8px;
+      background-color: rgb(255, 0, 60);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: smaller;
+      cursor: pointer;
+    }
     .img-src {
       width: 50px;
       height: 50px;
       padding: 5px 5px;
     }
     .room-fac {
-        position: absolute;
+      position: absolute;
       display: -ms-inline-grid;
     }
     .form-group button {
@@ -77,47 +128,58 @@
   </style>
 </head>
 <body>
-    <main>
-        <h2>Edit Property</h2>
-        <% if (messages.error) { %>
-          <div class="flash-error"><%= messages.error %></div>
-        <% } %>
-        <% if (messages.success) { %>
-          <div class="flash-success"><%= messages.success %></div>
-        <% } %>
-        <form class="edit-property-form" action="/owner/dashboard/editProperty/<%= property._id %>" method="POST" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="propertyName">Property Name:</label>
-            <input type="text" id="propertyName" name="propertyName" value="<%= property.propertyName %>" required />
-          </div>
-          <div class="form-group">
-            <label for="categoryName">Category Name:</label>
-            <select id="categoryName" name="categoryName" required>
-              <% categories.forEach(category => { %>
-                <option  name="categoryName" value="<%= category.name %>" <%= property.categoryName === category.name ? 'selected' : '' %>><%= category.name %></option>
-              <% }); %>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="roomFacilities">Room Facilities:</label><br>
-            <% roomFacilities.forEach(facility => { %>
-              <input class="room-fac" type="checkbox" id="<%= facility %>" name="roomFacilities[]" value="<%= facility %>" <%= property.roomFacilities.includes(facility) ? 'checked' : '' %>>
-              <label class="room-fac" name="roomFacilities[]" for="<%= facility %>"><%= facility %></label><br>
-            <% }); %>
-          </div>
-          <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" required><%= property.description %></textarea>
-          </div>
-          <div class="form-group">
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" value="<%= property.address %>" required />
-          </div>
-          <div class="image-preview" id="imagePreview">
+  <main>
+    <h2>Edit Property</h2>
+    <% if (messages.error) { %>
+      <div class="flash-error"><%= messages.error %></div>
+    <% } %>
+    <% if (messages.success) { %>
+      <div class="flash-success"><%= messages.success %></div>
+    <% } %>
+    <form class="edit-property-form" action="/owner/dashboard/editProperty/<%= property._id %>" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="propertyName">Property Name:</label>
+        <input type="text" id="propertyName" name="propertyName" value="<%= property.propertyName %>" required />
+      </div>
+      <div class="form-group">
+        <label for="categoryName">Category Name:</label>
+        <select id="categoryName" name="categoryName" required>
+          <% categories.forEach(category => { %>
+            <option value="<%= category.name %>" <%= property.categoryName === category.name ? 'selected' : '' %>><%= category.name %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="roomFacilities">Room Facilities:</label><br>
+        <% roomFacilities.forEach(facility => { %>
+          <input class="room-fac" type="checkbox" id="<%= facility %>" name="roomFacilities[]" value="<%= facility %>" <%= property.roomFacilities.includes(facility) ? 'checked' : '' %>>
+          <label class="room-fac" name="roomFacilities[]" for="<%= facility %>"><%= facility %></label><br>
+        <% }); %>
+      </div>
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required><%= property.description %></textarea>
+      </div>
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" value="<%= property.address %>" required />
+      </div>
+      <div class="form-group">
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" value="<%= property.price %>" required />
+      </div>
+
+      <!-- Image preview -->
+      <div class="image-preview" id="imagePreview">
+        <!-- Display existing images -->
         <% property.images.forEach((image, index) => { %>
           <div class="image-container">
-            <img class="img-src" src="/img/assets/<%= image %>" alt="Property Image" />
-            <button type="button" class="remove-btn" onclick="removeExistingImage(this, '<%= image %>')">&times;</button>
+            <img class="img-src" src="<%= image %>" alt="Property Image" />
+            <!-- Edit button -->
+            <button type="button" class="edit-btn" onclick="editImage('<%= image %>')">Edit</button>
+            <!-- Remove button -->
+            <button type="button" class="remove-btn" onclick="removeImage('<%= image %>')">&times;</button>
+            <!-- Hidden input to store existing image filenames -->
             <input type="hidden" name="existingImages[]" value="<%= image %>">
           </div>
         <% }) %>
@@ -125,64 +187,130 @@
 
       <!-- New image upload field -->
       <div class="form-group">
-        <label for="images">New Images:</label>
+        <br><br>
         <input type="file" id="images" name="images" multiple accept="image/*" onchange="previewImages()" />
-        <input type="button" id="fileCountDisplay" value="Choose Files" onclick="document.getElementById('images').click();" />
+        <input type="hidden" class="edit-btn" id="fileCountDisplay" value="Choose Files" onclick="document.getElementById('images').click();" />
       </div>
-          <button type="submit">Save Changes</button>
-        </form>
-      </main>
-    
-      <script>
-        function previewImages() {
-          const imagePreview = document.getElementById('imagePreview');
-          const files = document.getElementById('images').files;
-          const fileCountDisplay = document.getElementById('fileCountDisplay');
-          fileCountDisplay.value = files.length ? `${files.length} files` : 'Choose Files';
-    
-          for (let i = 0; i < files.length; i++) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const imageContainer = document.createElement('div');
-              imageContainer.classList.add('image-container');
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.alt = 'Property Image';
-              imageContainer.appendChild(img);
-              const removeButton = document.createElement('button');
-              removeButton.type = 'button';
-              removeButton.classList.add('remove-btn');
-              removeButton.innerHTML = '&times;';
-              removeButton.onclick = function() {
-                imagePreview.removeChild(imageContainer);
-                updateFileCount();
-              };
-              imageContainer.appendChild(removeButton);
-              imagePreview.appendChild(imageContainer);
-            };
-            reader.readAsDataURL(files[i]);
-          }
+      <div id="editModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <img id="cropperImage" src="" alt="Croppable Image">
+          <button class="edit-btn" onclick="previewCroppedImage()">Done</button>
+        </div>
+      </div>
+      
+      <button type="submit">Save Changes</button>
+    </form>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <script>
+    let currentImageUrl; // Variable to store the URL of the image being edited
+    let cropper; // Variable to store the Cropper instance
+
+    function editImage(imageUrl) {
+      const modal = document.getElementById('editModal');
+      const image = document.getElementById('cropperImage');
+      image.src = imageUrl;
+      currentImageUrl = imageUrl; // Store the URL of the current image being edited
+      modal.style.display = 'block';
+
+      // Destroy any existing Cropper instance before creating a new one
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(image, {
+        aspectRatio: 16 / 9,
+        crop(event) {
+          // You can access cropped data here
+          console.log(event.detail.x);
+          console.log(event.detail.y);
+          console.log(event.detail.width);
+          console.log(event.detail.height);
+        },
+      });
+
+      // Close the modal when the user clicks outside of it
+      window.onclick = function(event) {
+        if (event.target === modal) {
+          closeModal();
         }
-    
-        function updateFileCount() {
-          const files = document.getElementById('images').files;
-          document.getElementById('fileCountDisplay').value = files.length ? `${files.length} files` : 'Choose Files';
-        }
-    
-        function removeExistingImage(button, imageName) {
-          button.parentElement.remove();
-          updateFileCount();
-          fetch('/remove-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ propertyId: '<%= property._id %>', imageName }),
-          })
-          .then(response => {
-            if (!response.ok) throw new Error('Failed to remove image from the database');
-            console.log('Image removed from the database');
-          })
-          .catch(error => console.error('Error:', error));
-        }
-      </script>
-    </body>
-    </html>
+      };
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('editModal');
+      modal.style.display = 'none';
+      if (cropper) {
+        cropper.destroy();
+        cropper = null; // Reset the Cropper instance
+      }
+    }
+
+    function previewCroppedImage() {
+      const croppedCanvas = cropper.getCroppedCanvas();
+      const croppedImageUrl = croppedCanvas.toDataURL();
+
+      // Find the image container in the preview section with the current image URL
+      const imageContainer = document.querySelector(`.img-src[src='${currentImageUrl}']`);
+
+      // Replace the original image with the cropped one
+      imageContainer.src = croppedImageUrl;
+
+      // Close the modal
+      closeModal();
+    }
+
+    function removeImage(imageUrl) {
+      // Implement your logic to remove the image
+      console.log('Remove image:', imageUrl);
+      const imageContainer = document.querySelector(`[src='${imageUrl}']`).parentElement;
+      imageContainer.remove();
+    }
+
+    function previewImages() {
+      const imagePreview = document.getElementById('imagePreview');
+      const files = document.getElementById('images').files;
+      const fileCountDisplay = document.getElementById('fileCountDisplay');
+      fileCountDisplay.value = files.length ? `${files.length} files` : 'Choose Files';
+
+      for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imageContainer = document.createElement('div');
+          imageContainer.classList.add('image-container');
+          const img = document.createElement('img');
+          img.classList.add('img-src');
+          img.src = e.target.result;
+          img.alt = 'Property Image';
+          imageContainer.appendChild(img);
+          const editButton = document.createElement('button');
+          editButton.type = 'button';
+          editButton.classList.add('edit-btn');
+          editButton.innerHTML = 'Edit';
+          editButton.onclick = function() {
+            editImage(e.target.result);
+          };
+          imageContainer.appendChild(editButton);
+          const removeButton = document.createElement('button');
+          removeButton.type = 'button';
+          removeButton.classList.add('remove-btn');
+          removeButton.innerHTML = '&times;';
+          removeButton.onclick = function() {
+            imageContainer.remove();
+            updateFileCount();
+          };
+          imageContainer.appendChild(removeButton);
+          imagePreview.appendChild(imageContainer);
+        };
+        reader.readAsDataURL(files[i]);
+      }
+    }
+
+    function updateFileCount() {
+      const files = document.getElementById('images').files;
+      document.getElementById('fileCountDisplay').value = files.length ? `${files.length} files` : 'Choose Files';
+    }
+  </script>
+</body>
+</html>
