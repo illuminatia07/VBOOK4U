@@ -43,7 +43,7 @@ router.post(
 router.post("/changePassword", ownerController.changePassword);
 router.post("/cancelBooking/:bookingId", ownerController.cancelBooking);
 router.get("/dashboard/editProperty/:id", ownerController.renderEditProperty);
-router.post("/dashboard/editProperty/:id", upload.array('images', 10), ownerController.editProperty);
+router.post("/dashboard/editProperty/:id", upload.array('images', 3), ownerController.editProperty);
 router.get("/editProfile", ownerController.renderEditProfilePage);
 
 router.post(
@@ -57,7 +57,7 @@ router.post(
 
 router.post(
   "/dashboard/addProperty",
-  uploadPropertyImage.array("images", 5),
+  uploadPropertyImage.array("images", 3),
   (req, res, next) => {
       console.log("Request Files:", req.files);
       next();

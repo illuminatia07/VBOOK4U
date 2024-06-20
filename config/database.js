@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 
 // MongoDB connection string
-const mongoURI = 'mongodb://localhost:27017/vbook4u';
+const mongoURI = "mongodb+srv://viswanath:PeakyBlinders09$@vbook4u.uedbcbu.mongodb.net/VBOOK4U?retryWrites=true&w=majority&appName=VBOOK4U";
 
 // Connect to MongoDB
 mongoose.connect(mongoURI, {

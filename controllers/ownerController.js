@@ -3,54 +3,143 @@ const Owner = require("../models/owner");
 const Property = require("../models/property");
 const Category = require("../models/category");
 const Booking = require("../models/booking");
+const { check, validationResult } = require('express-validator');
 const {
   uploadProfilePicture,
   uploadPropertyImage,
 } = require("../middleware/multer");
 
 const ownerController = {
-  loginPost: async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      const owner = await Owner.findOne({ email });
-      if (!owner) {
-        req.flash("error", "Invalid email or password");
-        return res.render("propertyOwner/ownerLogin", {
-          errorMessage: req.flash("error"),
-          successMessage: req.flash("success"),
-        });
-      }
-      // Check if the owner is blocked
-      if (owner.isBlocked) {
-        req.flash(
-          "error",
-          "Your account has been blocked. Please contact support."
-        );
+
+  loginPost: [
+    // Validation and sanitization middleware
+    check("email")
+      .isEmail()
+      .withMessage("Invalid email format")
+      .normalizeEmail(),
+    check("password")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters long")
+      .trim()
+      .escape(),
+
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorMessage = errors
+          .array()
+          .map((err) => err.msg)
+          .join(", ");
+        req.flash("error", errorMessage);
         return res.render("propertyOwner/ownerLogin", {
           errorMessage: req.flash("error"),
           successMessage: req.flash("success"),
         });
       }
 
-      if (bcrypt.compareSync(password, owner.password)) {
-        // Create a session for the owner
+      const { email, password } = req.body;
+      try {
+        const owner = await Owner.findOne({ email });
+        if (!owner || !bcrypt.compareSync(password, owner.password)) {
+          req.flash("error", "Invalid email or password");
+          return res.render("propertyOwner/ownerLogin", {
+            errorMessage: req.flash("error"),
+            successMessage: req.flash("success"),
+          });
+        }
+
+        if (owner.isBlocked) {
+          req.flash(
+            "error",
+            "Your account has been blocked. Please contact support."
+          );
+          return res.render("propertyOwner/ownerLogin", {
+            errorMessage: req.flash("error"),
+            successMessage: req.flash("success"),
+          });
+        }
+
         req.session.owner = owner;
-
-        // Redirect to the dashboard
         return res.redirect(req.session.returnTo || "/owner/dashboard");
-      } else {
-        req.flash("error", "Invalid email or password");
-        return res.render("propertyOwner/ownerLogin", {
+      } catch (error) {
+        console.error("Error logging in:", error);
+        req.flash("error", "Internal Server Error");
+        return res.redirect("/owner/login");
+      }
+    },
+  ],
+
+  handleSignup: [
+    // Validation and sanitization middleware
+    check("fullname")
+      .notEmpty()
+      .withMessage("Full name is required")
+      .trim()
+      .escape(),
+    check("email")
+      .isEmail()
+      .withMessage("Invalid email format")
+      .normalizeEmail(),
+    check("password")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters long")
+      .trim()
+      .escape(),
+    check("phoneNumber")
+      .isMobilePhone()
+      .withMessage("Invalid phone number")
+      .trim()
+      .escape(),
+
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorMessage = errors
+          .array()
+          .map((err) => err.msg)
+          .join(", ");
+        req.flash("error", errorMessage);
+        return res.render("propertyOwner/ownerSignup", {
           errorMessage: req.flash("error"),
           successMessage: req.flash("success"),
         });
       }
-    } catch (error) {
-      console.error("Error logging in:", error);
-      req.flash("error", "Internal Server Error");
-      return res.redirect("/owner/login");
-    }
-  },
+
+      const { fullname, email, password, phoneNumber } = req.body;
+
+      try {
+        const existingOwner = await Owner.findOne({ email });
+        if (existingOwner) {
+          req.flash(
+            "error",
+            "Email already exists. Please use a different email."
+          );
+          return res.render("propertyOwner/ownerSignup", {
+            errorMessage: req.flash("error"),
+            successMessage: req.flash("success"),
+          });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newOwner = new Owner({
+          fullname,
+          email,
+          password: hashedPassword,
+          phoneNumber,
+        });
+
+        await newOwner.save();
+
+        req.flash("success", "Signup successful! Please login to continue.");
+        return res.redirect("/owner/login");
+      } catch (error) {
+        console.error("Error handling signup:", error);
+        req.flash("error", "Internal Server Error");
+        return res.redirect("/owner/signup");
+      }
+    },
+  ],
 
   renderLogin: (req, res) => {
     // Check if owner session exists
@@ -94,47 +183,6 @@ const ownerController = {
     } catch (error) {
       console.error("Failed to fetch properties:", error);
       return res.status(500).json({ error: "Internal Server Error" });
-    }
-  },
-
-  handleSignup: async (req, res) => {
-    try {
-      const { fullname, email, password, phoneNumber } = req.body;
-
-      // Check if the email already exists in the database
-      const existingOwner = await Owner.findOne({ email });
-      if (existingOwner) {
-        req.flash(
-          "error",
-          "Email already exists. Please use a different email."
-        );
-        return res.render("propertyOwner/ownerSignup", {
-          errorMessage: req.flash("error"),
-          successMessage: req.flash("success"),
-        });
-      }
-
-      // Hash the password before saving to the database
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create a new owner object
-      const newOwner = new Owner({
-        fullname,
-        email,
-        password: hashedPassword,
-        phoneNumber,
-      });
-
-      // Save the new owner to the database
-      await newOwner.save();
-
-      // Set success flash message and redirect to login page
-      req.flash("success", "Signup successful! Please login to continue.");
-      return res.redirect("/owner/login");
-    } catch (error) {
-      console.error("Error handling signup:", error);
-      req.flash("error", "Internal Server Error");
-      return res.redirect("/owner/signup");
     }
   },
 
@@ -351,6 +399,10 @@ const ownerController = {
 
   renderEditProperty: async (req, res) => {
     try {
+      if (!req.session.owner) {
+        req.flash("error", "Unauthorized access.");
+        return res.redirect("/owner/login");
+      }
       const propertyId = req.params.id;
       const property = await Property.findById(propertyId);
       const roomFacilities = [
@@ -393,38 +445,19 @@ const ownerController = {
         price,
         existingImages = [],
       } = req.body;
-
+      console.log("Edit property :", req.body);
       // Handle newly uploaded images
       let newImages = [];
       if (req.files) {
-        newImages = req.files.map((file) => `/uploads/properties/${file.filename}`);
+        newImages = req.files.map(
+          (file) => `/uploads/properties/${file.filename}`
+        );
       }
-
+      console.log("newImage");
       // Combine existing and new images
       const images = [...existingImages, ...newImages];
 
-      // Define regex patterns for validation
-      const nameRegex = /^[a-zA-Z0-9\s]+$/;
-      const addressRegex = /^[a-zA-Z0-9\s,-]+$/;
-      const descriptionRegex = /^[a-zA-Z0-9\s.,-]+$/;
-
-      // Server-side validation
-      if (
-        !nameRegex.test(propertyName) ||
-        !categoryName ||
-        !descriptionRegex.test(description) ||
-        !addressRegex.test(address) ||
-        !price ||
-        isNaN(Number(price)) ||
-        Number(price) <= 0
-      ) {
-        req.flash(
-          "error",
-          "Invalid input. Please provide valid data for all fields."
-        );
-        return res.redirect(`/owner/dashboard/editProperty/${propertyId}`);
-      }
-
+      console.log("Validation passes");
       // Find the property by ID and update its details
       await Property.findByIdAndUpdate(propertyId, {
         propertyName,
@@ -435,7 +468,7 @@ const ownerController = {
         price,
         images,
       });
-
+      console.log("Saved");
       req.flash("success", "Property details updated successfully.");
       return res.redirect("/owner/dashboard");
     } catch (error) {

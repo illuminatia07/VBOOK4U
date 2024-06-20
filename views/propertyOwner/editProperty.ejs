@@ -140,6 +140,7 @@
       <div class="form-group">
         <label for="propertyName">Property Name:</label>
         <input type="text" id="propertyName" name="propertyName" value="<%= property.propertyName %>" required />
+        <div class="validation-message" id="propertyNameValidation">Property Name is required and must be at least 3 characters long.</div>
       </div>
       <div class="form-group">
         <label for="categoryName">Category Name:</label>
@@ -159,14 +160,18 @@
       <div class="form-group">
         <label for="description">Description:</label>
         <textarea id="description" name="description" required><%= property.description %></textarea>
+        <div class="validation-message" id="descriptionValidation">Description is required and must be at least 10 characters long.</div>
       </div>
       <div class="form-group">
         <label for="address">Address:</label>
         <input type="text" id="address" name="address" value="<%= property.address %>" required />
+        <div class="validation-message" id="addressValidation">Address is required and must be at least 5 characters long.</div>
       </div>
       <div class="form-group">
         <label for="price">Price:</label>
         <input type="number" id="price" name="price" value="<%= property.price %>" required />
+        <div class="validation-message" id="priceValidation">Price is required and must be a positive number.</div>
+      </div>
       </div>
 
       <!-- Image preview -->
@@ -311,6 +316,86 @@
       const files = document.getElementById('images').files;
       document.getElementById('fileCountDisplay').value = files.length ? `${files.length} files` : 'Choose Files';
     }
+    // Function to validate property name in real-time
+function validatePropertyName() {
+  const propertyNameInput = document.getElementById('propertyName');
+  const propertyNameValidation = document.getElementById('propertyNameValidation');
+  const propertyName = propertyNameInput.value.trim();
+
+  const nameRegex = /^[a-zA-Z0-9,\s]+$/;
+
+  if (!nameRegex.test(propertyName)) {
+    propertyNameValidation.textContent = 'Property name should only contain letters, numbers, and spaces.';
+    propertyNameInput.classList.add('invalid');
+    return false;
+  } else {
+    propertyNameValidation.textContent = '';
+    propertyNameInput.classList.remove('invalid');
+    return true;
+  }
+}
+
+// Function to validate address in real-time
+function validateAddress() {
+  const addressInput = document.getElementById('address');
+  const addressValidation = document.getElementById('addressValidation');
+  const address = addressInput.value.trim();
+
+  const addressRegex = /^[a-zA-Z0-9\s,-]+$/;
+
+  if (!addressRegex.test(address)) {
+    addressValidation.textContent = 'Address should only contain letters, numbers, commas, and hyphens.';
+    addressInput.classList.add('invalid');
+    return false;
+  } else {
+    addressValidation.textContent = '';
+    addressInput.classList.remove('invalid');
+    return true;
+  }
+}
+
+// Function to validate price in real-time
+function validatePrice() {
+  const priceInput = document.getElementById('price');
+  const priceValidation = document.getElementById('priceValidation');
+  const price = priceInput.value.trim();
+
+  if (isNaN(price) || Number(price) <= 0) {
+    priceValidation.textContent = 'Price should be a positive number.';
+    priceInput.classList.add('invalid');
+    return false;
+  } else {
+    priceValidation.textContent = '';
+    priceInput.classList.remove('invalid');
+    return true;
+  }
+}
+
+// Function to validate description in real-time
+function validateDescription() {
+  const descriptionInput = document.getElementById('description');
+  const descriptionValidation = document.getElementById('descriptionValidation');
+  const description = descriptionInput.value.trim();
+
+  const descriptionRegex = /^[a-zA-Z0-9\s.,'"-]+$/;
+
+  if (!descriptionRegex.test(description)) {
+    descriptionValidation.textContent = 'Description should only contain letters, numbers, spaces, commas, and periods.';
+    descriptionInput.classList.add('invalid');
+    return false;
+  } else {
+    descriptionValidation.textContent = '';
+    descriptionInput.classList.remove('invalid');
+    return true;
+  }
+}
+
+// Event listeners for input fields
+document.getElementById('propertyName').addEventListener('input', validatePropertyName);
+document.getElementById('address').addEventListener('input', validateAddress);
+document.getElementById('price').addEventListener('input', validatePrice);
+document.getElementById('description').addEventListener('input', validateDescription);
+
   </script>
 </body>
 </html>
