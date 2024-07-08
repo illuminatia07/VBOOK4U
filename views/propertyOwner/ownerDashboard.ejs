@@ -25,11 +25,20 @@
           >ADD PROPERTIES</a
         >
         <a href="#" id="deleteLink">OPERATIONS</a>
-      
       </div>
 
       <!-- Main Content -->
       <div class="main-content">
+        <div id="confirmationModal" class="modal">
+          <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+              <button id="confirmButton">Confirm</button>
+              <button id="cancelButton">Cancel</button>
+            </div>
+          </div>
+        </div>
         <!-- Profile Section -->
         <div id="profileSection" style="display: none">
           <h2>Your Profile</h2>
@@ -108,17 +117,17 @@
                 </tr>
               </thead>
               <tbody>
-                <% 
-                bookings.sort((a, b) => new Date(b.dateInitiated) - new
-                Date(a.dateInitiated)); 
-                const recentBookings = bookings.slice(0, 5); 
-                recentBookings.forEach(booking => { %>
+                <% bookings.sort((a, b) => new Date(b.dateInitiated) - new
+                Date(a.dateInitiated)); const recentBookings = bookings.slice(0,
+                5); recentBookings.forEach(booking => { %>
                 <tr>
                   <td><%= booking.property.propertyName %></td>
                   <td><%= booking.checkIn %></td>
                   <td><%= booking.checkOut %></td>
                   <td><%= booking.price %> ₹</td>
-                  <td><%= booking.couponName ? booking.couponName : "NONE" %></td>
+                  <td>
+                    <%= booking.couponName ? booking.couponName : "NONE" %>
+                  </td>
                   <td><%= booking.bookingStatus %></td>
                 </tr>
                 <% }); %>
@@ -380,53 +389,33 @@
                 <tr>
                   <td><%= property.propertyName %></td>
                   <td>
-                    <form
-                      action="/owner/dashboard/updateAvailability/<%= property._id %>"
-                      method="POST"
-                      style="display: inline"
+                    <button
+                    class="action-btn delete-btn"
+                    class="action-btn <%= property.availability ? 'unlist-btn' : 'list-btn' %>"
+                    data-action="/owner/dashboard/updateAvailability/<%= property._id %>"
+                    data-method="POST"
+                    data-message="Are you sure you want to <%= property.availability ? 'unlist' : 'list' %> this property?"
+                    data-title="Confirm <%= property.availability ? 'Unlist' : 'List' %>"
+                    data-is-list="<%= !property.availability %>"
+                  >
+                    <%= property.availability ? 'Unlist' : 'List' %>
+                  </button>
+                    <button
+                      class="action-btn delete-btn"
+                      data-action="/owner/dashboard/deleteProperty/<%= property._id %>"
+                      data-method="POST"
+                      data-message="Are you sure you want to delete this property? This action cannot be undone."
+                      data-title="Confirm Deletion"
                     >
-                      <input 
-                        type="hidden"
-                        name="isListButton"
-                        value="<%= !property.availability %>"
-                      />
-                      <% if (property.availability) { %>
-                      <button
-                        class="unlist-btn"
-                        type="submit"
-                        data-property-id="<%= property._id %>"
-                      >
-                        Unlist
-                      </button>
-                      <% } else { %>
-                      <button
-                        class="list-btn"
-                        type="submit"
-                        data-property-id="<%= property._id %>"
-                      >
-                        List
-                      </button>
-                      <% } %>
-                    </form>
-                    <form
-                      action="/owner/dashboard/deleteProperty/<%= property._id %>"
-                      method="POST"
-                      style="display: inline"
-                    >
-                      <button
-                        class="delete-btn"
-                        type="submit"
-                        data-property-id="<%= property._id %>"
-                      >
-                        Delete
-                      </button>
-                    </form>
+                      Delete
+                    </button>
+
                     <a
-                      class="delete-btn"
+                      class="edit-btn"
                       href="/owner/dashboard/editProperty/<%= property._id %>"
-                      class="edit-property-link"
-                      >Edit</a
                     >
+                      Edit
+                    </a>
                   </td>
                 </tr>
                 <% }); %>
@@ -449,5 +438,61 @@
       </div>
     </div>
     <script src="/scripts/ownerDashboard.js"></script>
+    <script>
+     document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('confirmationModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const confirmButton = document.getElementById('confirmButton');
+  const cancelButton = document.getElementById('cancelButton');
+
+  document.querySelectorAll('.action-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      if (this.classList.contains('edit-btn')) {
+        // For edit button, just follow the link
+        return;
+      }
+
+      e.preventDefault();
+      const action = this.dataset.action;
+      const method = this.dataset.method;
+      const message = this.dataset.message;
+      const title = this.dataset.title;
+      const isList = this.dataset.isList;
+
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      modal.style.display = 'block';
+
+      confirmButton.onclick = function() {
+        const form = document.createElement('form');
+        form.method = method;
+        form.action = action;
+
+        // Add isListButton as a hidden input
+        const isListInput = document.createElement('input');
+        isListInput.type = 'hidden';
+        isListInput.name = 'isListButton';
+        isListInput.value = isList;
+        form.appendChild(isListInput);
+
+        document.body.appendChild(form);
+        form.submit();
+      };
+
+      cancelButton.onclick = function() {
+        modal.style.display = 'none';
+      };
+    });
+  });
+
+  // Close the modal if clicked outside
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+});
+    </script>
   </body>
 </html>

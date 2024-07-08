@@ -10,9 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1645.0",
     "bcrypt": "^5.1.1",
+    "chart.js": "^4.4.3",
     "connect-flash": "^0.1.1",
     "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",

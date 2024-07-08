@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retry Payment</title>
+  <link rel="stylesheet" href="/css/payment.css" />
+</head>
+<body>
+  <header>
+    <div class="vbook-box">
+      <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+    </div>
+    <div class="search">
+      <% if (userSession) { %>
+      <button class="logout-btn" onclick="window.location.href='/logout'">
+        Logout
+      </button>
+      <% } else { %>
+      <a href="/login"
+        ><button class="signin-btn logout-btn">Sign In</button></a
+      >
+      <% } %>
+    </div>
+  </header>
+
+  <main>
+    <h1>Retry Payment</h1>
+    <div class="booking-info">
+      <h2>Booking Details</h2>
+      <% if (property.images && property.images.length > 0) { %>
+        <% property.images.forEach(image => { %>
+          <img
+            class="property-images"
+            src="<%= image %>"
+            alt="<%= property.propertyName %> Image"
+          />
+        <% }); %>
+      <% } else { %>
+        <p>No images available for this property.</p>
+      <% } %>
+      <p>Property: <%= property.propertyName %></p>
+      <p>Price: ₹<%= booking.price %></p>
+      <p>Check-in Date: <%= booking.checkIn %></p>
+      <p>Check-out Date: <%= booking.checkOut %></p>
+    </div>
+    <form id="retryPaymentForm" method="POST">
+      <input type="hidden" name="bookingId" value="<%= booking._id %>">
+      <button type="submit" class="btn">Pay Now</button>
+    </form>
+  </main>
+
+  <footer>
+    <!-- Footer content -->
+  </footer>
+  <script src="/js/retryPayment.js"></script>
+</body>
+</html>

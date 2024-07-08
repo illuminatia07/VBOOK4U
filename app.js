@@ -10,7 +10,6 @@ const ownerRoutes = require("./routes/ownerRoutes");
 const passport = require("./config/passport");
 const db = require("./config/database");
 const noCache = require("nocache");
-const PORT = process.env.PORT || 3000;
 
 
 
@@ -72,11 +71,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Express on AWS Lambda!' });
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
-})
+  console.log(`Server is running on port ${PORT}`);
+});

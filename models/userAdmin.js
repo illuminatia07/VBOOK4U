@@ -6,8 +6,8 @@ const userAdminSchema = new mongoose.Schema(
     email: { type: String, required: false, unique: true },
     password: { type: String, required: false, minlength: 6 },
     phoneNumber: { type: String, required: false },
-    age: { type: Number, required: false }, // Add the age field
-    gender: { type: String, required: false }, // Add the gender field
+    age: { type: Number, required: false },
+    gender: { type: String, required: false },
     isAdmin: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     isMember: { type: Boolean, default: false },
@@ -16,7 +16,13 @@ const userAdminSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Coupon",
       },
-    ], // Array to store used coupons
+    ],
+    bookings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+      },
+    ],
   },
   { timestamps: true }
 );

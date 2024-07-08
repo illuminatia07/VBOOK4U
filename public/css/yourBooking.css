@@ -62,16 +62,20 @@ tr:hover {
 }
 
 .view-details-btn {
-  background-color: #ff0048;
+  background-color: #000000;
   color: white;
+  border-radius: 10px;
   padding: 5px 10px;
   margin-bottom: 5px;
 }
 
 .cancel-btn {
-  background-color: #dc3545;
+  background-color: #000000;
   color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: small;
    padding: 5px 10px;
+   border-radius: 10px;
   margin-bottom: 5px;
 }
 
@@ -126,13 +130,23 @@ tr:hover {
 .vbook-btn {
   background-color: #ff0048;
   color: #fff;
-  border-radius: 20px;
+  border-radius: 10px;
   border: none;
+}
+.btns{
+  background-color: #ff0048;
+  color: #fff;
+  border: none;
+  padding: 7px 50px;
+  gap: 10px;
+  border-radius: 20px;
+  margin-left: auto;
 }
 
 .logout-btn {
   background-color: #ff0048;
   color: #fff;
+  font-family: "Poppins", sans-serif;;
   border: none;
   border-radius: 20px;
   margin-left: auto;

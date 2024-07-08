@@ -1,3 +1,4 @@
+<!-- yourBooking.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,12 +26,12 @@
   <h2>Your Booking Details</h2>
 
   <% if (successMessage && successMessage.length > 0) { %>
-    <div class="alert" role="alert" id="success-message">
+    <div class="alert alert-success" role="alert" id="success-message">
       <%= successMessage %>
     </div>
   <% } %>
   <% if (errorMessage && errorMessage.length > 0) { %>
-    <div class="alert" role="alert" id="error-message">
+    <div class="alert alert-danger" role="alert" id="error-message">
       <%= errorMessage %>
     </div>
   <% } %>
@@ -62,12 +63,18 @@
           <td>
             <form action="/viewDetails" method="GET" style="display:inline;">
               <input type="hidden" name="bookingId" value="<%= booking.id %>">
-              <button type="submit" class="view-details-btn">View Details</button>
-            </form>
+              <button type="submit" class="btns">View Booking</button>
+            </form> <br> <br>
+            <% if ((booking.bookingStatus === 'Pending' || booking.bookingStatus === 'Failed') && (new Date() - new Date(booking.dateInitiated) <= 300000)) { %>
+              <form action="/payment" method="POST" style="display:inline;">
+                <input type="hidden" name="bookingId" value="<%= booking.id %>">
+                <button type="submit" class="btns">Pay Now</button>
+              </form> <br> <br>
+            <% } %>
             <% if (booking.bookingStatus !== 'Cancelled') { %>
               <form action="/cancelBooking" method="POST" style="display:inline;">
                 <input type="hidden" name="bookingId" value="<%= booking.id %>">
-                <button type="submit" class="cancel-btn">Cancel Booking</button>
+                <button type="submit" class="btns">Cancel Booking</button>
               </form>
             <% } %>
           </td>

@@ -1,17 +1,22 @@
 /* Global Styles */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+/* General Setup */
 html,
 body {
   height: 100%;
   font-family: "Poppins", sans-serif;
-}
-body {
   margin: 0;
   padding: 0;
   position: relative;
-  padding-bottom: 100px; /* Height of the footer */
-  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
 }
+
+body {
+  padding-bottom: 100px; /* Height of the footer */
+}
+
+/* Buttons and Links */
 .logout-btn,
 .search-btn,
 .vbook-btn,
@@ -21,8 +26,8 @@ body {
   color: #fff;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
-  transition: background-color 0.3s;
-  padding: 4px 9px;
+  transition: background-color 0.3s, transform 0.2s ease-out;
+  padding: 8px 12px;
   border-radius: 25px;
   font-size: small;
 }
@@ -31,55 +36,32 @@ body {
 .search-btn:hover,
 .view-info:hover {
   background-color: #ff0051;
+  transform: scale(1.05); /* Scale effect on hover */
 }
+
 .logout-btn {
   margin-left: 10px;
 }
 
+/* User Image */
 .img-user {
-  width: 40px; /* Adjust width as needed */
+  width: 40px;
   cursor: pointer;
   margin-right: 10px;
+  transition: background-color 0.3s, transform 0.2s ease-out;
 }
 
 .img-user:hover {
   background-color: #ff4d6d;
   border-radius: 40px;
+  transform: scale(1.1); /* Scale effect on hover */
 }
 
-.search input[type="text"],
-.search input[type="date"],
-.search select {
-  border: 1px solid #bfbfbf;
-  padding: 10px;
-  margin: 0 5px;
-  border-radius: 5px;
-  font-size: 12px;
-  margin-left: 25px;
-}
-
+/* Header */
 header {
   padding: 10px 20px;
   background-color: #f8f9fa;
-}
-
-.vbook-btn {
-    font-size: 14px;
-    padding: 4px 10px;
-}
-
-/* Global Styles */
-html,
-body {
-  height: 100%;
-  font-size: 0.8rem;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  position: relative;
-  padding-bottom: 100px; /* Height of the footer */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow effect */
 }
 
 /* Container Box */
@@ -87,88 +69,93 @@ body {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 20px;
-  margin: 20px auto; /* Center the container */
-  max-width: 800px; /* Limit container width */
+  margin: 20px auto;
+  max-width: 800px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
 }
+
 .div-top {
   margin-left: 23px;
   width: 80%;
 }
-/* Main Content Styles */
-.main-content {
-  margin-top: 20px;
-}
+
+/* Total Price Section */
 .total-price {
   font-family: "Poppins", sans-serif;
   color: rgb(0, 0, 0);
   font-size: 20px;
   font-weight: bold;
 }
+
 .price {
   font-family: "Poppins", sans-serif;
   color: rgb(255, 0, 140);
   font-size: 30px;
   font-weight: bold;
 }
+
+/* View Details Container */
 .view-details-container {
   margin-left: 100px;
   margin-top: 30px;
+  height: 1080px;
   border: 1px solid #ccc;
   border-radius: 10px;
   width: 80%;
   margin-bottom: 50px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow effect */
+}
+.view-details-container:hover {
+   transform: scale(1.02);
+}
+.property-details{
+  margin-left: 25px;
+  margin-top: 10px;
 }
 
-/* Property Details Styles */
-.property-details {
-  padding: 20px;
-  margin-bottom: 20px;
-  width: 80%;
-  margin-top: 20px;
-}
-.coupon {
-  border: 1px #ccc;
-  color: #ff0051;
-  background-color: #f8f9fa;
-  padding: 10px 36px;
-  border-radius: 5px;
-}
-/* Property Images Styles */
+/* Property Images */
 .property-images {
   display: flex;
-  justify-content: center;
-  margin-bottom: 40px;
-  margin-left: 300px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.property-images img {
-  width: 200px; /* Adjust size as needed */
-  height: auto; /* Maintain aspect ratio */
+.img-prop {
+  width: 200px;
+  height: 125px;
   border-radius: 10px;
-  margin-left: -437px;
   margin-top: 20px;
+  cursor: pointer;
+  transition: transform 0.2s ease-out;
 }
+
+.img-prop:hover {
+  transform: scale(1.05); /* Scale effect on hover */
+}
+
+/* Continue to Book Button */
 .continue-to-book {
   background-color: rgb(255, 0, 140);
   color: rgb(255, 255, 255);
   border-radius: 10px;
   padding: 10px 20px;
   border: 1px rgb(255, 0, 140);
+  transition: background-color 0.3s, transform 0.2s ease-out;
 }
+
+.continue-to-book:hover {
+  background-color: #ff0051;
+  transform: scale(1.05); /* Scale effect on hover */
+}
+
+/* Breadcrumbs */
 .breadcrumbs {
   margin-left: 17px;
   font-family: "Poppins", sans-serif;
 }
 
-/* Other Section Styles */
-.property-info,
-.hotel-policies,
-.facilities-amenities,
-.booking-details,
-.address {
-  margin-bottom: 20px;
-}
-/* Footer Styles */
+/* Footer */
 footer {
   background-color: #000;
   color: #fff;
@@ -255,6 +242,7 @@ footer {
 .copyright {
   font-size: 12px;
 }
-.check{
+
+.check {
   color: #ff0051;
 }

@@ -20,9 +20,9 @@
   margin-top: 20px;
   margin-left: -10px;
   width: 1200px;
+  gap: 20px;
   height: 100px;
   background-color: #ffbcd0;
- 
   border: 1px #ff0099;
   border-radius: 20px;
 
@@ -33,6 +33,7 @@
   padding: 5rem 1rem;
   z-index: 0;
 }
+
 
 .section__subheader {
   margin-bottom: 0.5rem;
@@ -162,6 +163,64 @@ nav {
 .nav__links.open {
   transform: translateY(0);
 }
+/* Adding animations and transitions */
+
+/* Example animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply animation to elements */
+.main-content {
+  animation: fadeInUp 1s ease-out; /* Example animation */
+}
+
+.btn {
+  transition: background-color 0.3s, transform 0.2s; /* Example transition */
+}
+
+.btn:hover {
+  background-color: var(--primary-color-dark);
+  transform: scale(1.05); /* Example transform on hover */
+}
+
+.nav__links a {
+  position: relative;
+  color: var(--white);
+  transition: color 0.3s; /* Example transition on color change */
+}
+
+.nav__links a::after {
+  position: absolute;
+  content: "";
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease-out; /* Example transition for underline */
+}
+
+.nav__links a:hover::after {
+  width: 100%;
+}
+
+.room__card {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Example transition */
+}
+
+.room__card:hover {
+  transform: translateY(-5px);
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
+}
+
 
 .nav__links a {
   position: relative;
@@ -588,6 +647,16 @@ nav {
   color: var(--text-light);
   text-align: center;
 }
+.date-picker{
+  margin-top: 20px;
+  justify-content: space-evenly;
+  width: 150px;
+  height: 50px;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px 10px 20px;
+}
+
 
 @media (width > 576px) {
   .room__grid {

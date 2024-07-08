@@ -116,7 +116,7 @@ const adminController = {
         req.flash("error", "You are not authorized to access this page");
         return res.redirect("/admin/login");
       }
-
+  
       const owners = await Owner.find();
       const coupon = await Coupon.find().populate("category");
       const { email } = req.session.admin;
@@ -124,25 +124,31 @@ const adminController = {
       const pendingRequests = await Property.find({
         approvalStatus: "Pending",
       }).populate("owner");
-
+  
       if (!admin) {
         req.flash("error", "Admin not found");
         return res.redirect("/admin/login");
       }
-
+  
       const categories = await Category.find();
       const properties = await Property.find().populate("owner");
       const users = await User.find();
       const bookings = await Booking.find()
         .populate("property")
         .populate("user");
-
+  
       // Calculate the total number of properties, users, and owners
       const totalProperties = properties.length;
       const totalUsers = users.length;
       const totalOwners = owners.length;
       const totalBookings = bookings.length;
-
+  
+      // Calculate total sales
+      const totalSales = bookings.reduce((acc, booking) => acc + booking.price, 0);
+  
+      // Calculate total transactions
+      const totalTransactions = bookings.length;
+  
       // Calculate total revenue by month
       const monthlyRevenue = {};
       const totalBookingsPerMonth = {};
@@ -151,9 +157,8 @@ const adminController = {
         Online: 0,
         PayAtProperty: 0,
       };
-
-      // OR If you want to fetch all coupons and iterate over them
-      const coupons = await Coupon.find(); // Fetching all coupons
+  
+      const coupons = await Coupon.find();
       bookings.forEach((booking) => {
         const monthYear = moment(booking.dateInitiated).format("YYYY-MM");
         if (!monthlyRevenue[monthYear]) {
@@ -169,14 +174,10 @@ const adminController = {
         monthlyBookingsByPayMethod[monthYear][booking.payMethod]++;
         totalBookingsByPayMethod[booking.payMethod]++;
       });
-
-      // Get distinct months for selecting
+  
       const distinctMonths = Object.keys(monthlyRevenue);
-
-      // Selected month from query parameters
-      const selectedMonth = req.query.month || distinctMonths[0]; // Default to the first month if not provided
-
-      // Top performing properties
+      const selectedMonth = req.query.month || distinctMonths[0];
+  
       const topProperties = await Property.aggregate([
         {
           $lookup: {
@@ -198,15 +199,16 @@ const adminController = {
           $limit: 5,
         },
       ]);
+  
       const totalRevenueByPayMethod = {
         Online: 0,
         PayAtProperty: 0,
       };
-
+  
       bookings.forEach((booking) => {
         totalRevenueByPayMethod[booking.payMethod] += booking.price;
       });
-
+  
       const flashMessages = {
         error: req.flash("error"),
         success: req.flash("success"),
@@ -214,18 +216,19 @@ const adminController = {
         addCategorySuccess: req.flash("success"),
         categoryDeletedSuccess: req.flash("success"),
       };
-
+  
       res.render("admin/adminDashboard", {
         admin,
         owners,
         totalBookings,
-        bookings,
+        bookings, // Pass bookings to the view
         categories,
         properties,
         coupon: coupon,
         users,
         coupons: coupons,
         totalProperties,
+        moment: moment, 
         totalUsers,
         totalOwners,
         totalRevenueByPayMethod,
@@ -236,6 +239,8 @@ const adminController = {
         distinctMonths,
         selectedMonth,
         topProperties,
+        totalSales,  // Pass totalSales to the view
+        totalTransactions,  // Pass totalTransactions to the view
         messages: flashMessages,
         requests: pendingRequests,
       });
@@ -245,6 +250,7 @@ const adminController = {
       return res.redirect("/admin/login");
     }
   },
+  
 
   renderDeletion: async (req, res) => {
     try {

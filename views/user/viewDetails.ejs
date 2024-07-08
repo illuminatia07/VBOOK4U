@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
 </head>
 <body>
   <header class="d-flex align-items-center justify-content-between">
@@ -18,10 +19,10 @@
     </div>
     <div class="d-flex align-items-center">
       <% if (userSession) { %>
-      <img class="img-user" src="/img/assets/User.png" alt="User Logo" onclick="window.location.href='/profile'" />
-      <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+        <img class="img-user" src="/img/assets/User.png" alt="User Logo" onclick="window.location.href='/profile'" />
+        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
       <% } else { %>
-      <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+        <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
       <% } %>
     </div>
   </header>
@@ -33,7 +34,9 @@
     <div class="div-top">
       <div class="property-images">
         <% property.images.forEach(image => { %>
-            <img src="<%= image %>" alt="<%= property.propertyName %> Image">
+          <a href="<%= image %>" data-lightbox="property-images" data-title="<%= property.propertyName %>">
+            <img class="img-prop" src="<%= image %>" alt="<%= property.propertyName %> Image">
+          </a>
         <% }); %>
       </div>
       <h2><%= property.propertyName %></h2>
@@ -42,13 +45,13 @@
         <span class="price">₹<span id="total-price"><%= totalPrice.toFixed(2) %></span></span>
       </p>
       <!-- End Coupon Code Section -->
-      <form action="/payment" method="GET">
-        <input type="hidden" name="propertyId" value="<%= encodeURIComponent(property._id) %>" />
-        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
+      <form action="/storePaymentDetails" method="POST">
+        <input type="hidden" name="propertyId" value="<%= property._id %>" />
+        <input type="hidden" name="propertyName" value="<%= property.propertyName %>" />
         <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
         <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
         <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
-        <input type="hidden" name="totalPrice" id="total-price-hidden" value="<%= totalPrice %>" />
+        <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
         <button type="submit" class="continue-to-book">Continue to Book</button>
       </form>
     </div>
@@ -67,6 +70,20 @@
             <span id="check-out-display"><%= checkOut.toISOString().split('T')[0] %></span>
           </div>
         </p>
+      </div>
+      <div class="check-in-out">
+        <div class="check-in">
+          <h4>Check In Time:</h4>
+          <p>12:00 PM</p>
+        </div>
+        <div class="check-out">
+          <h4>Check Out Time:</h4>
+          <p>11:00 AM</p>
+        </div>
+      </div>
+      <div class="address">
+        <h3>Address</h3>
+        <p><%= property.address %></p>
       </div>
       <div class="hotel-policies">
         <h3>Hotel Policies</h3>
@@ -88,28 +105,17 @@
           <% } %>
         </ul>
       </div>
-      <div class="check-in-out">
-        <div class="check-in">
-          <h4>Check In</h4>
-          <p>12:00 PM</p>
-        </div>
-        <div class="check-out">
-          <h4>Check Out</h4>
-          <p>11:00 AM</p>
-        </div>
-      </div>
-      <div class="address">
-        <h3>Address</h3>
-        <p><%= property.address %></p>
-      </div>
-      <form action="/payment" method="GET">
-        <input type="hidden" name="propertyName" value="<%= encodeURIComponent(property.propertyName) %>" />
+     
+      
+      <form action="/storePaymentDetails" method="POST">
+        <input type="hidden" name="propertyId" value="<%= property._id %>" />
+        <input type="hidden" name="propertyName" value="<%= property.propertyName %>" />
         <input type="hidden" name="propertyPrice" value="<%= property.price %>" />
         <input type="hidden" name="checkInDate" value="<%= checkIn.toISOString().split('T')[0] %>" />
         <input type="hidden" name="checkOutDate" value="<%= checkOut.toISOString().split('T')[0] %>" />
-        <input type="hidden" name="totalPrice" id="total-price-hidden-2" value="<%= totalPrice %>" />
+        <input type="hidden" name="totalPrice" value="<%= totalPrice %>" />
         <button type="submit" class="continue-to-book">Continue to Book</button>
-      </form>
+      </form> 
     </div>
   </div>
   <footer>
@@ -156,5 +162,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
   <script src="/js/viewDetails.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </body>
 </html>

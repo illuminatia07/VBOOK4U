@@ -3,6 +3,7 @@
   <head>
     <title>Vbook4U | Admin Dashboard</title>
     <link rel="stylesheet" href="/css/adminDashboard.css" />
+    
   </head>
   <body>
     <header>
@@ -64,6 +65,17 @@
 
       <!-- Main Content -->
       <div class="main-content">
+        <!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Confirmation</h2>
+    <p id="modalMessage">Are you sure you want to perform this operation?</p>
+    <div class="modal-buttons">
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
+</div>
         <!-- Profile Section -->
         <% if (admin) { %>
         <div id="profileSection">
@@ -617,6 +629,77 @@
         </div>
       </div>
     </div>
+    <script>
+      // Get the modal
+      var modal = document.getElementById('confirmationModal');
+      var modalTitle = document.getElementById('modalTitle');
+      var modalMessage = document.getElementById('modalMessage');
+      var confirmYes = document.getElementById('confirmYes');
+      var confirmNo = document.getElementById('confirmNo');
+    
+      // Function to show modal
+      function showConfirmationModal(title, message, onConfirm) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = "block";
+    
+        confirmYes.onclick = function() {
+          modal.style.display = "none";
+          onConfirm();
+        }
+    
+        confirmNo.onclick = function() {
+          modal.style.display = "none";
+        }
+      }
+    
+      // Close the modal when clicking outside of it
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+    
+      // Modify existing forms to use the confirmation modal
+      document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('action-form')) {
+          e.preventDefault();
+          var action = e.target.getAttribute('action');
+          var actionType = action.includes('block') ? 'block' : 
+                           action.includes('unblock') ? 'unblock' :
+                           action.includes('delete') ? 'delete' :
+                           action.includes('Delete') ? 'Delete' :
+                           action.includes('cancel') ? 'cancel' :
+                           action.includes('Edit') ? 'Edit' :
+                           action.includes('approve') ? 'approve' :
+                           action.includes('edit') ? 'edit' :
+                           action.includes('reject') ? 'reject' : 'perform this action';
+    
+          showConfirmationModal(
+            'Confirm Action',
+            `Are you sure you want to ${actionType}?`,
+            function() {
+              e.target.submit();
+            }
+          );
+        }
+      });
+    
+      // For edit forms (assuming they have a class 'edit-form')
+      var editForms = document.querySelectorAll('.edit-form');
+      editForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          showConfirmationModal(
+            'Confirm Edit',
+            'Are you sure you want to save these changes?',
+            function() {
+              form.submit();
+            }
+          );
+        });
+      });
+    </script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var profileLink = document.getElementById("profileLink");

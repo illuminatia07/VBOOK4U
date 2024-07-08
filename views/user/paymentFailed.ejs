@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Failed</title>
+  <link rel="stylesheet" href="/css/payment.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .box {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    .box-header {
+      background-color: #ff033d;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .box-content {
+      padding: 20px;
+    }
+    .booking-details p {
+      margin: 10px 0;
+    }
+    .error-message {
+      color: #ff033d;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #ff033d;
+      color: white;
+      text-align: center;
+      border-radius: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .btn:hover {
+      background-color: #dc003a;
+    }
+    footer {
+      background-color: #ff033d;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="vbook-box">
+        <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+      </div>
+      <div class="search">
+        <% if (userSession) { %>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+        <% } else { %>
+        <a href="/login"><button class="signin-btn logout-btn">Sign In</button></a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="box">
+        <div class="box-header">
+          <h1>Payment Failed</h1>
+        </div>
+        <div class="box-content">
+          <div class="error-message">
+            <p>Unfortunately, your payment could not be processed. Please try again.</p>
+          </div>
+          <div class="booking-details">
+            <p>Property ID: <%= booking.propertyId %></p>
+            <p>Check-In Date: <%= booking.checkIn %></p>
+            <p>Check-Out Date: <%= booking.checkOut %></p>
+            <p>Total Price: ₹<%= booking.price %></p>
+            <p>Coupon Code: <%= booking.couponCode || 'None' %></p>
+            <p>Booking Status: Failed</p>
+          </div>
+          <a href="/retry-payment?bookingId=<%= booking._id %>"><button class="btn">Pay Now</button></a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <!-- Footer content -->
+  </footer>
+</body>
+</html>

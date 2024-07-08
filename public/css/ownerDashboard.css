@@ -51,9 +51,9 @@ body {
 
 .edit-btn {
   position: relative;
-  margin-left: -10px;
+  margin-left: 5px;
   padding: 10px 20px;
-  background-color: #ff0048;
+  background-color: #ff007b;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -449,6 +449,40 @@ tr:hover {
   display: flex;
   align-items: flex-start;
   gap: 20px;
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal-buttons {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  margin-left: 10px;
+  padding: 5px 10px;
+}
+
+.action-btn {
+  margin-right: 5px;
 }
 
 .profile-picture {

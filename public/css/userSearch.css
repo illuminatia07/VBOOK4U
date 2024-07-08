@@ -18,8 +18,16 @@ body {
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   padding: 6px 17px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
+
+.search-btn:hover,
+.view-info:hover,
+.buy-now:hover {
+  background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
 .main-content {
   margin-bottom: 20px; /* Add some margin between main content and footer */
 }
@@ -45,6 +53,7 @@ main {
 .search-btn:hover,
 .view-info:hover {
   background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
 }
 
 .img-user {
@@ -52,11 +61,13 @@ main {
   margin-left: 1010px;
   width: 5%;
   cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s; /* Add transition for transform and background */
 }
 
 .img-user:hover {
   background-color: #ff4d6d;
   border-radius: 40px;
+  transform: scale(1.1); /* Zoom effect */
 }
 
 .search {
@@ -75,7 +86,15 @@ main {
   margin-right: 5px;
   width: 133px;
   font-size: 10px;
+  transition: border-color 0.3s; /* Add transition for border color */
 }
+
+.search input[type="text"]:focus,
+.search input[type="date"]:focus,
+.search select:focus {
+  border-color: #ff006a; /* Change border color on focus */
+}
+
 
 /* Specific Styles */
 .filters-box {
@@ -83,13 +102,19 @@ main {
   width: 23%;
   margin-left: 10px;
   margin-right: 2%;
-  border: 1px #adadad;
+  border: 1px;
   border-radius: 10px;
-  color: #ffff;
-  background-color: #ff0370;
-  height: 1360px;
+  color: #ffffff;
+  background-color: #ff006a;
+  height: 500px;
   margin-top: 33px;
+  transition: transform 0.3s; /* Add transition for transform */
 }
+
+.filters-box:hover {
+  transform: scale(1.02); /* Slight zoom effect */
+}
+
 .button {
   background-color: #4d4d4d41;
   border: 1px #ff003c;
@@ -99,6 +124,12 @@ main {
   margin-left: 27px;
   border-radius: 20px;
   margin-top: 4px;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
+}
+
+.button:hover {
+  background-color: #4d4d4d81;
+  transform: translateY(-3px); /* Slight lift effect */
 }
 
 .breadcrumbs {
@@ -111,6 +142,11 @@ main {
   border-radius: 10px;
   padding: 10px;
   margin-bottom: 20px;
+  transition: transform 0.3s; /* Add transition for transform */
+}
+
+.property:hover {
+  transform: scale(1.02); /* Slight zoom effect */
 }
 
 .properties-box {
@@ -126,7 +162,7 @@ main {
   font-family: "Poppins", sans-serif;
   font-size: 0.5rem;
   text-align: center;
-  border: 1px #adadad;
+  border: 1px #ff004c;
 }
 
 .properties h2 {
@@ -140,7 +176,16 @@ main {
   border-radius: 25px;
   margin-top: 20px;
   font-size: small;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
+
+.vbook-btn:hover,
+.view-info:hover,
+.buy-now:hover {
+  background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
 .logout-btn {
   position: absolute; /* Change positioning to absolute */
   top: 23px; /* Set the top position to 40px */
@@ -152,6 +197,12 @@ main {
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   padding: 6px 17px;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
+}
+
+.logout-btn:hover {
+  background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
 }
 
 .vbook-btn {
@@ -163,11 +214,23 @@ main {
   border-color: #ff0051;
   border: 1px #ff0051;
   color: #ffff;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
+
+.vbook-btn:hover {
+  background-color: #ff0033;
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
 .property-images img {
   max-width: 200px;
   max-height: 150px;
   border-radius: 10px;
+  transition: transform 0.3s ease-in-out; /* Add transition for smooth animation */
+}
+
+.property-images img:hover {
+  transform: scale(1.1); /* Zoom in effect */
 }
 
 .property {
@@ -176,7 +239,13 @@ main {
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
+  transition: transform 0.3s; /* Add transition for transform */
 }
+
+.property:hover {
+  transform: scale(1.02); /* Slight zoom effect */
+}
+
 .property h3 {
   font-size: 16px;
   margin-bottom: 5px;
@@ -213,6 +282,11 @@ main {
   height: 60px;
   border-radius: 5px;
   object-fit: cover;
+  transition: transform 0.3s; /* Add transition for transform */
+}
+
+.property-images img:hover {
+  transform: scale(1.1); /* Zoom effect */
 }
 
 .property-heading {
@@ -240,6 +314,7 @@ main {
 }
 header {
   margin-top: 10px;
+  
 }
 
 .pagination {
@@ -249,7 +324,14 @@ header {
   margin-top: -3px;
   margin-left: 900px;
   padding: 5px 15px;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
+
+.signin-btn:hover {
+  background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
+}
+
 .pagination a,
 .pagination .current-page {
   display: inline-block;
@@ -259,18 +341,17 @@ header {
   color: #fff;
   border-radius: 5px;
   text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
 
 .pagination a:hover {
   background-color: #ff0051;
+  transform: translateY(-3px); /* Slight lift effect */
 }
 
 .pagination .current-page {
   background-color: #ff0051;
   font-weight: bold;
-}
-.main-content {
-  margin-bottom: 20px; /* Add some margin between main content and footer */
 }
 
 .top-text,
@@ -285,10 +366,15 @@ header {
   background-color: #ffff;
   margin-top: 32px;
   margin-bottom: 30px;
+  transition: background-color 0.3s, transform 0.3s; /* Add transition for background and transform */
 }
-.buy-now :hover {
-  border-width: 3px;
+
+.buy-now:hover {
+  background-color: #ff0051;
+  color: #fff;
+  transform: translateY(-3px); /* Slight lift effect */
 }
+
 .footer-container {
   background-color: #f0f0f0;
   padding: 20px;

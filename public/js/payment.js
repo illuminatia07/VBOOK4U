@@ -1,33 +1,35 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const totalPriceElement = document.querySelector(".total-price");
+  const totalPriceElement = document.querySelector("#OriginalTotalPrice");
+  const discountedPriceElement = document.querySelector("#DiscountedTotalPrice");
   const applyCouponBtn = document.getElementById("applyCouponBtn");
   const couponCodeInput = document.getElementById("couponCode");
   const originalPrice = parseFloat(totalPriceElement.textContent.replace("₹", ""));
-  let discount = 0;
+  let discountPrice = originalPrice; // Initialize discountPrice to originalPrice
 
   applyCouponBtn.addEventListener("click", function () {
     if (applyCouponBtn.textContent === "Clear Coupon") {
-      totalPriceElement.textContent = `₹${originalPrice.toFixed(2)}`;
+      discountedPriceElement.textContent = `₹${originalPrice.toFixed(2)}`;
       couponCodeInput.value = "";
       applyCouponBtn.textContent = "Apply Coupon";
       displayFlashMessage("success", "Coupon cleared successfully.");
     } else {
       const couponCode = couponCodeInput.value;
       const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
-      const propertyName = document.querySelector('input[name="propertyName"]').value;
-  
+      const propertyName = document.querySelector('input[name="propertyName"]').value; // Ensure this input exists in your form
+      const propertyId = document.querySelector('input[name="propertyId"]').value; // Ensure this input exists in your form
+
       if (!couponCode) {
         displayFlashMessage("error", "Please enter a coupon code.");
         return;
       }
-  
+
       if (!paymentMethodElement) {
         displayFlashMessage("error", "Please select a payment method.");
         return;
       }
-  
+
       const paymentMethod = paymentMethodElement.value;
-  
+
       fetch("/apply-coupon", {
         method: "POST",
         headers: {
@@ -35,37 +37,40 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         body: JSON.stringify({
           couponCode: couponCode,
-          propertyName: propertyName,
+          propertyName: propertyName, // Send the property name
+          propertyId: propertyId, // Send the property ID
           paymentMethod: paymentMethod,
-          totalPrice: originalPrice || totalPrice
+          totalPrice: originalPrice
         }),
+        
       })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            discount = originalPrice - data.newPrice;
-            totalPriceElement.textContent = `₹${data.newPrice.toFixed(2)}`;
-            applyCouponBtn.textContent = "Clear Coupon";
-            displayFlashMessage("success", data.message);
-          } else {
-            displayFlashMessage("error", data.message);
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          displayFlashMessage("error", "An error occurred while applying the coupon.");
-        });
+      .then((response) => response.json())
+      .then((data) => {
+      console.log("coupon data : ",data)
+        if (data.success) {
+          discountedPriceElement.textContent = `₹${data.newPrice}`;
+          applyCouponBtn.textContent = "Clear Coupon";
+          discountPrice = data.newPrice; // Update discountPrice here
+          displayFlashMessage("success", data.message);
+        } else {
+          displayFlashMessage("error", data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        displayFlashMessage("error", "An error occurred while applying the coupon.");
+      });
     }
-  });  
+  });
 
   function displayFlashMessage(type, message) {
     const flashMessageElement = document.getElementById("couponMessage");
     flashMessageElement.textContent = message;
     flashMessageElement.className = type === "success" ? "success-message" : "error-message";
-  
+
     // Clear existing messages
     document.querySelectorAll(".flash-message").forEach(element => element.remove());
-  
+
     const couponGroup = document.querySelector(".coupon-group");
     const newMessageElement = document.createElement("div");
     newMessageElement.className = `flash-message ${type}`;
@@ -139,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const propertyId = document.querySelector('input[name="propertyId"]').value;
 
     const data = {
-      totalPrice: formData.get('totalPrice'),
+      totalPrice: parseFloat(discountPrice) > 0 ? parseFloat(discountPrice) * 100 : parseFloat(formData.get('totalPrice')) * 100,
       propertyId: propertyId,
       checkIn: formData.get('checkInDate'),
       checkOut: formData.get('checkOutDate'),
@@ -151,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
       couponName: formData.get('couponCode') || null,
       dateInitiated: new Date()
     };
-
+    console.log("Data : ", data);
     fetch("/createOrder", {
       method: "POST",
       headers: {
@@ -159,34 +164,41 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify(data),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          const options = {
-            key: 'rzp_test_KMrm8VgRyKa92K',
-            amount: data.amount, // Amount in paise
-            currency: 'INR',
-            order_id: data.orderId, // The order ID generated from your server
-            handler: function (response) {
-              window.location.href = "/yourBooking";
-            },
-            prefill: {
-              name: data.name,
-              email: data.email,
-              contact: data.phoneNumber
-            },
-            notes: {
-              address: 'Test address'
-            }
-          };
-          const rzp = new Razorpay(options);
-          rzp.open();
-        } else {
-          console.error("Error creating order:", data.error);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    .then((response) => response.json())
+    .then((data) => {
+      if (data) {
+        console.log("DATA paymentJS: ", data);
+        const options = {
+          key: 'rzp_test_KMrm8VgRyKa92K',
+          amount: data.amount, // Amount in paise
+          currency: 'INR',
+          order_id: data.orderId, // The order ID generated from your server
+          handler: function (response) {
+            window.location.href = "/paymentSuccess";
+          },
+          prefill: {
+            name: data.name,
+            email: data.email,
+            contact: data.phoneNumber
+          },
+          notes: {
+            address: 'Test address'
+          }
+        };
+        const rzp = new Razorpay(options);
+
+        // Handle payment failure
+        rzp.on('payment.failed', function (response) {
+          window.location.href = "/paymentFailed";
+        });
+
+        rzp.open();
+      } else {
+        console.error("Error creating order :", data.error);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
   });
 });

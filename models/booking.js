@@ -24,7 +24,7 @@ const bookingSchema = new mongoose.Schema({
   },
   bookingStatus: {
     type: String,
-    enum: ["Pending", "Confirmed", "Cancelled"],
+    enum: ["Pending", "Confirmed", "Cancelled", "Success", "Failed"],
     default: "Confirmed",
   },
   payMethod: {
@@ -53,6 +53,11 @@ const bookingSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+bookingSchema.methods.updateBookingStatus = async function(newStatus) {
+  this.bookingStatus = newStatus;
+  await this.save();
+};
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

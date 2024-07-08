@@ -28,6 +28,7 @@ router.get('/payment', userMiddleware.ensureAuthenticated, userController.displa
 router.get("/profile", userMiddleware.ensureAuthenticated, userController.renderAndUpdateProfile);
 router.get("/propertyDetails", userMiddleware.ensureAuthenticated, userController.renderPropertyDetails);
 router.post("/profile", userMiddleware.ensureAuthenticated, userController.updateProfile);
+router.post('/storePaymentDetails', userMiddleware.ensureAuthenticated,  userController.storePaymentDetails);
 router.get("/change-password", userMiddleware.ensureAuthenticated, userController.renderChangePassword);
 router.post("/change-password", userMiddleware.ensureAuthenticated, userController.changePassword);
 router.post("/payment", userMiddleware.ensureAuthenticated, userController.bookProperty);
@@ -36,6 +37,12 @@ router.get("/viewDetails", userMiddleware.ensureAuthenticated, userController.vi
 router.post("/cancelBooking", userMiddleware.ensureAuthenticated, userController.cancelBooking);
 router.post('/apply-coupon', userMiddleware.ensureAuthenticated, userController.applyCoupon);
 router.post("/createOrder", userMiddleware.ensureAuthenticated, userController.createOrder);
+router.get('/paymentSuccess',userMiddleware.ensureAuthenticated, userController.renderPaymentSuccessPage);
+router.get('/paymentPending',userMiddleware.ensureAuthenticated, userController.renderPaymentPendingPage);
+router.get('/paymentFailed', userMiddleware.ensureAuthenticated, userController.renderPaymentFailedPage);
+router.get('/retry-payment', userMiddleware.ensureAuthenticated, userController.renderRetryPaymentPage);
+router.post('/retryPayment', userMiddleware.ensureAuthenticated, userController.retryPayment);
+
 
 
 

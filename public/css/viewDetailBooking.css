@@ -62,8 +62,8 @@ h2 {
 
 .vbook-btn,
 .logout-btn {
-  padding: 5px 10px;
-  border-radius: 2px;
+  padding: 10px 10px;
+  border-radius: 10px;
   font-size: 12px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -86,7 +86,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
+  padding: 15px 10px;
   background-color: #fff;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;

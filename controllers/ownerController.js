@@ -298,34 +298,29 @@ const ownerController = {
   updateAvailability: async (req, res) => {
     try {
       const propertyId = req.params.propertyId;
-      const isListButton = req.body.isListButton === "true"; // Convert string to boolean
-
+      const isListButton = req.body.isListButton === "true";
+  
       // Fetch the property details by ID
       const property = await Property.findById(propertyId);
-
+  
       if (!property) {
-        // Handle property not found
         req.flash("error", "Property not found.");
         return res.redirect("/owner/dashboard");
       }
-
-      // Update the availability of the property based on button clicked
+  
+      // Update the availability of the property
       property.availability = isListButton;
       await property.save();
-
+  
       // Set flash message based on availability status
-      if (isListButton) {
-        req.flash("success", "Property listed successfully.");
-      } else {
-        req.flash("success", "Property unlisted successfully.");
-      }
-
+      req.flash("success", `Property ${isListButton ? 'listed' : 'unlisted'} successfully.`);
+  
       // Redirect back to dashboard
       return res.redirect("/owner/dashboard");
     } catch (error) {
       console.error("Error updating availability:", error);
       req.flash("error", "Failed to update property availability.");
-      return res.redirect("/dashboard/updateAvailability");
+      return res.redirect("/owner/dashboard");
     }
   },
   cancelBooking: async (req, res) => {

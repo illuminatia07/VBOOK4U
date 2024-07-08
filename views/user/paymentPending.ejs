@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Pending</title>
+    <link rel="stylesheet" href="/css/payment.css" />
+  </head>
+  <body>
+    <header>
+      <div class="vbook-box">
+        <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+      </div>
+      <div class="search">
+        <% if (userSession) { %>
+        <button class="logout-btn" onclick="window.location.href='/logout'">
+          Logout
+        </button>
+        <% } else { %>
+        <a href="/login"
+          ><button class="signin-btn logout-btn">Sign In</button></a
+        >
+        <% } %>
+      </div>
+    </header>
+
+    <main>
+      <h1>Payment Pending</h1>
+      <div class="loading-buffer">
+        <p>Please wait while we process your payment...</p>
+        <div class="spinner"></div>
+      </div>
+    </main>
+
+    <footer>
+      <!-- Footer content -->
+    </footer>
+  </body>
+</html>

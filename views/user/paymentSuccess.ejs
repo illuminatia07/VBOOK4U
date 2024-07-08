@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="/css/payment.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #ff033d;
+        padding: 10px 20px;
+      }
+      .vbook-box {
+        display: flex;
+        align-items: center;
+      }
+      .vbook-btn {
+        background-color: #ff033d;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        border-radius: 25px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .search {
+        display: flex;
+        align-items: center;
+      }
+      .signin-btn,
+      .logout-btn {
+        background-color: #f4f4f4;
+        color: #ff033d;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      main {
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .booking-info {
+        background-color: white;
+        padding: 20px;
+        border-radius: 25px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+      .booking-info img {
+        max-width: 100%;
+        border-radius: 10px;
+      }
+      .booking-info h2 {
+        margin-top: 0;
+      }
+      .booking-info p {
+        margin: 5px 0;
+      }
+      .btn {
+        display: inline-flexbox;
+        padding: 10px 20px;
+        background-color: #ff033d;
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+        margin-left: 10px;
+      }
+      footer {
+        background-color: #ff033d;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
+      .property-images {
+        width: 100px;
+        height: 70px;
+        display: inline-block;
+        margin-bottom: 10px;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="vbook-box">
+        <a href="/home"><button class="vbook-btn">VBOOK4U</button></a>
+      </div>
+      <div class="search">
+        <% if (userSession) { %>
+        <button class="logout-btn" onclick="window.location.href='/logout'">
+          Logout
+        </button>
+        <% } else { %>
+        <a href="/login"
+          ><button class="signin-btn logout-btn">Sign In</button></a
+        >
+        <% } %>
+      </div>
+    </header>
+
+    <main>
+      <h1>Payment Success</h1>
+      <div class="booking-info">
+        <h2>Booking Details</h2>
+        <% property.images.forEach(image => { %>
+        <img
+          class="property-images"
+          src="<%= image %>"
+          alt="<%= property.propertyName %> Image"
+        />
+        <% }); %>
+        <p>Property: <%= property.propertyName %></p>
+        <p>Price: ₹<%= booking.price %></p>
+        <p>Check-in Date: <%= booking.checkIn %></p>
+        <p>Check-out Date: <%= booking.checkOut %></p>
+       <p>Booking Status: Confirmed</p> 
+        <p>Coupon: <%= booking.couponCode || 'None' %></p>
+      </div>
+      <a href="/yourBooking"><button class="btn">Go to Your Booking</button></a>
+    </main>
+
+    <footer>
+      <!-- Footer content -->
+    </footer>
+  </body>
+</html>
