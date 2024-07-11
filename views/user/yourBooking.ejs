@@ -1,4 +1,3 @@
-<!-- yourBooking.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,7 @@
   <title>Your Booking Details</title>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/yourBooking.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <header>
@@ -66,10 +66,7 @@
               <button type="submit" class="btns">View Booking</button>
             </form> <br> <br>
             <% if ((booking.bookingStatus === 'Pending' || booking.bookingStatus === 'Failed') && (new Date() - new Date(booking.dateInitiated) <= 300000)) { %>
-              <form action="/payment" method="POST" style="display:inline;">
-                <input type="hidden" name="bookingId" value="<%= booking.id %>">
-                <button type="submit" class="btns">Pay Now</button>
-              </form> <br> <br>
+              <button class="btns" onclick="payNow('<%= booking.id %>', '<%= booking.price %>')">Pay Now</button> <br> <br>
             <% } %>
             <% if (booking.bookingStatus !== 'Cancelled') { %>
               <form action="/cancelBooking" method="POST" style="display:inline;">
@@ -110,7 +107,65 @@
 </div>
 
 <script>
-  // Hide success and error messages after 2 seconds
+  function payNow(bookingId, amount) {
+    fetch('/createOrder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ bookingId, amount })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const options = {
+        key: 'rzp_test_KMrm8VgRyKa92K',
+        amount: data.amount,
+        currency: 'INR',
+        order_id: data.id,
+        handler: function (response) {
+          verifyRetryPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature, bookingId);
+        },
+        prefill: {
+          name: '<%= userSession.name %>',
+          email: '<%= userSession.email %>',
+          contact: '<%= userSession.phoneNumber %>',
+        },
+        theme: {
+          color: '#F21345'
+        }
+      };
+      const rzp1 = new Razorpay(options);
+      rzp1.open();
+    })
+    .catch(error => {
+      console.error('Error creating Razorpay order:', error);
+    });
+  }
+
+  function verifyRetryPayment(payment_id, order_id, signature, bookingId) {
+    fetch('/verifyRetryPayment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ payment_id, order_id, signature, bookingId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Data in retry payment : ",data)
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Payment failed. Please try again.');
+        window.location.reload();
+      }
+    })
+    .catch(error => {
+      console.error('Error verifying payment:', error);
+    });
+  }
+
+  // Hide success and error messages after 5 seconds
   setTimeout(() => {
     const successMessage = document.getElementById('success-message');
     const errorMessage = document.getElementById('error-message');

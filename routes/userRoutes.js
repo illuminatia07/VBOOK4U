@@ -31,17 +31,16 @@ router.post("/profile", userMiddleware.ensureAuthenticated, userController.updat
 router.post('/storePaymentDetails', userMiddleware.ensureAuthenticated,  userController.storePaymentDetails);
 router.get("/change-password", userMiddleware.ensureAuthenticated, userController.renderChangePassword);
 router.post("/change-password", userMiddleware.ensureAuthenticated, userController.changePassword);
-router.post("/payment", userMiddleware.ensureAuthenticated, userController.bookProperty);
 router.get("/yourBooking", userMiddleware.ensureAuthenticated, userController.renderYourBooking);
 router.get("/viewDetails", userMiddleware.ensureAuthenticated, userController.viewDetails);
 router.post("/cancelBooking", userMiddleware.ensureAuthenticated, userController.cancelBooking);
-router.post('/apply-coupon', userMiddleware.ensureAuthenticated, userController.applyCoupon);
-router.post("/createOrder", userMiddleware.ensureAuthenticated, userController.createOrder);
+router.post('/applyCoupon', userMiddleware.ensureAuthenticated, userController.applyCoupon);
+router.post('/verifyPayment', userMiddleware.ensureAuthenticated, userController.verifyPayment);
+router.post('/handlePayment', userMiddleware.ensureAuthenticated, userController.handlePayment);
 router.get('/paymentSuccess',userMiddleware.ensureAuthenticated, userController.renderPaymentSuccessPage);
-router.get('/paymentPending',userMiddleware.ensureAuthenticated, userController.renderPaymentPendingPage);
-router.get('/paymentFailed', userMiddleware.ensureAuthenticated, userController.renderPaymentFailedPage);
-router.get('/retry-payment', userMiddleware.ensureAuthenticated, userController.renderRetryPaymentPage);
-router.post('/retryPayment', userMiddleware.ensureAuthenticated, userController.retryPayment);
+router.get('/paymentSuccessPAP',userMiddleware.ensureAuthenticated, userController.renderPaymentSuccessPAP);
+router.post('/createOrder',userMiddleware.ensureAuthenticated, userController.createOrder);
+router.post('/verifyRetryPayment', userMiddleware.ensureAuthenticated, userController.verifyRetryPayment);
 
 
 

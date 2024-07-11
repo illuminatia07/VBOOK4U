@@ -33,6 +33,7 @@ app.use("/scripts", express.static(path.join(__dirname, "scripts")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // Set up session
 app.use(
   session({
@@ -57,6 +58,7 @@ app.use(noCache());
 app.use("/", userRoutes);
 app.use("/admin", adminRoutes); // Use ensureAdminAuthenticated middleware here
 app.use("/owner", ownerRoutes);
+app.use('/api', userRoutes);
 
 // Remove Permissions-Policy header middleware
 app.use((req, res, next) => {
