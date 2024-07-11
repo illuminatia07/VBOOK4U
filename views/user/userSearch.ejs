@@ -100,6 +100,10 @@
         <div class="filters-box">
           <h2 class="section-heading">Filters</h2>
           <form action="/applyFilters" method="GET" id="applyFiltersForm">
+            <input type="hidden" name="search" value="<%= search %>">
+            <input type="hidden" name="checkIn" value="<%= checkIn %>">
+            <input type="hidden" name="checkOut" value="<%= checkOut %>">
+            
             <div class="filters">
               <h3 class="sub-heading">Categories</h3>
               <ul>
@@ -110,12 +114,13 @@
                     id="<%= category._id %>"
                     name="category"
                     value="<%= category.name %>"
+                    <%= (Array.isArray(category) ? category : [category]).includes(category.name) ? 'checked' : '' %>
                   />
                   <label for="<%= category._id %>"><%= category.name %></label>
                 </li>
                 <% }); %>
               </ul>
-
+        
               <h3 class="sub-heading">Price</h3>
               <input
                 class="range"
@@ -124,11 +129,11 @@
                 name="priceRange"
                 min="500"
                 max="3500"
-                value="0"
+                value="<%= priceRange ? priceRange.split('-')[1] : '3500' %>"
               /><br />
               <div class="range-price">
                 <span id="minPriceLabel">500</span> -
-                <span id="maxPriceLabel">3500</span><br />
+                <span id="maxPriceLabel"><%= priceRange ? priceRange.split('-')[1] : '3500' %></span><br />
               </div>
             </div>
             <button type="submit" class="buy-now apply-filters-btn">

@@ -116,7 +116,7 @@ const adminController = {
         req.flash("error", "You are not authorized to access this page");
         return res.redirect("/admin/login");
       }
-  
+
       const owners = await Owner.find();
       const coupon = await Coupon.find().populate("category");
       const { email } = req.session.admin;
@@ -124,31 +124,34 @@ const adminController = {
       const pendingRequests = await Property.find({
         approvalStatus: "Pending",
       }).populate("owner");
-  
+
       if (!admin) {
         req.flash("error", "Admin not found");
         return res.redirect("/admin/login");
       }
-  
+
       const categories = await Category.find();
       const properties = await Property.find().populate("owner");
       const users = await User.find();
       const bookings = await Booking.find()
         .populate("property")
         .populate("user");
-  
+
       // Calculate the total number of properties, users, and owners
       const totalProperties = properties.length;
       const totalUsers = users.length;
       const totalOwners = owners.length;
       const totalBookings = bookings.length;
-  
+
       // Calculate total sales
-      const totalSales = bookings.reduce((acc, booking) => acc + booking.price, 0);
-  
+      const totalSales = bookings.reduce(
+        (acc, booking) => acc + booking.price,
+        0
+      );
+
       // Calculate total transactions
       const totalTransactions = bookings.length;
-  
+
       // Calculate total revenue by month
       const monthlyRevenue = {};
       const totalBookingsPerMonth = {};
@@ -157,7 +160,7 @@ const adminController = {
         Online: 0,
         PayAtProperty: 0,
       };
-  
+
       const coupons = await Coupon.find();
       bookings.forEach((booking) => {
         const monthYear = moment(booking.dateInitiated).format("YYYY-MM");
@@ -174,10 +177,10 @@ const adminController = {
         monthlyBookingsByPayMethod[monthYear][booking.payMethod]++;
         totalBookingsByPayMethod[booking.payMethod]++;
       });
-  
+
       const distinctMonths = Object.keys(monthlyRevenue);
       const selectedMonth = req.query.month || distinctMonths[0];
-  
+
       const topProperties = await Property.aggregate([
         {
           $lookup: {
@@ -199,16 +202,16 @@ const adminController = {
           $limit: 5,
         },
       ]);
-  
+
       const totalRevenueByPayMethod = {
         Online: 0,
         PayAtProperty: 0,
       };
-  
+
       bookings.forEach((booking) => {
         totalRevenueByPayMethod[booking.payMethod] += booking.price;
       });
-  
+
       const flashMessages = {
         error: req.flash("error"),
         success: req.flash("success"),
@@ -216,7 +219,7 @@ const adminController = {
         addCategorySuccess: req.flash("success"),
         categoryDeletedSuccess: req.flash("success"),
       };
-  
+
       res.render("admin/adminDashboard", {
         admin,
         owners,
@@ -228,7 +231,7 @@ const adminController = {
         users,
         coupons: coupons,
         totalProperties,
-        moment: moment, 
+        moment: moment,
         totalUsers,
         totalOwners,
         totalRevenueByPayMethod,
@@ -239,8 +242,8 @@ const adminController = {
         distinctMonths,
         selectedMonth,
         topProperties,
-        totalSales,  // Pass totalSales to the view
-        totalTransactions,  // Pass totalTransactions to the view
+        totalSales, // Pass totalSales to the view
+        totalTransactions, // Pass totalTransactions to the view
         messages: flashMessages,
         requests: pendingRequests,
       });
@@ -250,7 +253,6 @@ const adminController = {
       return res.redirect("/admin/login");
     }
   },
-  
 
   renderDeletion: async (req, res) => {
     try {
@@ -619,55 +621,139 @@ const adminController = {
 
   updateCoupon: async (req, res) => {
     try {
-        const { id } = req.params;
-        const { code, category, expirationDate, fixedValue, payMethod } = req.body;
+      const { id } = req.params;
+      const { code, category, expirationDate, fixedValue, payMethod } =
+        req.body;
 
-        // Check if a coupon with the same name already exists
-        const existingCoupon = await Coupon.findOne({ code: code.toUpperCase(), _id: { $ne: id } });
-        if (existingCoupon) {
-            req.flash("error", "A coupon with the same name already exists");
-            return res.redirect("/admin/dashboard");
-        }
+      // Check if a coupon with the same name already exists
+      const existingCoupon = await Coupon.findOne({
+        code: code.toUpperCase(),
+        _id: { $ne: id },
+      });
+      if (existingCoupon) {
+        req.flash("error", "A coupon with the same name already exists");
+        return res.redirect("/admin/dashboard");
+      }
 
-        // Find the coupon by ID and update its details
-        const updatedCoupon = await Coupon.findByIdAndUpdate(id, {
-            code: code.toUpperCase(),
-            category: category, // Assuming category is the category ID
-            expirationDate: expirationDate,
-            fixedValue: fixedValue,
-            payMethod: payMethod,
-        });
+      // Find the coupon by ID and update its details
+      const updatedCoupon = await Coupon.findByIdAndUpdate(id, {
+        code: code.toUpperCase(),
+        category: category, // Assuming category is the category ID
+        expirationDate: expirationDate,
+        fixedValue: fixedValue,
+        payMethod: payMethod,
+      });
 
-        if (!updatedCoupon) {
-            req.flash("error", "Coupon not found");
-            return res.redirect("/admin/dashboard");
-        }
+      if (!updatedCoupon) {
+        req.flash("error", "Coupon not found");
+        return res.redirect("/admin/dashboard");
+      }
 
-        req.flash("success", "Coupon updated successfully");
-        res.redirect("/admin/dashboard");
+      req.flash("success", "Coupon updated successfully");
+      res.redirect("/admin/dashboard");
     } catch (error) {
-        console.error("Error updating coupon:", error);
-        req.flash("error", "An error occurred while updating the coupon");
-        res.redirect("/admin/dashboard");
+      console.error("Error updating coupon:", error);
+      req.flash("error", "An error occurred while updating the coupon");
+      res.redirect("/admin/dashboard");
     }
-},
+  },
 
-  deleteCoupon : async (req, res) => {
+  deleteCoupon: async (req, res) => {
     try {
-        const { id } = req.params;
-        const deletedCoupon = await Coupon.findByIdAndDelete(id);
-        if (!deletedCoupon) {
-            req.flash("error", "Coupon not found");
-        } else {
-            req.flash("success", "Coupon deleted successfully");
-        }
-        res.redirect("/admin/dashboard"); // Redirect to the dashboard or any other page
+      const { id } = req.params;
+      const deletedCoupon = await Coupon.findByIdAndDelete(id);
+      if (!deletedCoupon) {
+        req.flash("error", "Coupon not found");
+      } else {
+        req.flash("success", "Coupon deleted successfully");
+      }
+      res.redirect("/admin/dashboard"); // Redirect to the dashboard or any other page
     } catch (error) {
-        console.error("Error deleting coupon:", error);
-        req.flash("error", "An error occurred while deleting the coupon");
-        res.redirect("/admin/dashboard");
+      console.error("Error deleting coupon:", error);
+      req.flash("error", "An error occurred while deleting the coupon");
+      res.redirect("/admin/dashboard");
     }
-},
+  },
+  getDailyRevenue: async (req, res) => {
+    const { year, month } = req.query;
+    try {
+      const dailyRevenueData = await Booking.aggregate([
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: [{ $year: "$dateInitiated" }, parseInt(year)] },
+                { $eq: [{ $month: "$dateInitiated" }, parseInt(month)] },
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $dayOfMonth: "$dateInitiated" },
+            totalRevenue: { $sum: "$price" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      res.json(dailyRevenueData);
+    } catch (error) {
+      console.error("Error fetching daily revenue:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getMonthlyRevenue: async (req, res) => {
+    const { year, month } = req.query;
+    try {
+      const monthlyRevenueData = await Booking.aggregate([
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: [{ $year: "$dateInitiated" }, parseInt(year)] },
+                { $eq: [{ $month: "$dateInitiated" }, parseInt(month)] },
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$price" },
+          },
+        },
+      ]);
+      res.json(monthlyRevenueData);
+    } catch (error) {
+      console.error("Error fetching monthly revenue:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getYearlyRevenue: async (req, res) => {
+    const { year } = req.query;
+    try {
+      const yearlyRevenueData = await Booking.aggregate([
+        {
+          $match: {
+            $expr: { $eq: [{ $year: "$dateInitiated" }, parseInt(year)] },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$dateInitiated" },
+            totalRevenue: { $sum: "$price" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      res.json(yearlyRevenueData);
+    } catch (error) {
+      console.error("Error fetching yearly revenue:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = adminController;

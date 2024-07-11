@@ -45,8 +45,26 @@ document.addEventListener("DOMContentLoaded", function () {
       // Get the form data
       const formData = new FormData(this);
 
+      // Add price range to form data
+      const priceRange = document.getElementById('priceRange');
+      const minPrice = 500; // Assuming 500 is the minimum price
+      const maxPrice = priceRange.value;
+      formData.set('priceRange', `${minPrice}-${maxPrice}`);
+
       // Convert form data to URLSearchParams
       const params = new URLSearchParams(formData);
+
+      // Add search, checkIn, and checkOut parameters if they exist
+      const searchInput = document.getElementById('search');
+      if (searchInput && searchInput.value) {
+        params.set('search', searchInput.value);
+      }
+      if (checkInDateElement.value) {
+        params.set('checkIn', checkInDateElement.value);
+      }
+      if (checkOutDateElement.value) {
+        params.set('checkOut', checkOutDateElement.value);
+      }
 
       // Redirect to the applyFilters route with the form data as query params
       window.location.href = `/applyFilters?${params.toString()}`;
@@ -103,12 +121,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Add an event listener to the price range input
-  document.getElementById("priceRange").addEventListener("input", function () {
-    const minPriceLabel = document.getElementById("minPriceLabel");
-    const maxPriceLabel = document.getElementById("maxPriceLabel");
+  const priceRange = document.getElementById("priceRange");
+  const minPriceLabel = document.getElementById("minPriceLabel");
+  const maxPriceLabel = document.getElementById("maxPriceLabel");
 
+  priceRange.addEventListener("input", function () {
     // Update the min and max price labels based on the input value
     minPriceLabel.textContent = this.min;
     maxPriceLabel.textContent = this.value;
   });
+
+  // Set initial values for price range labels
+  minPriceLabel.textContent = priceRange.min;
+  maxPriceLabel.textContent = priceRange.value;
 });

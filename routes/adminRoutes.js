@@ -40,7 +40,9 @@ router.post("/bookings/:id/cancel",adminMiddleware.ensureAdminAuthenticated, adm
 router.post("/coupons/create",adminMiddleware.ensureAdminAuthenticated, adminController.createCoupon);
 router.post("/coupons/update/:id",adminMiddleware.ensureAdminAuthenticated, adminController.updateCoupon);
 router.post('/coupons/delete/:id',adminMiddleware.ensureAdminAuthenticated, adminController.deleteCoupon);
-
+router.get('/revenue/daily', adminMiddleware.ensureAdminAuthenticated, adminController.getDailyRevenue);
+router.get('/revenue/monthly', adminMiddleware.ensureAdminAuthenticated, adminController.getMonthlyRevenue);
+router.get('/revenue/yearly', adminMiddleware.ensureAdminAuthenticated, adminController.getYearlyRevenue);
 
 router.post("/logout", adminController.logout);
 

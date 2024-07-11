@@ -3,6 +3,33 @@
   <head>
     <title>Vbook4U | Admin Dashboard</title>
     <link rel="stylesheet" href="/css/adminDashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .daily-revenue, .monthly-revenue, .yearly-revenue {
+            margin-bottom: 10px;
+        }
+        canvas {
+            max-width: 50%;
+            margin-top: 10px;
+            max-height: 70%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .revenue-section {
+            margin-bottom: 10px;
+        }
+       
+    </style>
     
   </head>
   <body>
@@ -360,70 +387,192 @@
 
         <div id="salesReportSection">
           <h2>Sales Report</h2>
-          <div class="sales-statistics">
-              <h3>General Statistics</h3>
-              <table>
-                  <tbody>
-                      <tr>
-                          <td>Total Number of Properties:</td>
-                          <td><%= totalProperties %></td>
-                      </tr>
-                      <tr>
-                          <td>Total Number of Users:</td>
-                          <td><%= totalUsers %></td>
-                      </tr>
-                      <tr>
-                          <td>Total Number of Owners:</td>
-                          <td><%= totalOwners %></td>
-                      </tr>
-                  </tbody>
-              </table>
+            <!-- Graph 1: Daily Revenue -->
+        <div class="revenue-section daily-revenue">
+          <h3>Daily Revenue</h3>
+          <div>
+              <label for="dailyRevenueDate">Select Date:</label>
+              <input type="date" id="dailyRevenueDate" onchange="fetchDailyRevenueData()">
           </div>
-      
-          <div class="top-properties">
-              <h3>Top Performing Properties</h3>
-              <table>
-                  <thead>
-                      <tr>
-                          <th>Property</th>
-                          <th>Total Bookings</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <% topProperties.forEach(property => { %>
-                      <tr>
-                          <td><%= property.propertyName %></td>
-                          <td><%= property.totalBookings %></td>
-                      </tr>
-                      <% }); %>
-                  </tbody>
-              </table>
-          </div>
-          <div class="revenue-breakdown">
-            <h3>Revenue Breakdown</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Booking Type</th>
-                        <th>Total Bookings</th>
-                        <th>Total Revenue (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Online</td>
-                        <td><%= totalBookingsByPayMethod.Online || 0 %></td>
-                        <td>₹ <%= totalRevenueByPayMethod.Online || 0 %></td>
-                    </tr>
-                    <tr>
-                        <td>Pay at Property</td>
-                        <td><%= totalBookingsByPayMethod.PayAtProperty || 0 %></td>
-                        <td>₹ <%= totalRevenueByPayMethod.PayAtProperty || 0 %></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>        
+          <canvas id="dailyRevenueChart"></canvas>
       </div>
+  
+      <!-- Graph 2: Monthly Revenue -->
+      <div class="revenue-section monthly-revenue">
+          <h3>Monthly Revenue</h3>
+          <div>
+              <label for="monthlyRevenueDate">Select Month and Year:</label>
+              <input type="month" id="monthlyRevenueDate" onchange="fetchMonthlyRevenueData()">
+          </div>
+          <canvas id="monthlyRevenueChart"></canvas>
+      </div>
+  
+      <!-- Graph 3: Yearly Revenue -->
+      <div class="revenue-section yearly-revenue">
+          <h3>Yearly Revenue</h3>
+          <div>
+              <label for="yearlyRevenuePicker">Select Year:</label>
+              <select id="yearlyRevenuePicker" onchange="fetchYearlyRevenueData()">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+              </select>
+          </div>
+          <canvas id="yearlyRevenueChart"></canvas>
+      </div>
+        </div>    
+      
+        <script>
+          let dailyChart, monthlyChart, yearlyChart;
+  
+          // Function to fetch and update daily revenue data
+          function fetchDailyRevenueData() {
+              const selectedDate = document.getElementById('dailyRevenueDate').value;
+              const [year, month] = selectedDate.split('-');
+  
+              fetch(`/admin/revenue/daily?year=${year}&month=${month}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateDailyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching daily revenue data:', error));
+          }
+  
+          // Function to fetch and update monthly revenue data
+          function fetchMonthlyRevenueData() {
+              const selectedDate = document.getElementById('monthlyRevenueDate').value;
+              const [year, month] = selectedDate.split('-');
+  
+              fetch(`/admin/revenue/monthly?year=${year}&month=${month}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateMonthlyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching monthly revenue data:', error));
+          }
+  
+          // Function to fetch and update yearly revenue data
+          function fetchYearlyRevenueData() {
+              const selectedYear = document.getElementById('yearlyRevenuePicker').value;
+  
+              fetch(`/admin/revenue/yearly?year=${selectedYear}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      updateYearlyRevenueChart(data);
+                  })
+                  .catch(error => console.error('Error fetching yearly revenue data:', error));
+          }
+  
+          function updateDailyRevenueChart(data) {
+              const ctx = document.getElementById('dailyRevenueChart').getContext('2d');
+              const labels = data.map(item => `Day ${item._id}`);
+              const values = data.map(item => item.totalRevenue);
+  
+              if (dailyChart) {
+                  dailyChart.destroy();
+              }
+  
+              dailyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: labels,
+                      datasets: [{
+                          label: 'Daily Revenue',
+                          data: values,
+                          backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          function updateMonthlyRevenueChart(data) {
+              const ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+              const value = data[0]?.totalRevenue || 0;
+  
+              if (monthlyChart) {
+                  monthlyChart.destroy();
+              }
+  
+              monthlyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: ['Monthly Revenue'],
+                      datasets: [{
+                          label: 'Monthly Revenue',
+                          data: [value],
+                          backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          function updateYearlyRevenueChart(data) {
+              const ctx = document.getElementById('yearlyRevenueChart').getContext('2d');
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              const values = new Array(12).fill(0);
+  
+              data.forEach(item => {
+                  values[item._id - 1] = item.totalRevenue;
+              });
+  
+              if (yearlyChart) {
+                  yearlyChart.destroy();
+              }
+  
+              yearlyChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: months,
+                      datasets: [{
+                          label: 'Yearly Revenue by Month',
+                          data: values,
+                          backgroundColor: 'rgba(153, 102, 255, 0.6)'
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          }
+  
+          // Initialize with current date/year
+          document.addEventListener('DOMContentLoaded', () => {
+              const currentDate = new Date();
+              document.getElementById('dailyRevenueDate').value = currentDate.toISOString().split('T')[0];
+              document.getElementById('monthlyRevenueDate').value = currentDate.toISOString().slice(0, 7);
+              document.getElementById('yearlyRevenuePicker').value = currentDate.getFullYear().toString();
+  
+              fetchDailyRevenueData();
+              fetchMonthlyRevenueData();
+              fetchYearlyRevenueData();
+          });
+      </script>
+      
+    
+      
+      
 
         <!-- Bookings Section -->
         <div id="bookingsSection" style="display: none">

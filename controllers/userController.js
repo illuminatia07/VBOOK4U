@@ -468,99 +468,62 @@ const userController = {
   },
 
   applyFilters: async (req, res, next) => {
-    try {
-      const {
-        category,
-        roomFacilities,
-        priceRange,
-        search,
-        page = 1,
-      } = req.query;
-      const { checkIn, checkOut } = req.query;
+  try {
+    const { category, priceRange, search, page = 1, checkIn, checkOut } = req.query;
 
-      // Store check-in and check-out dates in session
-      req.session.checkIn = checkIn;
-      req.session.checkOut = checkOut;
+    // Store check-in and check-out dates in session
+    req.session.checkIn = checkIn;
+    req.session.checkOut = checkOut;
 
-      // Retrieve properties from session
-      const properties = req.session.properties || [];
-      const categories = await Category.find();
+    const propertiesPerPage = 4;
 
-      // Construct the filter object based on the query parameters
-      let filteredProperties = properties;
+    // Construct the filter object
+    let filter = { availability: true };
 
-      if (category) {
-        const selectedCategories = Array.isArray(category)
-          ? category
-          : [category];
-        filteredProperties = filteredProperties.filter((property) =>
-          selectedCategories.includes(property.categoryName)
-        );
-        console.log(
-          "FilteredProp and SelectedCats :",
-          filteredProperties,
-          selectedCategories
-        );
-      }
-
-      if (roomFacilities) {
-        filteredProperties = filteredProperties.filter((property) =>
-          property.roomFacilities.some((facility) =>
-            roomFacilities.includes(facility)
-          )
-        );
-        console.log("RoomFacility :", filteredProperties);
-      }
-
-      if (priceRange) {
-        if (priceRange.includes("-")) {
-          const [minPrice, maxPrice] = priceRange.split("-").map(parseFloat);
-          if (!isNaN(minPrice) && !isNaN(maxPrice)) {
-            filteredProperties = filteredProperties.filter(
-              (property) =>
-                property.price >= minPrice && property.price <= maxPrice
-            );
-          } else {
-            throw new Error("Invalid price range");
-          }
-        } else {
-          const price = parseFloat(priceRange);
-          if (!isNaN(price)) {
-            filteredProperties = filteredProperties.filter(
-              (property) => property.price <= price
-            );
-          } else {
-            throw new Error("Invalid price range");
-          }
-        }
-        console.log("PriceRange :", filteredProperties);
-      }
-
-      // Calculate total number of pages
-      const propertiesPerPage = 4;
-      const totalCount = filteredProperties.length;
-      const totalPages = Math.ceil(totalCount / propertiesPerPage);
-
-      // Render the userSearch.ejs view with filtered properties
-      res.render("user/userSearch", {
-        category,
-        roomFacilities,
-        search: search || "",
-        priceRange,
-        properties: filteredProperties,
-        categories,
-        checkIn,
-        checkOut,
-        currentPage: page,
-        propertyCount: filteredProperties.length,
-        totalPages: totalPages,
-        userSession: req.session.user,
-      });
-    } catch (error) {
-      console.error("Error applying filters:", error);
-      res.status(500).send(`Error applying filters: ${error.message}`);
+    if (search) {
+      filter.$or = [
+        { propertyName: { $regex: new RegExp(search, "i") } },
+        { address: { $regex: new RegExp(search, "i") } }
+      ];
     }
-  },
+
+    if (category && category.length > 0) {
+      filter.categoryName = { $in: Array.isArray(category) ? category : [category] };
+    }
+
+    if (priceRange) {
+      const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+      filter.price = { $gte: minPrice, $lte: maxPrice };
+    }
+
+    // Fetch filtered properties from the database
+    const properties = await Property.find(filter)
+      .skip((page - 1) * propertiesPerPage)
+      .limit(propertiesPerPage);
+
+    const totalCount = await Property.countDocuments(filter);
+    const totalPages = Math.ceil(totalCount / propertiesPerPage);
+
+    // Fetch categories
+    const categories = await Category.find();
+
+    res.render("user/userSearch", {
+      search: search || "",
+      category,
+      priceRange,
+      checkIn,
+      checkOut,
+      properties,
+      categories,
+      currentPage: parseInt(page),
+      totalPages,
+      userSession: req.session.user,
+    });
+  } catch (error) {
+    console.error("Error applying filters:", error);
+    res.status(500).send(`Error applying filters: ${error.message}`);
+  }
+},
 
   renderPropertyDetails: async (req, res, next) => {
     try {
