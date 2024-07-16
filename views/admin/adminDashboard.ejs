@@ -685,7 +685,7 @@
         <% coupon.forEach(function(coupon) { %>
         <tr>
           <td><%= coupon.code %></td>
-          <td><%= coupon.category.name %></td>
+          <td><%= coupon.category ? coupon.category.name : 'No Category' %></td>
           <td><%= coupon.expirationDate.toISOString().split('T')[0] %></td>
           <td><%= coupon.fixedValue %></td>
           <td><%= coupon.payMethod %></td>
@@ -694,9 +694,8 @@
               <!-- Editable fields -->
               <input type="text" name="code" value="<%= coupon.code %>" class="styled-input" required>
               <select name="category" class="styled-input" required>
-                <!-- Populate with available categories -->
                 <% categories.forEach(function(category) { %>
-                <option value="<%= category._id %>" <%= coupon.category.toString() === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                  <option value="<%= category._id %>" <%= coupon.category && coupon.category.toString() === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
                 <% }); %>
               </select>
               <input type="date" name="expirationDate" value="<%= coupon.expirationDate.toISOString().split('T')[0] %>" class="styled-input" required>
